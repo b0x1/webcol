@@ -1,12 +1,20 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Colonization</title>
     <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
-    <script src="//cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script> 
+    <script type="module" defer src="./dist/game.js"></script>
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+      }
+    </style>
   </head>
   <body>
-    <script type="module" src="src/game.js"></script>
+    <section id="game"></section>
   </body>
 </html>
+

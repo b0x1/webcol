@@ -6,7 +6,7 @@ Recreating Sid Meier's Colonization in hexagonal tiles.
 Development
 -----------
 
-Use `start.sh` to start the development server.
+Use `server.py` to start the development server.
 
 Acknowledgement
 ---------------
