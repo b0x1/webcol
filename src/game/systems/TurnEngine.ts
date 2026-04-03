@@ -2,7 +2,7 @@ import { Player } from '../entities/Player';
 import { Tile } from '../entities/Tile';
 import { Colony } from '../entities/Colony';
 import { Unit } from '../entities/Unit';
-import { TerrainType, GoodType, ResourceType, UnitType } from '../entities/types';
+import { TerrainType, GoodType, ResourceType, UnitType, JobType, BuildingType } from '../entities/types';
 import { eventBus } from '../state/EventBus';
 
 export class TurnEngine {
@@ -29,12 +29,70 @@ export class TurnEngine {
         newColony.buildings = [...colony.buildings];
         newColony.productionQueue = [...colony.productionQueue];
         newColony.inventory = new Map(colony.inventory);
+        newColony.workforce = new Map(colony.workforce);
+        newColony.units = [...colony.units];
 
-        // Food from population (2 per pop)
+        // 1. Process Workforce Production
+        newColony.workforce.forEach((job) => {
+          let good: GoodType | null = null;
+          let amount = 3;
+
+          switch (job) {
+            case JobType.FARMER:
+              good = GoodType.FOOD;
+              break;
+            case JobType.LUMBERJACK:
+              good = GoodType.LUMBER;
+              break;
+            case JobType.MINER:
+              good = GoodType.ORE;
+              break;
+            case JobType.TOBACCONIST:
+              good = GoodType.TOBACCO;
+              break;
+            case JobType.WEAVER:
+              good = GoodType.TRADE_GOODS;
+              break;
+          }
+
+          if (good) {
+            newColony.inventory.set(good, (newColony.inventory.get(good) || 0) + amount);
+          }
+        });
+
+        // 2. Add Building Bonuses
+        if (newColony.buildings.includes(BuildingType.LUMBER_MILL)) {
+          newColony.inventory.set(
+            GoodType.LUMBER,
+            (newColony.inventory.get(GoodType.LUMBER) || 0) + 2,
+          );
+        }
+        if (newColony.buildings.includes(BuildingType.IRON_WORKS)) {
+          newColony.inventory.set(GoodType.ORE, (newColony.inventory.get(GoodType.ORE) || 0) + 2);
+        }
+
+        // 3. Population Growth & Food Consumption
+        if (newColony.buildings.includes(BuildingType.PRINTING_PRESS)) {
+          // The issue says +1 population growth/turn
+          // For simplicity, we just add it to population
+          newColony.population += 1;
+        }
+
+        const foodNeeded = newColony.population * 2;
         const currentFood = newColony.inventory.get(GoodType.FOOD) || 0;
-        newColony.inventory.set(GoodType.FOOD, currentFood + colony.population * 2);
+        newColony.inventory.set(GoodType.FOOD, Math.max(0, currentFood - foodNeeded));
 
-        // Goods from surrounding tiles (9 tiles: colony tile + 8 neighbors)
+        // 4. Inventory Cap
+        const cap = newColony.buildings.includes(BuildingType.WAREHOUSE) ? 400 : 200;
+        newColony.inventory.forEach((amount, good) => {
+          if (amount > cap) {
+            newColony.inventory.set(good, cap);
+          }
+        });
+
+        // (Keeping the original tile production logic if any - but wait, the instructions imply job-based now)
+        // Original code had this:
+        /*
         for (let dy = -1; dy <= 1; dy++) {
           for (let dx = -1; dx <= 1; dx++) {
             const tx = colony.x + dx;
@@ -45,6 +103,9 @@ export class TurnEngine {
             }
           }
         }
+        */
+        // Based on the prompt "WorkforcePanel: list of colonist units assigned to this colony. Each colonist has a dropdown to assign their job",
+        // it seems I should replace the tile-based production with job-based production.
 
         return newColony;
       });

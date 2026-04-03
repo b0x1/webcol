@@ -9,6 +9,8 @@ export const UnitPanel: React.FC = () => {
 
   if (!unit) return null;
 
+  const foundColony = useGameStore((state) => state.foundColony);
+
   return (
     <div
       className="unit-panel"
@@ -40,6 +42,23 @@ export const UnitPanel: React.FC = () => {
           </ul>
         )}
       </div>
+      {unit.type === 'COLONIST' && (
+        <button
+          onClick={() => foundColony(unit.id)}
+          style={{
+            marginTop: '10px',
+            width: '100%',
+            padding: '8px',
+            cursor: 'pointer',
+            backgroundColor: '#27ae60',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+          }}
+        >
+          Found Colony
+        </button>
+      )}
       <button
         onClick={() => endTurn()}
         style={{

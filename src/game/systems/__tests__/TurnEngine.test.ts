@@ -4,7 +4,7 @@ import { Player } from '../../entities/Player';
 import { Tile } from '../../entities/Tile';
 import { Colony } from '../../entities/Colony';
 import { Unit } from '../../entities/Unit';
-import { TerrainType, GoodType, UnitType } from '../../entities/types';
+import { TerrainType, GoodType, UnitType, JobType } from '../../entities/types';
 
 describe('TurnEngine', () => {
   const createMap = (width: number, height: number): Tile[][] => {
@@ -20,35 +20,22 @@ describe('TurnEngine', () => {
   };
 
   describe('runProduction', () => {
-    it('should calculate food based on population and surrounding terrain', () => {
+    it('should calculate food based on workforce and population consumption', () => {
       const map = createMap(5, 5);
-      // Set some specific terrains around colony at (2,2)
-      map[2][2].terrainType = TerrainType.PLAINS; // Colony tile
-      map[1][2].terrainType = TerrainType.PLAINS;
-      map[3][2].terrainType = TerrainType.OCEAN;
-      map[2][1].terrainType = TerrainType.DESERT;
-      map[2][3].terrainType = TerrainType.SWAMP;
-
       const player = new Player('p1', 'Player 1', true, 0);
       const colony = new Colony('c1', 'p1', 'Colony 1', 2, 2, 1);
+      const unit = new Unit('u1', 'p1', UnitType.COLONIST, 2, 2, 1);
+      colony.units.push(unit);
+      colony.workforce.set(unit.id, JobType.FARMER);
       player.colonies.push(colony);
 
       const updatedPlayers = TurnEngine.runProduction([player], map);
       const updatedColony = updatedPlayers[0].colonies[0];
 
-      // Food:
-      // Population 1 -> 1 * 2 = 2 food
-      // 9 tiles total:
-      // PLAINS (2,2) -> 2 food
-      // PLAINS (1,2) -> 2 food
-      // OCEAN (3,2) -> 2 food
-      // DESERT (2,1) -> 0 food (produces ORE)
-      // SWAMP (2,3) -> 0 food (produces LUMBER)
-      // Others (4 tiles) are GRASSLAND -> 4 * 3 = 12 food
-      // Total food = 2 (pop) + 2 + 2 + 2 + 0 + 0 + 12 = 20
-      expect(updatedColony.inventory.get(GoodType.FOOD)).toBe(20);
-      expect(updatedColony.inventory.get(GoodType.ORE)).toBe(1);
-      expect(updatedColony.inventory.get(GoodType.LUMBER)).toBe(1);
+      // Farmer produces 3 FOOD.
+      // Pop 1 consumes 2 FOOD.
+      // Net = 1 FOOD.
+      expect(updatedColony.inventory.get(GoodType.FOOD)).toBe(1);
     });
   });
 

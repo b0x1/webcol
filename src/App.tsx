@@ -6,6 +6,7 @@ import { HUD } from './ui/HUD';
 import { UnitPanel } from './ui/UnitPanel';
 import { ColonyPanel } from './ui/ColonyPanel';
 import { MiniMap } from './ui/MiniMap';
+import { ColonyScreen } from './ui/ColonyScreen/ColonyScreen';
 
 function App() {
   const gameRef = useRef<Phaser.Game | null>(null);
@@ -65,6 +66,7 @@ function App() {
         <UnitPanel />
         <ColonyPanel />
         <MiniMap />
+        <ColonyScreen />
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import { Player } from '../entities/Player';
 import { Tile } from '../entities/Tile';
 import { Unit } from '../entities/Unit';
 import { Colony } from '../entities/Colony';
-import { TurnPhase, UnitType } from '../entities/types';
+import { BuildingType, JobType, TurnPhase, UnitType } from '../entities/types';
 import { TurnEngine } from '../systems/TurnEngine';
 
 export interface GameState {
@@ -13,13 +13,17 @@ export interface GameState {
   phase: TurnPhase;
   selectedUnitId: string | null;
   selectedColonyId: string | null;
+  isColonyScreenOpen: boolean;
   map: Tile[][];
 
   selectUnit: (unitId: string | null) => void;
   selectColony: (colonyId: string | null) => void;
+  setColonyScreenOpen: (isOpen: boolean) => void;
   moveUnit: (unitId: string, toX: number, toY: number) => void;
   endTurn: () => void;
   foundColony: (unitId: string) => void;
+  buyBuilding: (colonyId: string, building: BuildingType) => void;
+  assignJob: (colonyId: string, unitId: string, job: JobType) => void;
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -29,10 +33,12 @@ export const useGameStore = create<GameState>((set, get) => ({
   phase: TurnPhase.MOVEMENT,
   selectedUnitId: null,
   selectedColonyId: null,
+  isColonyScreenOpen: false,
   map: [],
 
   selectUnit: (unitId) => set({ selectedUnitId: unitId, selectedColonyId: null }),
   selectColony: (colonyId) => set({ selectedColonyId: colonyId, selectedUnitId: null }),
+  setColonyScreenOpen: (isOpen) => set({ isColonyScreenOpen: isOpen }),
 
   moveUnit: (unitId, toX, toY) =>
     set((state) => {
@@ -170,6 +176,8 @@ export const useGameStore = create<GameState>((set, get) => ({
         unit.y,
         1,
       );
+      newColony.units.push(unit);
+      newColony.workforce.set(unit.id, JobType.FARMER);
 
       const updatedPlayers = state.players.map((p) => {
         if (p.id === state.currentPlayerId) {
@@ -186,4 +194,79 @@ export const useGameStore = create<GameState>((set, get) => ({
         selectedUnitId: state.selectedUnitId === unitId ? null : state.selectedUnitId,
       };
     }),
+
+  buyBuilding: (colonyId, building) =>
+    set((state) => {
+      const buildingCosts: Record<BuildingType, number> = {
+        [BuildingType.LUMBER_MILL]: 100,
+        [BuildingType.IRON_WORKS]: 150,
+        [BuildingType.SCHOOLHOUSE]: 120,
+        [BuildingType.WAREHOUSE]: 80,
+        [BuildingType.STOCKADE]: 200,
+        [BuildingType.PRINTING_PRESS]: 180,
+        [BuildingType.TOWN_HALL]: 0,
+        [BuildingType.CARPENTERS_SHOP]: 0,
+        [BuildingType.BLACKSMITHS_HOUSE]: 0,
+        [BuildingType.BLACKSMITHS_SHOP]: 0,
+        [BuildingType.STABLES]: 0,
+      };
+
+      const cost = buildingCosts[building];
+      const player = state.players.find((p) => p.id === state.currentPlayerId);
+      if (!player || player.gold < cost) return state;
+
+      const updatedPlayers = state.players.map((p) => {
+        if (p.id === state.currentPlayerId) {
+          const updatedColonies = p.colonies.map((c) => {
+            if (c.id === colonyId) {
+              const newColony = new Colony(c.id, c.ownerId, c.name, c.x, c.y, c.population);
+              newColony.buildings = [...c.buildings, building];
+              newColony.inventory = new Map(c.inventory);
+              newColony.workforce = new Map(c.workforce);
+              newColony.units = [...c.units];
+              newColony.productionQueue = [...c.productionQueue];
+              return newColony;
+            }
+            return c;
+          });
+          const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold - cost);
+          newPlayer.units = [...p.units];
+          newPlayer.colonies = updatedColonies;
+          return newPlayer;
+        }
+        return p;
+      });
+
+      return { players: updatedPlayers };
+    }),
+
+  assignJob: (colonyId, unitId, job) =>
+    set((state) => {
+      const updatedPlayers = state.players.map((p) => {
+        const updatedColonies = p.colonies.map((c) => {
+          if (c.id === colonyId) {
+            const newColony = new Colony(c.id, c.ownerId, c.name, c.x, c.y, c.population);
+            newColony.buildings = [...c.buildings];
+            newColony.inventory = new Map(c.inventory);
+            const newWorkforce = new Map(c.workforce);
+            newWorkforce.set(unitId, job);
+            newColony.workforce = newWorkforce;
+            newColony.units = [...c.units];
+            newColony.productionQueue = [...c.productionQueue];
+            return newColony;
+          }
+          return c;
+        });
+        const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold);
+        newPlayer.units = [...p.units];
+        newPlayer.colonies = updatedColonies;
+        return newPlayer;
+      });
+
+      return { players: updatedPlayers };
+    }),
 }));
+
+if (typeof window !== 'undefined') {
+  (window as any).useGameStore = useGameStore;
+}

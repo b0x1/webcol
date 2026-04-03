@@ -51,8 +51,20 @@ export const BuildingType = {
   IRON_WORKS: 'IRON_WORKS',
   STABLES: 'STABLES',
   WAREHOUSE: 'WAREHOUSE',
+  SCHOOLHOUSE: 'SCHOOLHOUSE',
+  STOCKADE: 'STOCKADE',
+  PRINTING_PRESS: 'PRINTING_PRESS',
 } as const;
 export type BuildingType = (typeof BuildingType)[keyof typeof BuildingType];
+
+export const JobType = {
+  FARMER: 'FARMER',
+  LUMBERJACK: 'LUMBERJACK',
+  MINER: 'MINER',
+  TOBACCONIST: 'TOBACCONIST',
+  WEAVER: 'WEAVER',
+} as const;
+export type JobType = (typeof JobType)[keyof typeof JobType];
 
 export const TurnPhase = {
   MOVEMENT: 'MOVEMENT',

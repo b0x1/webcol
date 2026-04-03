@@ -126,13 +126,23 @@ export class WorldScene extends Phaser.Scene {
           .flatMap((p) => p.units)
           .find((u) => u.x === x && u.y === y);
 
+        const colonyAtTile = state.players
+          .flatMap((p) => p.colonies)
+          .find((c) => c.x === x && c.y === y);
+
         if (unitAtTile) {
           console.log(`Selecting unit ${unitAtTile.id} at ${x}, ${y}`);
           useGameStore.getState().selectUnit(unitAtTile.id);
           this.events.emit('unitSelected', unitAtTile.id);
+        } else if (colonyAtTile) {
+          console.log(`Selecting colony ${colonyAtTile.id} at ${x}, ${y}`);
+          useGameStore.getState().selectColony(colonyAtTile.id);
+          this.events.emit('colonySelected', colonyAtTile.id);
         } else {
           useGameStore.getState().selectUnit(null);
+          useGameStore.getState().selectColony(null);
           this.events.emit('unitSelected', null);
+          this.events.emit('colonySelected', null);
         }
         this.terrainRenderer.updateSelectionHighlight(x, y);
       } else if (pointer.rightButtonDown()) {
@@ -267,6 +277,8 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private renderUnits() {
+    if (!this.unitSprites?.children || !this.selectionRings?.children || !this.unitBadges?.children) return;
+
     this.unitSprites.clear(true, true);
     this.selectionRings.clear(true, true);
     this.unitBadges.clear(true, true);

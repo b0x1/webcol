@@ -2,7 +2,7 @@ import React from 'react';
 import { useGameStore } from '../game/state/gameStore';
 
 export const ColonyPanel: React.FC = () => {
-  const { selectedColonyId, players, selectColony } = useGameStore();
+  const { selectedColonyId, players, selectColony, setColonyScreenOpen } = useGameStore();
   const colony = players
     .flatMap((p) => p.colonies)
     .find((c) => c.id === selectedColonyId);
@@ -58,6 +58,7 @@ export const ColonyPanel: React.FC = () => {
           )}
         </div>
         <button
+          onClick={() => setColonyScreenOpen(true)}
           style={{
             marginTop: '20px',
             width: '100%',
