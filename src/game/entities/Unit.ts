@@ -2,6 +2,7 @@ import type { GoodType, UnitType } from './types';
 
 export class Unit {
   public cargo: Map<GoodType, number> = new Map();
+  public maxMoves: number;
 
   constructor(
     public readonly id: string,
@@ -10,5 +11,7 @@ export class Unit {
     public x: number,
     public y: number,
     public movesRemaining: number,
-  ) {}
+  ) {
+    this.maxMoves = movesRemaining;
+  }
 }

@@ -49,3 +49,12 @@ export const BuildingType = {
   WAREHOUSE: 'WAREHOUSE',
 } as const;
 export type BuildingType = (typeof BuildingType)[keyof typeof BuildingType];
+
+export const TurnPhase = {
+  MOVEMENT: 'MOVEMENT',
+  PRODUCTION: 'PRODUCTION',
+  TRADE: 'TRADE',
+  AI: 'AI',
+  END_TURN: 'END_TURN',
+} as const;
+export type TurnPhase = (typeof TurnPhase)[keyof typeof TurnPhase];
