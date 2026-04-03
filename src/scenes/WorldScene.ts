@@ -1,14 +1,20 @@
 import Phaser from 'phaser';
 import { TerrainGenerator } from '../game/map/TerrainGenerator';
 import { TileMap } from '../game/map/TileMap';
-import { TerrainType } from '../game/map/TerrainType';
+import { TerrainType, ResourceType } from '../game/entities/types';
+import { TerrainRenderer } from '../game/map/TerrainRenderer';
+import { generateTerrainTextures } from '../assets/sprites/terrain';
+import { Tile } from '../game/entities/Tile';
 
 export class WorldScene extends Phaser.Scene {
   public tileMap!: TileMap;
+  private terrainRenderer!: TerrainRenderer;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private zoomKeys!: {
     plus: Phaser.Input.Keyboard.Key;
     minus: Phaser.Input.Keyboard.Key;
+    plusEqual: Phaser.Input.Keyboard.Key;
+    minusKey: Phaser.Input.Keyboard.Key;
   };
 
   private readonly TILE_SIZE = 32;
@@ -20,76 +26,62 @@ export class WorldScene extends Phaser.Scene {
   }
 
   preload() {
-    // Generate placeholder tileset with solid colors
-    const graphics = this.make.graphics({ x: 0, y: 0 });
-
-    const terrainColors: Record<TerrainType, number> = {
-      [TerrainType.OCEAN]: 0x00008b, // Dark blue
-      [TerrainType.COAST]: 0x1e90ff, // Dodger blue
-      [TerrainType.PLAINS]: 0x228b22, // Forest green
-      [TerrainType.FOREST]: 0x006400, // Dark green
-      [TerrainType.HILLS]: 0x8b4513, // Saddle brown
-      [TerrainType.MOUNTAINS]: 0x808080, // Grey
-    };
-
-    // Draw each color on a 32x32 area in the graphics object
-    Object.entries(terrainColors).forEach(([type, color]) => {
-      const terrainType = Number(type) as TerrainType;
-      graphics.fillStyle(color, 1);
-      graphics.fillRect(
-        terrainType * this.TILE_SIZE,
-        0,
-        this.TILE_SIZE,
-        this.TILE_SIZE,
-      );
-    });
-
-    graphics.generateTexture('tiles', this.TILE_SIZE * 6, this.TILE_SIZE);
+    generateTerrainTextures(this, this.TILE_SIZE);
   }
 
   create() {
-    // Generate terrain data
+    this.terrainRenderer = new TerrainRenderer(this as any, this.TILE_SIZE);
+
     const generator = new TerrainGenerator(this.MAP_WIDTH, this.MAP_HEIGHT);
     const terrainData = generator.generate();
     this.tileMap = new TileMap(this.MAP_WIDTH, this.MAP_HEIGHT, terrainData);
 
-    // Create Phaser tilemap
-    const map = this.make.tilemap({
-      data: terrainData,
-      tileWidth: this.TILE_SIZE,
-      tileHeight: this.TILE_SIZE,
-    });
-
-    const tileset = map.addTilesetImage(
-      'tiles',
-      undefined,
-      this.TILE_SIZE,
-      this.TILE_SIZE,
-      0,
-      0,
+    const tiles: Tile[][] = terrainData.map((row, y) =>
+      row.map((type, x) => {
+        const tile = new Tile(`${x}-${y}`, x, y, type, 1);
+        if (type === TerrainType.OCEAN && Math.random() < 0.05) {
+          tile.hasResource = ResourceType.FISH;
+        } else if (type === TerrainType.FOREST && Math.random() < 0.1) {
+          tile.hasResource = ResourceType.FOREST;
+        } else if (type === TerrainType.PLAINS && Math.random() < 0.05) {
+          tile.hasResource = ResourceType.ORE_DEPOSIT;
+        } else if (type === TerrainType.PLAINS && Math.random() < 0.05) {
+          tile.hasResource = ResourceType.FERTILE_LAND;
+        }
+        return tile;
+      })
     );
 
-    if (tileset) {
-      map.createLayer(0, tileset, 0, 0);
-    }
+    this.terrainRenderer.renderTileMap(tiles);
 
-    // Example interaction to emit events
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-      // For now, simple logic to alternate between selecting a unit and a colony
-      // in a real game, this would be based on what's at the pointer position
       const worldPoint = pointer.positionToCamera(this.cameras.main) as Phaser.Math.Vector2;
-      const x = Math.floor(worldPoint.x / this.TILE_SIZE);
-      const y = Math.floor(worldPoint.y / this.TILE_SIZE);
+      const { x, y } = this.terrainRenderer.worldToTile(worldPoint.x, worldPoint.y);
 
-      console.log(`Clicked at ${x}, ${y}`);
+      if (x >= 0 && x < this.MAP_WIDTH && y >= 0 && y < this.MAP_HEIGHT) {
+        console.log(`Clicked at ${x}, ${y}`);
+        this.terrainRenderer.updateSelectionHighlight(x, y);
+      }
 
-      // Emit events that React UI will listen to
-      // These are placeholders for real selection logic
       this.events.emit('unitSelected', null);
       this.events.emit('colonySelected', null);
     });
 
-    // Set camera bounds
+    this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+      const worldPoint = pointer.positionToCamera(this.cameras.main) as Phaser.Math.Vector2;
+      const { x, y } = this.terrainRenderer.worldToTile(worldPoint.x, worldPoint.y);
+
+      if (x >= 0 && x < this.MAP_WIDTH && y >= 0 && y < this.MAP_HEIGHT) {
+        this.terrainRenderer.showTooltip(x, y, worldPoint.x, worldPoint.y);
+      } else {
+        this.terrainRenderer.hideTooltip();
+      }
+    });
+
+    this.input.on('pointerout', () => {
+      this.terrainRenderer.hideTooltip();
+    });
+
     this.cameras.main.setBounds(
       0,
       0,
@@ -97,12 +89,13 @@ export class WorldScene extends Phaser.Scene {
       this.MAP_HEIGHT * this.TILE_SIZE,
     );
 
-    // Setup input
     if (this.input.keyboard) {
       this.cursors = this.input.keyboard.createCursorKeys();
       this.zoomKeys = {
         plus: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS),
         minus: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS),
+        plusEqual: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.EQUALS),
+        minusKey: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DASH),
       };
     }
   }
@@ -111,31 +104,26 @@ export class WorldScene extends Phaser.Scene {
     const cam = this.cameras.main;
     const speed = 10;
 
-    // Pan with arrow keys
-    if (this.cursors.left.isDown) {
+    if (this.cursors?.left?.isDown) {
       cam.scrollX -= speed;
-    } else if (this.cursors.right.isDown) {
+    } else if (this.cursors?.right?.isDown) {
       cam.scrollX += speed;
     }
 
-    if (this.cursors.up.isDown) {
+    if (this.cursors?.up?.isDown) {
       cam.scrollY -= speed;
-    } else if (this.cursors.down.isDown) {
+    } else if (this.cursors?.down?.isDown) {
       cam.scrollY += speed;
     }
 
-    // Zoom with +/-
     const zoomSpeed = 0.02;
-    if (this.zoomKeys.plus.isDown || this.input.keyboard?.addKey(187).isDown) {
-      // 187 is '=' which is '+' on many keyboards
+    if (this.zoomKeys?.plus?.isDown || this.zoomKeys?.plusEqual?.isDown) {
       cam.zoom += zoomSpeed;
     }
-    if (this.zoomKeys.minus.isDown || this.input.keyboard?.addKey(189).isDown) {
-      // 189 is '-'
+    if (this.zoomKeys?.minus?.isDown || this.zoomKeys?.minusKey?.isDown) {
       cam.zoom -= zoomSpeed;
     }
 
-    // Constrain zoom
     cam.zoom = Phaser.Math.Clamp(cam.zoom, 0.5, 2.0);
   }
 }

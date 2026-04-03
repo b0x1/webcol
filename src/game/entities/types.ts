@@ -26,7 +26,12 @@ export const UnitType = {
 export type UnitType = (typeof UnitType)[keyof typeof UnitType];
 
 export const TerrainType = {
+  OCEAN: 'OCEAN',
+  COAST: 'COAST',
   PLAINS: 'PLAINS',
+  FOREST: 'FOREST',
+  HILLS: 'HILLS',
+  MOUNTAINS: 'MOUNTAINS',
   GRASSLAND: 'GRASSLAND',
   PRAIRIE: 'PRAIRIE',
   TUNDRA: 'TUNDRA',
@@ -34,7 +39,6 @@ export const TerrainType = {
   DESERT: 'DESERT',
   SWAMP: 'SWAMP',
   MARSH: 'MARSH',
-  OCEAN: 'OCEAN',
 } as const;
 export type TerrainType = (typeof TerrainType)[keyof typeof TerrainType];
 
