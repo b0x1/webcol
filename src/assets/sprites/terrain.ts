@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { TerrainType, ResourceType } from '../../game/entities/types';
+import { TerrainType, ResourceType, UnitType } from '../../game/entities/types';
 
 export const TERRAIN_COLORS: Record<TerrainType, number> = {
   [TerrainType.OCEAN]: 0x1a6b8a,
@@ -114,6 +114,64 @@ export function generateTerrainTextures(scene: Phaser.Scene, tileSize: number) {
     }
 
     graphics.generateTexture(`resource-${type}`, tileSize, tileSize);
+  });
+
+  graphics.destroy();
+}
+
+export function generateUnitTextures(scene: Phaser.Scene, tileSize: number) {
+  const graphics = scene.make.graphics({ x: 0, y: 0 });
+
+  const units = [
+    { type: UnitType.COLONIST, color: 0xffffff, label: 'C', shape: 'circle' },
+    { type: UnitType.SOLDIER, color: 0xff0000, label: 'S', shape: 'circle' },
+    { type: UnitType.PIONEER, color: 0x8b4513, label: 'P', shape: 'circle' },
+    { type: UnitType.SHIP, color: 0x0000ff, label: 'Sh', shape: 'square' },
+  ];
+
+  units.forEach((unit) => {
+    graphics.clear();
+    const center = tileSize / 2;
+    const size = tileSize * 0.7;
+
+    if (unit.shape === 'circle') {
+      graphics.fillStyle(unit.color, 1);
+      graphics.lineStyle(1, 0x000000, 1);
+      graphics.fillCircle(center, center, size / 2);
+      graphics.strokeCircle(center, center, size / 2);
+    } else {
+      graphics.fillStyle(unit.color, 1);
+      graphics.lineStyle(1, 0x000000, 1);
+      graphics.fillRect(center - size / 2, center - size / 2, size, size);
+      graphics.strokeRect(center - size / 2, center - size / 2, size, size);
+    }
+
+    // Generate the base texture
+    graphics.generateTexture(`unit-${unit.type}-base`, tileSize, tileSize);
+
+    // Create a final texture with text
+    const baseImage = scene.make.image({ x: center, y: center, key: `unit-${unit.type}-base` });
+    const rt = scene.add.renderTexture(0, 0, tileSize, tileSize);
+    rt.draw(baseImage);
+
+    const text = scene.make.text({
+      x: center,
+      y: center,
+      text: unit.label,
+      style: {
+        fontSize: unit.label.length > 1 ? '10px' : '14px',
+        color: unit.color === 0xffffff ? '#000000' : '#ffffff',
+        fontStyle: 'bold',
+      }
+    }).setOrigin(0.5);
+
+    rt.draw(text);
+    rt.saveTexture(`unit-${unit.type}`);
+
+    // Clean up temporary objects
+    rt.destroy();
+    text.destroy();
+    baseImage.destroy();
   });
 
   graphics.destroy();

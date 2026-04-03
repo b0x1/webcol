@@ -13,6 +13,7 @@ export class TerrainRenderer {
   private scene: SceneLike;
   private tileSize: number;
   private selectionHighlight: any = null;
+  private reachableHighlights: any = null;
   private hoverTooltip: any = null;
   private coastBorders: any = null;
 
@@ -90,6 +91,27 @@ export class TerrainRenderer {
     // East
     if (checkOcean(x + 1, y)) {
       this.coastBorders.lineBetween(worldX + this.tileSize, worldY, worldX + this.tileSize, worldY + this.tileSize);
+    }
+  }
+
+  public updateReachableHighlights(reachableTiles: { x: number; y: number }[]) {
+    if (this.reachableHighlights) {
+      this.reachableHighlights.destroy();
+    }
+    this.reachableHighlights = this.scene.add.graphics();
+    this.reachableHighlights.fillStyle(0x00ff00, 0.3);
+    this.reachableHighlights.setDepth(5);
+
+    reachableTiles.forEach((tile) => {
+      const { x: worldX, y: worldY } = this.tileToWorld(tile.x, tile.y);
+      this.reachableHighlights.fillRect(worldX, worldY, this.tileSize, this.tileSize);
+    });
+  }
+
+  public clearReachableHighlights() {
+    if (this.reachableHighlights) {
+      this.reachableHighlights.destroy();
+      this.reachableHighlights = null;
     }
   }
 
