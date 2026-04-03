@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import Phaser from 'phaser';
 import { useGameStore } from './game/state/store';
+import { WorldScene } from './scenes/WorldScene';
 
 function App() {
   const gameRef = useRef<Phaser.Game | null>(null);
@@ -14,16 +15,7 @@ function App() {
       width: 800,
       height: 600,
       parent: 'game-container',
-      scene: {
-        preload: function (this: Phaser.Scene) {
-          // preload assets
-        },
-        create: function (this: Phaser.Scene) {
-          this.add.text(10, 10, 'Phaser + React + Zustand', {
-            color: '#ffffff',
-          });
-        },
-      },
+      scene: [WorldScene],
     };
 
     gameRef.current = new Phaser.Game(config);
