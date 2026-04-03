@@ -1,11 +1,16 @@
 import { useEffect, useRef } from 'react';
 import Phaser from 'phaser';
-import { useGameStore } from './game/state/store';
+import { useGameStore } from './game/state/gameStore';
 import { WorldScene } from './scenes/WorldScene';
+import { HUD } from './ui/HUD';
+import { UnitPanel } from './ui/UnitPanel';
+import { ColonyPanel } from './ui/ColonyPanel';
+import { MiniMap } from './ui/MiniMap';
 
 function App() {
   const gameRef = useRef<Phaser.Game | null>(null);
-  const { score, incrementScore } = useGameStore();
+  const selectUnit = useGameStore((state) => state.selectUnit);
+  const selectColony = useGameStore((state) => state.selectColony);
 
   useEffect(() => {
     if (gameRef.current) return;
@@ -18,7 +23,20 @@ function App() {
       scene: [WorldScene],
     };
 
-    gameRef.current = new Phaser.Game(config);
+    const game = new Phaser.Game(config);
+    gameRef.current = game;
+
+    game.events.once('ready', () => {
+      const worldScene = game.scene.getScene('WorldScene') as WorldScene;
+      if (worldScene) {
+        worldScene.events.on('unitSelected', (unitId: string | null) => {
+          selectUnit(unitId);
+        });
+        worldScene.events.on('colonySelected', (colonyId: string | null) => {
+          selectColony(colonyId);
+        });
+      }
+    });
 
     return () => {
       if (gameRef.current) {
@@ -26,10 +44,10 @@ function App() {
         gameRef.current = null;
       }
     };
-  }, []);
+  }, [selectUnit, selectColony]);
 
   return (
-    <div className="App">
+    <div className="App" style={{ position: 'relative', width: '800px', height: '600px' }}>
       <div id="game-container"></div>
       <div
         className="ui-overlay"
@@ -37,16 +55,16 @@ function App() {
           position: 'absolute',
           top: 0,
           left: 0,
-          padding: '20px',
-          color: 'white',
+          width: '100%',
+          height: '100%',
           pointerEvents: 'none',
+          overflow: 'hidden',
         }}
       >
-        <h1>Web Colonization</h1>
-        <p>Score from Zustand: {score}</p>
-        <button onClick={incrementScore} style={{ pointerEvents: 'auto' }}>
-          Increment Score
-        </button>
+        <HUD />
+        <UnitPanel />
+        <ColonyPanel />
+        <MiniMap />
       </div>
     </div>
   );

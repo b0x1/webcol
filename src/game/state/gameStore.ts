@@ -11,9 +11,11 @@ export interface GameState {
   turn: number;
   phase: TurnPhase;
   selectedUnitId: string | null;
+  selectedColonyId: string | null;
   map: Tile[][];
 
   selectUnit: (unitId: string | null) => void;
+  selectColony: (colonyId: string | null) => void;
   moveUnit: (unitId: string, toX: number, toY: number) => void;
   endTurn: () => void;
   foundColony: (unitId: string) => void;
@@ -25,9 +27,11 @@ export const useGameStore = create<GameState>((set) => ({
   turn: 1,
   phase: TurnPhase.MOVEMENT,
   selectedUnitId: null,
+  selectedColonyId: null,
   map: [],
 
-  selectUnit: (unitId) => set({ selectedUnitId: unitId }),
+  selectUnit: (unitId) => set({ selectedUnitId: unitId, selectedColonyId: null }),
+  selectColony: (colonyId) => set({ selectedColonyId: colonyId, selectedUnitId: null }),
 
   moveUnit: (unitId, toX, toY) =>
     set((state) => {
