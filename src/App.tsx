@@ -7,6 +7,7 @@ import { UnitPanel } from './ui/UnitPanel';
 import { ColonyPanel } from './ui/ColonyPanel';
 import { MiniMap } from './ui/MiniMap';
 import { ColonyScreen } from './ui/ColonyScreen/ColonyScreen';
+import { EuropeScreen } from './ui/EuropeScreen/EuropeScreen';
 
 function App() {
   const gameRef = useRef<Phaser.Game | null>(null);
@@ -67,6 +68,7 @@ function App() {
         <ColonyPanel />
         <MiniMap />
         <ColonyScreen />
+        <EuropeScreen />
       </div>
     </div>
   );

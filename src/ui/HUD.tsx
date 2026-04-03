@@ -1,9 +1,11 @@
 import React from 'react';
 import { useGameStore } from '../game/state/gameStore';
+import { UnitType } from '../game/entities/types';
 
 export const HUD: React.FC = () => {
-  const { players, currentPlayerId, turn, phase } = useGameStore();
+  const { players, currentPlayerId, turn, phase, setEuropeScreenOpen } = useGameStore();
   const currentPlayer = players.find((p) => p.id === currentPlayerId);
+  const hasShip = currentPlayer?.units.some((u) => u.type === UnitType.SHIP);
 
   return (
     <div
@@ -27,6 +29,13 @@ export const HUD: React.FC = () => {
       <div>Gold: {currentPlayer?.gold ?? 0}</div>
       <div>Turn: {turn}</div>
       <div>Phase: {phase}</div>
+      <button
+        disabled={!hasShip}
+        onClick={() => setEuropeScreenOpen(true)}
+        style={{ cursor: hasShip ? 'pointer' : 'not-allowed' }}
+      >
+        Sail to Europe
+      </button>
     </div>
   );
 };

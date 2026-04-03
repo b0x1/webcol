@@ -3,7 +3,7 @@ import { Player } from '../entities/Player';
 import { Tile } from '../entities/Tile';
 import { Unit } from '../entities/Unit';
 import { Colony } from '../entities/Colony';
-import { BuildingType, JobType, TurnPhase, UnitType } from '../entities/types';
+import { BuildingType, GoodType, JobType, TurnPhase, UnitType } from '../entities/types';
 import { TurnEngine } from '../systems/TurnEngine';
 
 export interface GameState {
@@ -14,16 +14,22 @@ export interface GameState {
   selectedUnitId: string | null;
   selectedColonyId: string | null;
   isColonyScreenOpen: boolean;
+  isEuropeScreenOpen: boolean;
+  europePrices: Record<GoodType, number>;
   map: Tile[][];
 
   selectUnit: (unitId: string | null) => void;
   selectColony: (colonyId: string | null) => void;
   setColonyScreenOpen: (isOpen: boolean) => void;
+  setEuropeScreenOpen: (isOpen: boolean) => void;
   moveUnit: (unitId: string, toX: number, toY: number) => void;
   endTurn: () => void;
   foundColony: (unitId: string) => void;
   buyBuilding: (colonyId: string, building: BuildingType) => void;
   assignJob: (colonyId: string, unitId: string, job: JobType) => void;
+  sellGood: (unitId: string, good: GoodType, amount: number) => void;
+  buyGood: (unitId: string, good: GoodType, amount: number) => void;
+  recruitUnit: (unitType: UnitType) => void;
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -34,11 +40,23 @@ export const useGameStore = create<GameState>((set, get) => ({
   selectedUnitId: null,
   selectedColonyId: null,
   isColonyScreenOpen: false,
+  isEuropeScreenOpen: false,
+  europePrices: {
+    [GoodType.FOOD]: 1,
+    [GoodType.LUMBER]: 2,
+    [GoodType.ORE]: 3,
+    [GoodType.TOBACCO]: 4,
+    [GoodType.COTTON]: 3,
+    [GoodType.FURS]: 5,
+    [GoodType.TRADE_GOODS]: 6,
+    [GoodType.MUSKETS]: 8,
+  },
   map: [],
 
   selectUnit: (unitId) => set({ selectedUnitId: unitId, selectedColonyId: null }),
   selectColony: (colonyId) => set({ selectedColonyId: colonyId, selectedUnitId: null }),
   setColonyScreenOpen: (isOpen) => set({ isColonyScreenOpen: isOpen }),
+  setEuropeScreenOpen: (isOpen) => set({ isEuropeScreenOpen: isOpen }),
 
   moveUnit: (unitId, toX, toY) =>
     set((state) => {
@@ -146,7 +164,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     // Check if we need to auto-advance phases
     const state = get();
     if (state.phase === TurnPhase.PRODUCTION) {
-      const updatedPlayers = TurnEngine.runProduction(state.players, state.map);
+      const updatedPlayers = TurnEngine.runProduction(state.players);
       set({ players: updatedPlayers });
       state.endTurn();
     } else if (state.phase === TurnPhase.TRADE) {
@@ -261,6 +279,145 @@ export const useGameStore = create<GameState>((set, get) => ({
         newPlayer.units = [...p.units];
         newPlayer.colonies = updatedColonies;
         return newPlayer;
+      });
+
+      return { players: updatedPlayers };
+    }),
+
+  sellGood: (unitId, good, amount) =>
+    set((state) => {
+      const player = state.players.find((p) => p.id === state.currentPlayerId);
+      if (!player) return state;
+
+      const unit = player.units.find((u) => u.id === unitId);
+      if (!unit) return state;
+
+      const cargoAmount = unit.cargo.get(good) || 0;
+      const actualSellAmount = Math.min(amount, cargoAmount);
+      if (actualSellAmount <= 0) return state;
+
+      const price = state.europePrices[good];
+      const goldGained = actualSellAmount * price;
+
+      const updatedPlayers = state.players.map((p) => {
+        if (p.id === state.currentPlayerId) {
+          const updatedUnits = p.units.map((u) => {
+            if (u.id === unitId) {
+              const newUnit = new Unit(u.id, u.ownerId, u.type, u.x, u.y, u.movesRemaining);
+              newUnit.maxMoves = u.maxMoves;
+              newUnit.cargo = new Map(u.cargo);
+              newUnit.cargo.set(good, cargoAmount - actualSellAmount);
+              return newUnit;
+            }
+            return u;
+          });
+          const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold + goldGained);
+          newPlayer.units = updatedUnits;
+          newPlayer.colonies = [...p.colonies];
+          return newPlayer;
+        }
+        return p;
+      });
+
+      const newPrices = { ...state.europePrices };
+      if (actualSellAmount > 20) {
+        newPrices[good] = Math.max(1, price - 1);
+      }
+
+      return { players: updatedPlayers, europePrices: newPrices };
+    }),
+
+  buyGood: (unitId, good, amount) =>
+    set((state) => {
+      const player = state.players.find((p) => p.id === state.currentPlayerId);
+      if (!player) return state;
+
+      const unit = player.units.find((u) => u.id === unitId);
+      if (!unit) return state;
+
+      const price = state.europePrices[good];
+      const cost = amount * price;
+      if (player.gold < cost) return state;
+
+      const updatedPlayers = state.players.map((p) => {
+        if (p.id === state.currentPlayerId) {
+          const updatedUnits = p.units.map((u) => {
+            if (u.id === unitId) {
+              const newUnit = new Unit(u.id, u.ownerId, u.type, u.x, u.y, u.movesRemaining);
+              newUnit.maxMoves = u.maxMoves;
+              newUnit.cargo = new Map(u.cargo);
+              newUnit.cargo.set(good, (u.cargo.get(good) || 0) + amount);
+              return newUnit;
+            }
+            return u;
+          });
+          const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold - cost);
+          newPlayer.units = updatedUnits;
+          newPlayer.colonies = [...p.colonies];
+          return newPlayer;
+        }
+        return p;
+      });
+
+      return { players: updatedPlayers };
+    }),
+
+  recruitUnit: (unitType) =>
+    set((state) => {
+      const player = state.players.find((p) => p.id === state.currentPlayerId);
+      if (!player) return state;
+
+      const selectedUnit = player.units.find((u) => u.id === state.selectedUnitId);
+      if (!selectedUnit || selectedUnit.type !== UnitType.SHIP) return state;
+
+      const costs: Record<UnitType, number> = {
+        [UnitType.COLONIST]: 500,
+        [UnitType.SOLDIER]: 800,
+        [UnitType.PIONEER]: 650,
+        [UnitType.SHIP]: 0,
+      };
+
+      const goldCost = costs[unitType];
+      if (player.gold < goldCost) return state;
+
+      let musketsToConsume = 0;
+      if (unitType === UnitType.SOLDIER) {
+        musketsToConsume = 50;
+        const currentMuskets = selectedUnit.cargo.get(GoodType.MUSKETS) || 0;
+        if (currentMuskets < musketsToConsume) return state;
+      }
+
+      const updatedPlayers = state.players.map((p) => {
+        if (p.id === state.currentPlayerId) {
+          const newUnit = new Unit(
+            `unit-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+            p.id,
+            unitType,
+            selectedUnit.x,
+            selectedUnit.y,
+            1, // Initial moves
+          );
+
+          const updatedUnits = p.units.map((u) => {
+            if (u.id === selectedUnit.id && musketsToConsume > 0) {
+              const updatedShip = new Unit(u.id, u.ownerId, u.type, u.x, u.y, u.movesRemaining);
+              updatedShip.maxMoves = u.maxMoves;
+              updatedShip.cargo = new Map(u.cargo);
+              updatedShip.cargo.set(
+                GoodType.MUSKETS,
+                (u.cargo.get(GoodType.MUSKETS) || 0) - musketsToConsume,
+              );
+              return updatedShip;
+            }
+            return u;
+          });
+
+          const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold - goldCost);
+          newPlayer.units = [...updatedUnits, newUnit];
+          newPlayer.colonies = [...p.colonies];
+          return newPlayer;
+        }
+        return p;
       });
 
       return { players: updatedPlayers };

@@ -6,7 +6,7 @@ import { TerrainType, GoodType, ResourceType, UnitType, JobType, BuildingType } 
 import { eventBus } from '../state/EventBus';
 
 export class TurnEngine {
-  static runProduction(players: Player[], map: Tile[][]): Player[] {
+  static runProduction(players: Player[]): Player[] {
     const updatedPlayers = players.map((player) => {
       const newPlayer = new Player(player.id, player.name, player.isHuman, player.gold);
       // Deep clone units
@@ -114,52 +114,6 @@ export class TurnEngine {
 
     eventBus.emit('productionCompleted', updatedPlayers);
     return updatedPlayers;
-  }
-
-  private static addTileProduction(colony: Colony, tile: Tile) {
-    let type: GoodType | null = null;
-    let amount = 0;
-
-    if (tile.hasResource === ResourceType.FOREST) {
-      type = GoodType.LUMBER;
-      amount = 3;
-    } else {
-      switch (tile.terrainType) {
-        case TerrainType.PLAINS:
-          type = GoodType.FOOD;
-          amount = 2;
-          break;
-        case TerrainType.GRASSLAND:
-          type = GoodType.FOOD;
-          amount = 3;
-          break;
-        case TerrainType.OCEAN:
-          type = GoodType.FOOD;
-          amount = 2;
-          break;
-        case TerrainType.DESERT:
-          type = GoodType.ORE;
-          amount = 1;
-          break;
-        case TerrainType.SWAMP:
-          type = GoodType.LUMBER;
-          amount = 1;
-          break;
-        case TerrainType.TUNDRA:
-          type = GoodType.FURS;
-          amount = 1;
-          break;
-        case TerrainType.MARSH:
-          type = GoodType.FOOD;
-          amount = 1;
-          break;
-      }
-    }
-
-    if (type && amount > 0) {
-      const current = colony.inventory.get(type) || 0;
-      colony.inventory.set(type, current + amount);
-    }
   }
 
   static runAITurn(players: Player[], map: Tile[][]): Player[] {

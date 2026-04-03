@@ -21,7 +21,6 @@ describe('TurnEngine', () => {
 
   describe('runProduction', () => {
     it('should calculate food based on workforce and population consumption', () => {
-      const map = createMap(5, 5);
       const player = new Player('p1', 'Player 1', true, 0);
       const colony = new Colony('c1', 'p1', 'Colony 1', 2, 2, 1);
       const unit = new Unit('u1', 'p1', UnitType.COLONIST, 2, 2, 1);
@@ -29,7 +28,7 @@ describe('TurnEngine', () => {
       colony.workforce.set(unit.id, JobType.FARMER);
       player.colonies.push(colony);
 
-      const updatedPlayers = TurnEngine.runProduction([player], map);
+      const updatedPlayers = TurnEngine.runProduction([player]);
       const updatedColony = updatedPlayers[0].colonies[0];
 
       // Farmer produces 3 FOOD.

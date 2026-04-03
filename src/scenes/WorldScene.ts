@@ -163,11 +163,13 @@ export class WorldScene extends Phaser.Scene {
 
     // Subscribe to store changes
     this.storeUnsubscribe = useGameStore.subscribe((state) => {
+      if (!this.scene?.scene) return;
+      if (!this.scene.isActive('WorldScene')) return;
       this.renderUnits();
 
       const selectedUnit = state.players
-        .flatMap(p => p.units)
-        .find(u => u.id === state.selectedUnitId);
+        .flatMap((p) => p.units)
+        .find((u) => u.id === state.selectedUnitId);
 
       if (selectedUnit) {
         this.reachableTiles = MovementSystem.getReachableTiles(selectedUnit, tiles);

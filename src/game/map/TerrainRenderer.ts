@@ -97,7 +97,9 @@ export class TerrainRenderer {
   public updateReachableHighlights(reachableTiles: { x: number; y: number }[]) {
     if (this.reachableHighlights) {
       this.reachableHighlights.destroy();
+      this.reachableHighlights = null;
     }
+    if (!this.scene || !this.scene.add || !this.scene.add.graphics) return;
     this.reachableHighlights = this.scene.add.graphics();
     this.reachableHighlights.fillStyle(0x00ff00, 0.3);
     this.reachableHighlights.setDepth(5);
@@ -122,6 +124,7 @@ export class TerrainRenderer {
     }
 
     if (tileX !== null && tileY !== null) {
+      if (!this.scene || !this.scene.add || !this.scene.add.graphics) return;
       const { x: worldX, y: worldY } = this.tileToWorld(tileX, tileY);
       this.selectionHighlight = this.scene.add.graphics();
       this.selectionHighlight.lineStyle(2, 0xffffff, 1);

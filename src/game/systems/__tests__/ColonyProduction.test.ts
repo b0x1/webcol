@@ -1,15 +1,12 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect} from 'vitest';
 import { TurnEngine } from '../TurnEngine';
 import { Player } from '../../entities/Player';
 import { Colony } from '../../entities/Colony';
-import { Tile } from '../../entities/Tile';
-import { TerrainType, GoodType, JobType, BuildingType } from '../../entities/types';
+import { GoodType, JobType, BuildingType } from '../../entities/types';
 import { Unit } from '../../entities/Unit';
 import { UnitType } from '../../entities/types';
 
 describe('Colony Production and Building Logic', () => {
-  const mockMap: Tile[][] = [[new Tile(0, 0, TerrainType.PLAINS)]];
-
   it('calculates job-based production correctly', () => {
     const player = new Player('p1', 'Player 1', true, 1000);
     const colony = new Colony('c1', 'p1', 'Colony 1', 0, 0, 1);
@@ -18,7 +15,7 @@ describe('Colony Production and Building Logic', () => {
     colony.workforce.set(unit.id, JobType.LUMBERJACK);
     player.colonies.push(colony);
 
-    const updatedPlayers = TurnEngine.runProduction([player], mockMap);
+    const updatedPlayers = TurnEngine.runProduction([player]);
     const updatedColony = updatedPlayers[0].colonies[0];
 
     // Lumberjack produces 3 LUMBER.
@@ -34,7 +31,7 @@ describe('Colony Production and Building Logic', () => {
     colony.buildings.push(BuildingType.IRON_WORKS);
     player.colonies.push(colony);
 
-    const updatedPlayers = TurnEngine.runProduction([player], mockMap);
+    const updatedPlayers = TurnEngine.runProduction([player]);
     const updatedColony = updatedPlayers[0].colonies[0];
 
     // Lumber Mill gives +2 LUMBER. Iron Works gives +2 ORE.
@@ -49,13 +46,13 @@ describe('Colony Production and Building Logic', () => {
     player.colonies.push(colony);
 
     // No warehouse, cap is 200
-    let updatedPlayers = TurnEngine.runProduction([player], mockMap);
+    let updatedPlayers = TurnEngine.runProduction([player]);
     expect(updatedPlayers[0].colonies[0].inventory.get(GoodType.FOOD)).toBe(200);
 
     // With warehouse, cap is 400
     colony.buildings.push(BuildingType.WAREHOUSE);
     colony.inventory.set(GoodType.FOOD, 350);
-    updatedPlayers = TurnEngine.runProduction([player], mockMap);
+    updatedPlayers = TurnEngine.runProduction([player]);
     expect(updatedPlayers[0].colonies[0].inventory.get(GoodType.FOOD)).toBe(350 - 2); // 350 - (1 pop * 2 food) = 348
   });
 
@@ -65,7 +62,7 @@ describe('Colony Production and Building Logic', () => {
     colony.buildings.push(BuildingType.PRINTING_PRESS);
     player.colonies.push(colony);
 
-    const updatedPlayers = TurnEngine.runProduction([player], mockMap);
+    const updatedPlayers = TurnEngine.runProduction([player]);
     expect(updatedPlayers[0].colonies[0].population).toBe(2);
   });
 

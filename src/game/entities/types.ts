@@ -6,6 +6,7 @@ export const GoodType = {
   COTTON: 'COTTON',
   FURS: 'FURS',
   TRADE_GOODS: 'TRADE_GOODS',
+  MUSKETS: 'MUSKETS',
 } as const;
 export type GoodType = (typeof GoodType)[keyof typeof GoodType];
 
