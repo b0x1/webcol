@@ -73,6 +73,22 @@ export class WorldScene extends Phaser.Scene {
       map.createLayer(0, tileset, 0, 0);
     }
 
+    // Example interaction to emit events
+    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      // For now, simple logic to alternate between selecting a unit and a colony
+      // in a real game, this would be based on what's at the pointer position
+      const worldPoint = pointer.positionToCamera(this.cameras.main) as Phaser.Math.Vector2;
+      const x = Math.floor(worldPoint.x / this.TILE_SIZE);
+      const y = Math.floor(worldPoint.y / this.TILE_SIZE);
+
+      console.log(`Clicked at ${x}, ${y}`);
+
+      // Emit events that React UI will listen to
+      // These are placeholders for real selection logic
+      this.events.emit('unitSelected', null);
+      this.events.emit('colonySelected', null);
+    });
+
     // Set camera bounds
     this.cameras.main.setBounds(
       0,
