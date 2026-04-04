@@ -75,3 +75,18 @@ export const TurnPhase = {
   END_TURN: 'END_TURN',
 } as const;
 export type TurnPhase = (typeof TurnPhase)[keyof typeof TurnPhase];
+
+export const Tribe = {
+  AZTEC: 'AZTEC',
+  IROQUOIS: 'IROQUOIS',
+  CHEROKEE: 'CHEROKEE',
+  SIOUX: 'SIOUX',
+} as const;
+export type Tribe = (typeof Tribe)[keyof typeof Tribe];
+
+export const Attitude = {
+  FRIENDLY: 'FRIENDLY',
+  NEUTRAL: 'NEUTRAL',
+  HOSTILE: 'HOSTILE',
+} as const;
+export type Attitude = (typeof Attitude)[keyof typeof Attitude];

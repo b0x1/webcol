@@ -1,4 +1,5 @@
 import { Tile } from '../entities/Tile';
+import { NativeSettlement } from '../entities/NativeSettlement';
 import { TerrainType } from '../entities/types';
 
 export interface SceneLike {
@@ -16,6 +17,7 @@ export class TerrainRenderer {
   private reachableHighlights: any = null;
   private hoverTooltip: any = null;
   private coastBorders: any = null;
+  private nativeSettlementGraphics: any = null;
 
   constructor(scene: SceneLike, tileSize: number) {
     this.scene = scene;
@@ -36,7 +38,7 @@ export class TerrainRenderer {
     };
   }
 
-  public renderTileMap(tiles: Tile[][]) {
+  public renderTileMap(tiles: Tile[][], nativeSettlements: NativeSettlement[] = []) {
     if (this.coastBorders) {
       this.coastBorders.destroy();
     }
@@ -65,6 +67,25 @@ export class TerrainRenderer {
             .setDepth(2);
         }
       });
+    });
+
+    // Native Settlements
+    if (this.nativeSettlementGraphics) {
+      this.nativeSettlementGraphics.destroy();
+    }
+    this.nativeSettlementGraphics = this.scene.add.graphics();
+    this.nativeSettlementGraphics.fillStyle(0x8b4513, 1); // Brown
+    this.nativeSettlementGraphics.setDepth(3);
+
+    nativeSettlements.forEach((settlement) => {
+      const { x: worldX, y: worldY } = this.tileToWorld(settlement.x, settlement.y);
+      this.nativeSettlementGraphics.beginPath();
+      this.nativeSettlementGraphics.moveTo(worldX + this.tileSize / 2, worldY);
+      this.nativeSettlementGraphics.lineTo(worldX + this.tileSize, worldY + this.tileSize / 2);
+      this.nativeSettlementGraphics.lineTo(worldX + this.tileSize / 2, worldY + this.tileSize);
+      this.nativeSettlementGraphics.lineTo(worldX, worldY + this.tileSize / 2);
+      this.nativeSettlementGraphics.closePath();
+      this.nativeSettlementGraphics.fillPath();
     });
   }
 
@@ -133,19 +154,24 @@ export class TerrainRenderer {
     }
   }
 
-  public showTooltip(tileX: number, tileY: number, worldX: number, worldY: number) {
+  public showTooltip(
+    tileX: number,
+    tileY: number,
+    worldX: number,
+    worldY: number,
+    settlementName?: string
+  ) {
     this.hideTooltip();
 
-    this.hoverTooltip = this.scene.add.text(
-      worldX + 10,
-      worldY + 10,
-      `(${tileX}, ${tileY})`,
-      {
+    const text = settlementName ? `${settlementName} (${tileX}, ${tileY})` : `(${tileX}, ${tileY})`;
+
+    this.hoverTooltip = this.scene.add
+      .text(worldX + 10, worldY + 10, text, {
         fontSize: '12px',
         backgroundColor: '#000000',
         padding: { x: 4, y: 2 },
-      }
-    ).setDepth(100);
+      })
+      .setDepth(100);
   }
 
   public hideTooltip() {

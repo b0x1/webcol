@@ -8,9 +8,10 @@ import { Tile } from '../game/entities/Tile';
 import { useGameStore } from '../game/state/gameStore';
 import { Unit } from '../game/entities/Unit';
 import { Player } from '../game/entities/Player';
-import { UnitType } from '../game/entities/types';
+import { UnitType, Attitude } from '../game/entities/types';
 import { MovementSystem } from '../game/systems/MovementSystem';
 import { eventBus } from '../game/state/EventBus';
+import { MAP_CONSTANTS, UNIT_CONSTANTS } from '../game/constants';
 
 export class WorldScene extends Phaser.Scene {
   public tileMap!: TileMap;
@@ -25,9 +26,9 @@ export class WorldScene extends Phaser.Scene {
     minus: Phaser.Input.Keyboard.Key;
   };
 
-  private readonly TILE_SIZE = 32;
-  private readonly MAP_WIDTH = 80;
-  private readonly MAP_HEIGHT = 60;
+  private readonly TILE_SIZE = MAP_CONSTANTS.TILE_SIZE;
+  private readonly MAP_WIDTH = MAP_CONSTANTS.WIDTH;
+  private readonly MAP_HEIGHT = MAP_CONSTANTS.HEIGHT;
 
   constructor() {
     super('WorldScene');
@@ -49,6 +50,7 @@ export class WorldScene extends Phaser.Scene {
 
     const generator = new TerrainGenerator(this.MAP_WIDTH, this.MAP_HEIGHT);
     const terrainData = generator.generate();
+    const nativeSettlements = generator.generateNativeSettlements(terrainData);
     this.tileMap = new TileMap(this.MAP_WIDTH, this.MAP_HEIGHT, terrainData);
 
     const tiles: Tile[][] = terrainData.map((row, y) =>
@@ -71,7 +73,7 @@ export class WorldScene extends Phaser.Scene {
       })
     );
 
-    this.terrainRenderer.renderTileMap(tiles);
+    this.terrainRenderer.renderTileMap(tiles, nativeSettlements);
 
     // Initialize game state if map is empty
     if (useGameStore.getState().map.length === 0) {
@@ -102,6 +104,7 @@ export class WorldScene extends Phaser.Scene {
 
       useGameStore.setState({
         map: tiles,
+        nativeSettlements: nativeSettlements,
         players: [humanPlayer],
         currentPlayerId: 'player-1',
       });
@@ -130,6 +133,8 @@ export class WorldScene extends Phaser.Scene {
           .flatMap((p) => p.colonies)
           .find((c) => c.x === x && c.y === y);
 
+        const nativeSettlementAtTile = state.nativeSettlements.find((s) => s.x === x && s.y === y);
+
         if (unitAtTile) {
           console.log(`Selecting unit ${unitAtTile.id} at ${x}, ${y}`);
           useGameStore.getState().selectUnit(unitAtTile.id);
@@ -138,6 +143,25 @@ export class WorldScene extends Phaser.Scene {
           console.log(`Selecting colony ${colonyAtTile.id} at ${x}, ${y}`);
           useGameStore.getState().selectColony(colonyAtTile.id);
           this.events.emit('colonySelected', colonyAtTile.id);
+        } else if (nativeSettlementAtTile) {
+          const selectedUnitId = useGameStore.getState().selectedUnitId;
+          const selectedUnit = state.players
+            .flatMap((p) => p.units)
+            .find((u) => u.id === selectedUnitId);
+
+          if (selectedUnit) {
+            if (
+              selectedUnit.type === UnitType.SOLDIER &&
+              nativeSettlementAtTile.attitude === Attitude.HOSTILE
+            ) {
+              useGameStore.getState().attackNativeSettlement(nativeSettlementAtTile.id, selectedUnitId);
+            } else if (
+              selectedUnit.type === UnitType.COLONIST &&
+              nativeSettlementAtTile.attitude !== Attitude.HOSTILE
+            ) {
+              useGameStore.getState().setNativeTradeModalOpen(true, nativeSettlementAtTile.id);
+            }
+          }
         } else {
           useGameStore.getState().selectUnit(null);
           useGameStore.getState().selectColony(null);
@@ -165,6 +189,7 @@ export class WorldScene extends Phaser.Scene {
     this.storeUnsubscribe = useGameStore.subscribe((state) => {
       if (!this.scene?.scene) return;
       if (!this.scene.isActive('WorldScene')) return;
+      this.terrainRenderer.renderTileMap(state.map, state.nativeSettlements);
       this.renderUnits();
 
       const selectedUnit = state.players
@@ -192,7 +217,8 @@ export class WorldScene extends Phaser.Scene {
       const { x, y } = this.terrainRenderer.worldToTile(worldPoint.x, worldPoint.y);
 
       if (x >= 0 && x < this.MAP_WIDTH && y >= 0 && y < this.MAP_HEIGHT) {
-        this.terrainRenderer.showTooltip(x, y, worldPoint.x, worldPoint.y);
+        const settlement = useGameStore.getState().nativeSettlements.find((s) => s.x === x && s.y === y);
+        this.terrainRenderer.showTooltip(x, y, worldPoint.x, worldPoint.y, settlement?.name);
       } else {
         this.terrainRenderer.hideTooltip();
       }
@@ -270,7 +296,7 @@ export class WorldScene extends Phaser.Scene {
       targets: tempSprite,
       x: endX + this.TILE_SIZE / 2,
       y: endY + this.TILE_SIZE / 2,
-      duration: 200,
+      duration: UNIT_CONSTANTS.ANIMATION_DURATION,
       onComplete: () => {
         tempSprite.destroy();
         onComplete();
