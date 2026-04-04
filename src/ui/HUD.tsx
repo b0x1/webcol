@@ -3,7 +3,10 @@ import { useGameStore } from '../game/state/gameStore';
 import { UnitType } from '../game/entities/types';
 
 export const HUD: React.FC = () => {
-  const { players, currentPlayerId, turn, phase, setEuropeScreenOpen, setSaveModalOpen } = useGameStore();
+  const { players, currentPlayerId, turn, phase, setEuropeScreenOpen, setSaveModalOpen, isMainMenuOpen } = useGameStore();
+
+  if (isMainMenuOpen) return null;
+
   const currentPlayer = players.find((p) => p.id === currentPlayerId);
   const hasShip = currentPlayer?.units.some((u) => u.type === UnitType.SHIP);
 

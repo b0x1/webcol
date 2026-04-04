@@ -1,6 +1,10 @@
 import React from 'react';
+import { useGameStore } from '../game/state/gameStore';
 
 export const MiniMap: React.FC = () => {
+  const isMainMenuOpen = useGameStore((state) => state.isMainMenuOpen);
+  if (isMainMenuOpen) return null;
+
   return (
     <div
       className="minimap"

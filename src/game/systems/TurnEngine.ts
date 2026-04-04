@@ -15,7 +15,7 @@ export class TurnEngine {
 
   static runProduction(players: Player[]): Player[] {
     const updatedPlayers = players.map((player) => {
-      const newPlayer = new Player(player.id, player.name, player.isHuman, player.gold);
+      const newPlayer = new Player(player.id, player.name, player.isHuman, player.gold, player.nation);
       // Deep clone units
       newPlayer.units = player.units.map((u) => {
         const nu = new Unit(u.id, u.ownerId, u.type, u.x, u.y, u.movesRemaining);
@@ -128,7 +128,7 @@ export class TurnEngine {
 
     // Deep clone players to work on
     const updatedPlayers = players.map((p) => {
-      const np = new Player(p.id, p.name, p.isHuman, p.gold);
+      const np = new Player(p.id, p.name, p.isHuman, p.gold, p.nation);
       np.units = p.units.map((u) => {
         const nu = new Unit(u.id, u.ownerId, u.type, u.x, u.y, u.movesRemaining);
         nu.cargo = new Map(u.cargo);

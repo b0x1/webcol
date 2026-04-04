@@ -3,7 +3,7 @@ import { useGameStore } from '../gameStore';
 import { Player } from '../../entities/Player';
 import { Unit } from '../../entities/Unit';
 import { Tile } from '../../entities/Tile';
-import { TerrainType, TurnPhase, UnitType } from '../../entities/types';
+import { TerrainType, TurnPhase, UnitType, Nation } from '../../entities/types';
 
 describe('gameStore', () => {
   beforeEach(() => {
@@ -19,7 +19,7 @@ describe('gameStore', () => {
 
   describe('moveUnit', () => {
     it('should update unit position and movesRemaining when move is valid', () => {
-      const player = new Player('p1', 'Player 1', true, 100);
+      const player = new Player('p1', 'Player 1', true, 100, Nation.ENGLAND);
       const unit = new Unit('u1', 'p1', UnitType.COLONIST, 0, 0, 3);
       player.units = [unit];
 
@@ -39,7 +39,7 @@ describe('gameStore', () => {
     });
 
     it('should not update unit position when not enough movesRemaining', () => {
-      const player = new Player('p1', 'Player 1', true, 100);
+      const player = new Player('p1', 'Player 1', true, 100, Nation.ENGLAND);
       const unit = new Unit('u1', 'p1', UnitType.COLONIST, 0, 0, 1);
       player.units = [unit];
 
@@ -62,7 +62,7 @@ describe('gameStore', () => {
   describe('endTurn', () => {
     it('should advance phases correctly', () => {
       // We need players and a map for endTurn to not cycle immediately if logic relies on it
-      const p1 = new Player('p1', 'Player 1', true, 100);
+      const p1 = new Player('p1', 'Player 1', true, 100, Nation.ENGLAND);
       const map = [[new Tile('t00', 0, 0, TerrainType.PLAINS, 1)]];
       useGameStore.setState({ players: [p1], currentPlayerId: 'p1', phase: TurnPhase.MOVEMENT, map });
 
@@ -77,8 +77,8 @@ describe('gameStore', () => {
     });
 
     it('should cycle to next player and reset phase after END_TURN phase', () => {
-      const p1 = new Player('p1', 'Player 1', true, 100);
-      const p2 = new Player('p2', 'Player 2', false, 100);
+      const p1 = new Player('p1', 'Player 1', true, 100, Nation.ENGLAND);
+      const p2 = new Player('p2', 'Player 2', false, 100, Nation.SPAIN);
 
       useGameStore.setState({
         players: [p1, p2],
@@ -94,8 +94,8 @@ describe('gameStore', () => {
     });
 
     it('should increment turn when cycling back to first player', () => {
-      const p1 = new Player('p1', 'Player 1', true, 100);
-      const p2 = new Player('p2', 'Player 2', false, 100);
+      const p1 = new Player('p1', 'Player 1', true, 100, Nation.ENGLAND);
+      const p2 = new Player('p2', 'Player 2', false, 100, Nation.SPAIN);
 
       useGameStore.setState({
         players: [p1, p2],
@@ -111,12 +111,12 @@ describe('gameStore', () => {
     });
 
     it('should reset movesRemaining to maxMoves for the NEW current player', () => {
-      const p1 = new Player('p1', 'Player 1', true, 100);
+      const p1 = new Player('p1', 'Player 1', true, 100, Nation.ENGLAND);
       const unit1 = new Unit('u1', 'p1', UnitType.COLONIST, 0, 0, 0);
       unit1.maxMoves = 3;
       p1.units = [unit1];
 
-      const p2 = new Player('p2', 'Player 2', false, 100);
+      const p2 = new Player('p2', 'Player 2', false, 100, Nation.SPAIN);
       const unit2 = new Unit('u2', 'p2', UnitType.COLONIST, 5, 5, 0);
       unit2.maxMoves = 2;
       p2.units = [unit2];

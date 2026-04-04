@@ -2,7 +2,10 @@ import React from 'react';
 import { useGameStore } from '../game/state/gameStore';
 
 export const ColonyPanel: React.FC = () => {
-  const { selectedColonyId, players, selectColony, setColonyScreenOpen } = useGameStore();
+  const { selectedColonyId, players, selectColony, setColonyScreenOpen, isMainMenuOpen } = useGameStore();
+
+  if (isMainMenuOpen) return null;
+
   const colony = players
     .flatMap((p) => p.colonies)
     .find((c) => c.id === selectedColonyId);

@@ -9,6 +9,7 @@ export const SaveLoadModal: React.FC = () => {
   const setSaveModalOpen = useGameStore((state) => state.setSaveModalOpen);
   const loadGameState = useGameStore((state) => state.loadGameState);
   const gameState = useGameStore((state) => state);
+  const resetGame = useGameStore((state) => state.resetGame);
 
   const [saves, setSaves] = useState<SaveMeta[]>([]);
 
@@ -71,7 +72,20 @@ export const SaveLoadModal: React.FC = () => {
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
           <h2 style={{ margin: 0 }}>Save / Load Game</h2>
-          <button onClick={() => setSaveModalOpen(false)}>Close</button>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              onClick={() => {
+                if (confirm('Are you sure you want to return to the main menu? Unsaved progress will be lost.')) {
+                  resetGame();
+                  setSaveModalOpen(false);
+                }
+              }}
+              style={{ backgroundColor: '#e67e22', color: 'white' }}
+            >
+              Main Menu
+            </button>
+            <button onClick={() => setSaveModalOpen(false)}>Close</button>
+          </div>
         </div>
 
         <div style={{ marginBottom: '20px' }}>

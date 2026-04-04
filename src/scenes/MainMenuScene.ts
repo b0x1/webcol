@@ -1,0 +1,71 @@
+import Phaser from 'phaser';
+import { TerrainGenerator } from '../game/map/TerrainGenerator';
+import { TerrainRenderer } from '../game/map/TerrainRenderer';
+import { TerrainType } from '../game/entities/types';
+import { Tile } from '../game/entities/Tile';
+import { generateTerrainTextures } from '../assets/sprites/terrain';
+import { MAP_CONSTANTS } from '../game/constants';
+import { eventBus } from '../game/state/EventBus';
+
+export class MainMenuScene extends Phaser.Scene {
+  private terrainRenderer!: TerrainRenderer;
+
+  constructor() {
+    super('MainMenuScene');
+  }
+
+  preload() {
+    generateTerrainTextures(this, MAP_CONSTANTS.TILE_SIZE);
+  }
+
+  create() {
+    const width = 25; // Enough to cover 800px width with 32px tiles
+    const height = 20; // Enough to cover 600px height with 32px tiles
+
+    this.terrainRenderer = new TerrainRenderer(this as any, MAP_CONSTANTS.TILE_SIZE);
+
+    const generator = new TerrainGenerator(width, height, `menu-bg-${Date.now()}`);
+    const terrainData = generator.generate();
+
+    const tiles: Tile[][] = terrainData.map((row, y) =>
+      row.map((type, x) => {
+        let cost = 1;
+        if (type === TerrainType.FOREST || type === TerrainType.HILLS) {
+          cost = 2;
+        }
+        return new Tile(`${x}-${y}`, x, y, type, cost);
+      })
+    );
+
+    this.terrainRenderer.renderTileMap(tiles, []);
+
+    // Dark overlay
+    const overlay = this.add.graphics();
+    overlay.fillStyle(0x000000, 0.6);
+    overlay.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height);
+    overlay.setDepth(100);
+
+    // Title
+    const title = this.add.text(
+      this.cameras.main.centerX,
+      this.cameras.main.centerY - 100,
+      'Webcol',
+      {
+        fontSize: '64px',
+        color: '#ffffff',
+        fontStyle: 'bold',
+      }
+    );
+    title.setOrigin(0.5);
+    title.setDepth(101);
+
+    // Event listeners for scene transitions
+    eventBus.on('gameStarted', () => {
+      this.scene.start('WorldScene');
+    });
+
+    eventBus.on('returnToMainMenu', () => {
+      this.scene.start('MainMenuScene');
+    });
+  }
+}

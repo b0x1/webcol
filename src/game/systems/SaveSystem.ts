@@ -110,7 +110,7 @@ export class SaveSystem {
 
   private static hydrateState(data: SaveData): any {
     const players = data.players.map((pData) => {
-      const player = new Player(pData.id, pData.name, pData.isHuman, pData.gold);
+      const player = new Player(pData.id, pData.name, pData.isHuman, pData.gold, pData.nation);
       player.units = pData.units.map((uData: any) => {
         const unit = new Unit(
           uData.id,
