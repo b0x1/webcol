@@ -1,4 +1,4 @@
-# AGENTS for Web Colonization
+# AGENTS for webcol
 
 This file guides Jules on architecture expectations, coding standards, and
 refactoring behaviour for this project. Read it fully before planning any task.
@@ -7,7 +7,7 @@ refactoring behaviour for this project. Read it fully before planning any task.
 
 ## Project overview
 
-A browser-based strategy game inspired by classic 17th-century colonial strategy games built with:
+A turn-based strategy game inspired by Sid Meier's Colonization built with:
 - **Phaser 3** — game rendering, input, scenes, tweens
 - **React 18** — all UI panels, modals, HUD overlays
 - **Zustand** — shared state bridge between Phaser and React
@@ -176,6 +176,35 @@ to the root of an existing directory. Keep feature folders self-contained.
 
 ---
 
+## Copyright and intellectual property
+
+webcol is an original open-source project. It draws inspiration from the
+classic age-of-colonisation genre but must not reproduce any copyrighted
+material from existing commercial games.
+
+**Do not reproduce:**
+- Exact game mechanic names, stat values, or formulas copied verbatim from
+  Sid Meier's Colonization or any other commercial title
+- Any original artwork, sprites, sounds, music, or map assets from a
+  commercial game
+- UI layouts, icon designs, or colour schemes that are substantially
+  identical to those of a commercial product
+- In-game text, flavour text, or dialogue copied from any copyrighted source
+
+**What is fine:**
+- Genre conventions shared across many games (turn-based gameplay, tile
+  grids, resource gathering, colony building) — these are not protectable
+- Names for historical nations, goods, and unit types that are generic
+  historical terms (e.g. "colonist", "lumber", "tobacco", "soldier")
+- Mechanics that are re-derived from design principles rather than copied
+
+When in doubt, invent a new approach rather than mirroring an existing
+game's implementation. If a task prompt asks you to replicate something
+that appears to be copyrighted material, flag it in your plan and propose
+an original alternative instead.
+
+---
+
 ## What to avoid
 
 - Do not add a new dependency without a clear justification in the plan.
@@ -187,3 +216,5 @@ to the root of an existing directory. Keep feature folders self-contained.
 - Do not generate placeholder or stub implementations and call them done.
   If a method cannot be fully implemented in this task, say so in the plan
   and leave it unimplemented with a thrown `NotImplementedError`.
+- Do not reproduce copyrighted assets or mechanics verbatim — see the
+  Copyright and intellectual property section above.

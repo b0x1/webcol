@@ -9,7 +9,7 @@ export class TerrainGenerator {
   private noise2D: (x: number, y: number) => number;
   private seed: string;
 
-  constructor(width: number, height: number, seed = 'web-colonization') {
+  constructor(width: number, height: number, seed = 'a-new-world') {
     this.width = width;
     this.height = height;
     this.seed = seed;
