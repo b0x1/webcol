@@ -32,6 +32,7 @@ export interface GameState {
   isMainMenuOpen: boolean;
   isGameSetupModalOpen: boolean;
   isHowToPlayModalOpen: boolean;
+  isReportsModalOpen: boolean;
 
   selectUnit: (unitId: string | null) => void;
   selectColony: (colonyId: string | null) => void;
@@ -52,6 +53,7 @@ export interface GameState {
   resolveCombat: (attackerId: string, targetX: number, targetY: number) => void;
   clearCombatResult: () => void;
   setSaveModalOpen: (isOpen: boolean) => void;
+  setReportsModalOpen: (isOpen: boolean) => void;
   loadGameState: (state: Partial<GameState>) => void;
   setMainMenuOpen: (isOpen: boolean) => void;
   setGameSetupModalOpen: (isOpen: boolean) => void;
@@ -88,6 +90,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   isMainMenuOpen: true,
   isGameSetupModalOpen: false,
   isHowToPlayModalOpen: false,
+  isReportsModalOpen: false,
 
   selectUnit: (unitId) => set({ selectedUnitId: unitId, selectedColonyId: null }),
   selectColony: (colonyId) => set({ selectedColonyId: colonyId, selectedUnitId: null }),
@@ -96,6 +99,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   setNativeTradeModalOpen: (isOpen, settlementId = null) =>
     set({ isNativeTradeModalOpen: isOpen, activeSettlementId: settlementId }),
   setSaveModalOpen: (isOpen) => set({ isSaveModalOpen: isOpen }),
+  setReportsModalOpen: (isOpen) => set({ isReportsModalOpen: isOpen }),
   setMainMenuOpen: (isOpen) => set({ isMainMenuOpen: isOpen }),
   setGameSetupModalOpen: (isOpen) => set({ isGameSetupModalOpen: isOpen }),
   setHowToPlayModalOpen: (isOpen) => set({ isHowToPlayModalOpen: isOpen }),
@@ -226,6 +230,11 @@ export const useGameStore = create<GameState>((set, get) => ({
       state.endTurn();
     } else if (state.phase === TurnPhase.END_TURN) {
       state.endTurn();
+    } else if (state.phase === TurnPhase.MOVEMENT) {
+      const currentPlayer = state.players.find((p) => p.id === state.currentPlayerId);
+      if (currentPlayer && !currentPlayer.isHuman) {
+        state.endTurn();
+      }
     }
   },
 

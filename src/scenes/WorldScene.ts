@@ -26,6 +26,7 @@ export class WorldScene extends Phaser.Scene {
     minus: Phaser.Input.Keyboard.Key;
   };
   private gameLoadedUnsubscribe: (() => void) | null = null;
+  private cameraJumpUnsubscribe: (() => void) | null = null;
 
   private readonly TILE_SIZE = MAP_CONSTANTS.TILE_SIZE;
   private readonly MAP_WIDTH = MAP_CONSTANTS.WIDTH;
@@ -62,9 +63,10 @@ export class WorldScene extends Phaser.Scene {
     const mapWidth = tiles[0].length;
     const mapHeight = tiles.length;
     const nativeSettlements = state.nativeSettlements;
+    const colonies = state.players.flatMap(p => p.colonies);
     this.tileMap = new TileMap(mapWidth, mapHeight, tiles.map(row => row.map(t => t.terrainType)));
 
-    this.terrainRenderer.renderTileMap(tiles, nativeSettlements);
+    this.terrainRenderer.renderTileMap(tiles, nativeSettlements, colonies);
 
     // Disable context menu for right-click handling
     this.input.mouse?.disableContextMenu();
@@ -172,9 +174,16 @@ export class WorldScene extends Phaser.Scene {
       if (!this.scene?.scene) return;
       if (!this.scene.isActive('WorldScene')) return;
 
-      // Only re-render the map if it or native settlements have changed
-      if (state.map !== prevState.map || state.nativeSettlements !== prevState.nativeSettlements) {
-        this.terrainRenderer.renderTileMap(state.map, state.nativeSettlements);
+      // Only re-render the map if it, native settlements, or colonies have changed
+      const colonies = state.players.flatMap(p => p.colonies);
+      const prevColonies = prevState.players.flatMap(p => p.colonies);
+      if (
+        state.map !== prevState.map ||
+        state.nativeSettlements !== prevState.nativeSettlements ||
+        colonies.length !== prevColonies.length ||
+        !colonies.every((c, i) => c === prevColonies[i])
+      ) {
+        this.terrainRenderer.renderTileMap(state.map, state.nativeSettlements, colonies);
       }
 
       this.renderUnits();
@@ -232,6 +241,11 @@ export class WorldScene extends Phaser.Scene {
 
     this.gameLoadedUnsubscribe = eventBus.on('gameLoaded', () => {
       this.scene.restart();
+    });
+
+    this.cameraJumpUnsubscribe = eventBus.on('cameraJump', ({ x, y }) => {
+      const { x: wx, y: wy } = this.terrainRenderer.tileToWorld(x, y);
+      this.cameras.main.centerOn(wx, wy);
     });
 
     this.scale.on('resize', (gameSize: Phaser.Structs.Size) => {
@@ -371,6 +385,9 @@ export class WorldScene extends Phaser.Scene {
     }
     if (this.gameLoadedUnsubscribe) {
       this.gameLoadedUnsubscribe();
+    }
+    if (this.cameraJumpUnsubscribe) {
+      this.cameraJumpUnsubscribe();
     }
     this.terrainRenderer.destroy();
     this.unitSprites.destroy(true);

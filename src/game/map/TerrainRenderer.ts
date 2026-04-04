@@ -14,6 +14,7 @@ export class TerrainRenderer {
   private hoverTooltip: Phaser.GameObjects.Text | null = null;
   private coastBorders: Phaser.GameObjects.Graphics | null = null;
   private nativeSettlementGraphics: Phaser.GameObjects.Group | null = null;
+  private colonyGraphics: Phaser.GameObjects.Group | null = null;
 
   private terrainIndexMap: Map<string, number> = new Map();
   private resourceIndexMap: Map<string, number> = new Map();
@@ -51,7 +52,7 @@ export class TerrainRenderer {
     };
   }
 
-  public renderTileMap(tiles: Tile[][], nativeSettlements: NativeSettlement[] = []) {
+  public renderTileMap(tiles: Tile[][], nativeSettlements: NativeSettlement[] = [], colonies: any[] = []) {
     const height = tiles.length;
     const width = tiles[0]?.length || 0;
 
@@ -110,6 +111,7 @@ export class TerrainRenderer {
     });
 
     this.renderNativeSettlements(nativeSettlements);
+    this.renderColonies(colonies);
   }
 
   private renderNativeSettlements(nativeSettlements: NativeSettlement[]) {
@@ -124,6 +126,21 @@ export class TerrainRenderer {
         .setOrigin(0, 0)
         .setDepth(3);
       this.nativeSettlementGraphics?.add(sprite);
+    });
+  }
+
+  private renderColonies(colonies: any[]) {
+    if (this.colonyGraphics) {
+      this.colonyGraphics.destroy(true, true);
+    }
+    this.colonyGraphics = this.scene.add.group();
+
+    colonies.forEach((colony) => {
+      const { x: worldX, y: worldY } = this.tileToWorld(colony.x, colony.y);
+      const sprite = this.scene.add.image(worldX, worldY, 'other', 'colony')
+        .setOrigin(0, 0)
+        .setDepth(3);
+      this.colonyGraphics?.add(sprite);
     });
   }
 
@@ -235,5 +252,6 @@ export class TerrainRenderer {
     if (this.hoverTooltip) this.hoverTooltip.destroy();
     if (this.coastBorders) this.coastBorders.destroy();
     if (this.nativeSettlementGraphics) this.nativeSettlementGraphics.destroy(true, true);
+    if (this.colonyGraphics) this.colonyGraphics.destroy(true, true);
   }
 }

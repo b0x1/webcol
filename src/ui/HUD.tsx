@@ -3,7 +3,15 @@ import { useGameStore } from '../game/state/gameStore';
 import { UnitType } from '../game/entities/types';
 
 export const HUD: React.FC = () => {
-  const { players, currentPlayerId, turn, phase, setEuropeScreenOpen, setSaveModalOpen, isMainMenuOpen } = useGameStore();
+  const {
+    players,
+    currentPlayerId,
+    turn,
+    setEuropeScreenOpen,
+    setSaveModalOpen,
+    setReportsModalOpen,
+    isMainMenuOpen
+  } = useGameStore();
 
   if (isMainMenuOpen) return null;
 
@@ -23,23 +31,27 @@ export const HUD: React.FC = () => {
         color: 'white',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-around',
+        justifyContent: 'space-between',
         padding: '0 20px',
         pointerEvents: 'auto',
+        zIndex: 1000,
       }}
     >
-      <div>Player: {currentPlayer?.name || 'N/A'}</div>
-      <div>Gold: {currentPlayer?.gold ?? 0}</div>
-      <div>Turn: {turn}</div>
-      <div>Phase: {phase}</div>
-      <button
-        disabled={!hasShip}
-        onClick={() => setEuropeScreenOpen(true)}
-        style={{ cursor: hasShip ? 'pointer' : 'not-allowed' }}
-      >
-        Sail to Europe
-      </button>
-      <button onClick={() => setSaveModalOpen(true)}>Menu</button>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+        <button onClick={() => setSaveModalOpen(true)}>Load / Save Game</button>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
+        <button onClick={() => setEuropeScreenOpen(true)} disabled={!hasShip} style={{ cursor: hasShip ? 'pointer' : 'not-allowed' }}>
+          Sail to Europe
+        </button>
+        <div>Turn: {turn}</div>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+        <button onClick={() => setReportsModalOpen(true)}>Reports</button>
+        <div style={{ minWidth: '100px' }}>Gold: {currentPlayer?.gold ?? 0}</div>
+      </div>
     </div>
   );
 };

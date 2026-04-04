@@ -6,6 +6,7 @@ import { eventBus } from '../game/state/EventBus';
 
 export const SaveLoadModal: React.FC = () => {
   const isSaveModalOpen = useGameStore((state) => state.isSaveModalOpen);
+  const isMainMenuOpen = useGameStore((state) => state.isMainMenuOpen);
   const setSaveModalOpen = useGameStore((state) => state.setSaveModalOpen);
   const loadGameState = useGameStore((state) => state.loadGameState);
   const gameState = useGameStore((state) => state);
@@ -144,7 +145,9 @@ export const SaveLoadModal: React.FC = () => {
                 )}
               </div>
               <div style={{ display: 'flex', gap: '5px' }}>
-                <button onClick={() => handleSave(slot)}>{save ? 'Overwrite' : 'Save'}</button>
+                {!isMainMenuOpen && (
+                  <button onClick={() => handleSave(slot)}>{save ? 'Overwrite' : 'Save'}</button>
+                )}
                 {save && (
                   <>
                     <button onClick={() => handleLoad(slot)}>Load</button>

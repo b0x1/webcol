@@ -78,7 +78,7 @@ describe('gameStore', () => {
 
     it('should cycle to next player and reset phase after END_TURN phase', () => {
       const p1 = new Player('p1', 'Player 1', true, 100, Nation.ENGLAND);
-      const p2 = new Player('p2', 'Player 2', false, 100, Nation.SPAIN);
+      const p2 = new Player('p2', 'Player 2', true, 100, Nation.SPAIN); // Make p2 human so it doesn't auto-skip
 
       useGameStore.setState({
         players: [p1, p2],
@@ -116,15 +116,20 @@ describe('gameStore', () => {
       unit1.maxMoves = 3;
       p1.units = [unit1];
 
-      const p2 = new Player('p2', 'Player 2', false, 100, Nation.SPAIN);
-      const unit2 = new Unit('u2', 'p2', UnitType.COLONIST, 5, 5, 0);
+      const p2 = new Player('p2', 'Player 2', true, 100, Nation.SPAIN); // Make p2 human so it doesn't auto-skip
+      const unit2 = new Unit('u2', 'p2', UnitType.COLONIST, 0, 0, 0); // Corrected to be within map bounds
       unit2.maxMoves = 2;
       p2.units = [unit2];
+
+      const map = [
+        [new Tile('t00', 0, 0, TerrainType.PLAINS, 1)],
+      ];
 
       useGameStore.setState({
         players: [p1, p2],
         currentPlayerId: 'p1',
-        phase: TurnPhase.END_TURN
+        phase: TurnPhase.END_TURN,
+        map
       });
 
       useGameStore.getState().endTurn();

@@ -12,6 +12,7 @@ import { EuropeScreen } from './ui/EuropeScreen/EuropeScreen';
 import { NativeTradeModal } from './ui/NativeTradeModal/NativeTradeModal';
 import { CombatResultToast } from './ui/CombatResultToast';
 import { SaveLoadModal } from './ui/SaveLoadModal';
+import { ReportsModal } from './ui/ReportsModal';
 import { NotificationToast } from './ui/NotificationToast';
 import { MainMenu } from './ui/MainMenu/MainMenu';
 import { HowToPlayModal } from './ui/MainMenu/HowToPlayModal';
@@ -84,6 +85,7 @@ function App() {
         <NativeTradeModal />
         <CombatResultToast />
         <SaveLoadModal />
+        <ReportsModal />
         <NotificationToast />
         <MainMenu />
         <HowToPlayModal />
