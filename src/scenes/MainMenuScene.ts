@@ -3,8 +3,8 @@ import { TerrainGenerator } from '../game/map/TerrainGenerator';
 import { TerrainRenderer } from '../game/map/TerrainRenderer';
 import { TerrainType } from '../game/entities/types';
 import { Tile } from '../game/entities/Tile';
-import { generateTerrainTextures } from '../assets/sprites/terrain';
 import { MAP_CONSTANTS } from '../game/constants';
+import { SpriteLoader } from '../game/utils/SpriteLoader';
 import { eventBus } from '../game/state/EventBus';
 
 export class MainMenuScene extends Phaser.Scene {
@@ -15,10 +15,17 @@ export class MainMenuScene extends Phaser.Scene {
   }
 
   preload() {
-    generateTerrainTextures(this, MAP_CONSTANTS.TILE_SIZE);
+    // Load AVIF spritesheets via SpriteLoader
+    SpriteLoader.preload(this, 'terrain', 'terrain.avif', 'terrain.json');
+    SpriteLoader.preload(this, 'resources', 'resources.avif', 'resources.json');
+    SpriteLoader.preload(this, 'other', 'other.avif', 'other.json');
   }
 
   create() {
+    // Register frames from manifests via SpriteLoader
+    ['terrain', 'resources', 'other'].forEach((key) => {
+      SpriteLoader.register(this, key);
+    });
     const width = Math.ceil(this.cameras.main.width / MAP_CONSTANTS.TILE_SIZE) + 1;
     const height = Math.ceil(this.cameras.main.height / MAP_CONSTANTS.TILE_SIZE) + 1;
 
