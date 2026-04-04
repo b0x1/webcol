@@ -10,6 +10,8 @@ import { ColonyScreen } from './ui/ColonyScreen/ColonyScreen';
 import { EuropeScreen } from './ui/EuropeScreen/EuropeScreen';
 import { NativeTradeModal } from './ui/NativeTradeModal/NativeTradeModal';
 import { CombatResultToast } from './ui/CombatResultToast';
+import { SaveLoadModal } from './ui/SaveLoadModal';
+import { NotificationToast } from './ui/NotificationToast';
 
 function App() {
   const gameRef = useRef<Phaser.Game | null>(null);
@@ -73,6 +75,8 @@ function App() {
         <EuropeScreen />
         <NativeTradeModal />
         <CombatResultToast />
+        <SaveLoadModal />
+        <NotificationToast />
       </div>
     </div>
   );

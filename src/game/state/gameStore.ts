@@ -26,6 +26,7 @@ export interface GameState {
   map: Tile[][];
   nativeSettlements: NativeSettlement[];
   combatResult: CombatResult | null;
+  isSaveModalOpen: boolean;
 
   selectUnit: (unitId: string | null) => void;
   selectColony: (colonyId: string | null) => void;
@@ -45,6 +46,8 @@ export interface GameState {
   attackNativeSettlement: (settlementId: string, unitId: string) => void;
   resolveCombat: (attackerId: string, targetX: number, targetY: number) => void;
   clearCombatResult: () => void;
+  setSaveModalOpen: (isOpen: boolean) => void;
+  loadGameState: (state: Partial<GameState>) => void;
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -71,6 +74,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   map: [],
   nativeSettlements: [],
   combatResult: null,
+  isSaveModalOpen: false,
 
   selectUnit: (unitId) => set({ selectedUnitId: unitId, selectedColonyId: null }),
   selectColony: (colonyId) => set({ selectedColonyId: colonyId, selectedUnitId: null }),
@@ -78,6 +82,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   setEuropeScreenOpen: (isOpen) => set({ isEuropeScreenOpen: isOpen }),
   setNativeTradeModalOpen: (isOpen, settlementId = null) =>
     set({ isNativeTradeModalOpen: isOpen, activeSettlementId: settlementId }),
+  setSaveModalOpen: (isOpen) => set({ isSaveModalOpen: isOpen }),
 
   moveUnit: (unitId, toX, toY) =>
     set((state) => {
@@ -155,6 +160,15 @@ export const useGameStore = create<GameState>((set, get) => ({
       const nextPlayer = state.players[nextPlayerIndex];
 
       const nextTurn = nextPlayerIndex === 0 ? state.turn + 1 : state.turn;
+
+      // Auto-save at the start of a new turn
+      if (nextTurn > state.turn && nextPlayerIndex === 0) {
+        // We use setTimeout to ensure the store is updated before we save
+        setTimeout(() => {
+          const currentState = get();
+          TurnEngine.autoSave(currentState);
+        }, 0);
+      }
 
       // Reset moves for the NEW current player
       const updatedPlayers = state.players.map((p) => {
@@ -377,6 +391,8 @@ export const useGameStore = create<GameState>((set, get) => ({
 
       return { players: updatedPlayers };
     }),
+
+  loadGameState: (state) => set({ ...state, isSaveModalOpen: false }),
 
   tradeWithNativeSettlement: (settlementId, unitId, goodOffered) =>
     set((state) => {

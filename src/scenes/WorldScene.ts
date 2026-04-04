@@ -25,6 +25,7 @@ export class WorldScene extends Phaser.Scene {
     plus: Phaser.Input.Keyboard.Key;
     minus: Phaser.Input.Keyboard.Key;
   };
+  private gameLoadedUnsubscribe: (() => void) | null = null;
 
   private readonly TILE_SIZE = MAP_CONSTANTS.TILE_SIZE;
   private readonly MAP_WIDTH = MAP_CONSTANTS.WIDTH;
@@ -268,6 +269,10 @@ export class WorldScene extends Phaser.Scene {
         minus: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS),
       };
     }
+
+    this.gameLoadedUnsubscribe = eventBus.on('gameLoaded', () => {
+      this.scene.restart();
+    });
   }
 
   private isAnimating = false;
@@ -393,6 +398,9 @@ export class WorldScene extends Phaser.Scene {
   destroy() {
     if (this.storeUnsubscribe) {
       this.storeUnsubscribe();
+    }
+    if (this.gameLoadedUnsubscribe) {
+      this.gameLoadedUnsubscribe();
     }
   }
 

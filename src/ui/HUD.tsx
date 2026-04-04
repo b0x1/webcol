@@ -3,7 +3,7 @@ import { useGameStore } from '../game/state/gameStore';
 import { UnitType } from '../game/entities/types';
 
 export const HUD: React.FC = () => {
-  const { players, currentPlayerId, turn, phase, setEuropeScreenOpen } = useGameStore();
+  const { players, currentPlayerId, turn, phase, setEuropeScreenOpen, setSaveModalOpen } = useGameStore();
   const currentPlayer = players.find((p) => p.id === currentPlayerId);
   const hasShip = currentPlayer?.units.some((u) => u.type === UnitType.SHIP);
 
@@ -36,6 +36,7 @@ export const HUD: React.FC = () => {
       >
         Sail to Europe
       </button>
+      <button onClick={() => setSaveModalOpen(true)}>Menu</button>
     </div>
   );
 };

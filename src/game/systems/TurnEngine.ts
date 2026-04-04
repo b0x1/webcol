@@ -4,8 +4,15 @@ import { Colony } from '../entities/Colony';
 import { Unit } from '../entities/Unit';
 import { TerrainType, GoodType, ResourceType, UnitType, JobType, BuildingType } from '../entities/types';
 import { eventBus } from '../state/EventBus';
+import { SaveSystem } from './SaveSystem';
+import type { GameState } from '../state/gameStore';
 
 export class TurnEngine {
+  static autoSave(state: GameState): void {
+    SaveSystem.save(state, 'autosave');
+    eventBus.emit('notification', 'Auto-saved');
+  }
+
   static runProduction(players: Player[]): Player[] {
     const updatedPlayers = players.map((player) => {
       const newPlayer = new Player(player.id, player.name, player.isHuman, player.gold);
