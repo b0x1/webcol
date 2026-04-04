@@ -4,29 +4,28 @@ import crypto from 'node:crypto';
 import sharp from 'sharp';
 
 const TILE_SIZE = 64;
-const SPRITE_CACHE_FILE = path.join('src', 'assets', 'sprites', '.sprite-cache');
-const CONFIGS = [
-  {
-    inputDir: path.join('src', 'assets', 'sprites', 'terrain'),
-    outputPng: path.join('dist', 'terrain.png'),
-    outputJson: path.join('public', 'terrain.json'),
-  },
-  {
-    inputDir: path.join('src', 'assets', 'sprites', 'units'),
-    outputPng: path.join('dist', 'units.png'),
-    outputJson: path.join('public', 'units.json'),
-  },
-];
+const SPRITE_CACHE_FILE = '.sprite-cache';
+const INPUT_ROOT_DIR = path.join('src', 'assets', 'sprites');
+const OUTPUT_DIR = 'public'
 
-async function run() {
+async function get_config(type) {
+  return {
+    inputDir: path.join(INPUT_ROOT_DIR, type),
+    hashCacheFile: path.join(INPUT_ROOT_DIR, type, SPRITE_CACHE_FILE),
+    outputPng: path.join(OUTPUT_DIR, `${type}.avif`),
+    outputJson: path.join(OUTPUT_DIR, `${type}.json`),
+  }
+}
+
+const CONFIGS = [await get_config('terrain'), await get_config('units')];
+
+async function checkCache(inputDir, hashCacheFile) {
   const allFiles = [];
-  for (const config of CONFIGS) {
-    if (fs.existsSync(config.inputDir)) {
-      const files = fs.readdirSync(config.inputDir)
-        .filter(f => f.endsWith('.svg'))
-        .map(f => path.join(config.inputDir, f));
-      allFiles.push(...files);
-    }
+  if (fs.existsSync(inputDir)) {
+    const files = fs.readdirSync(inputDir)
+      .filter(f => f.endsWith('.svg'))
+      .map(f => path.join(inputDir, f));
+    allFiles.push(...files);
   }
 
   // Sort by full path for determinism
@@ -35,32 +34,26 @@ async function run() {
   const hash = crypto.createHash('sha256');
   for (const file of allFiles) {
     // Include relative path in hash so renames/moves trigger rebuild
-    hash.update(path.relative('src/assets/sprites', file));
+    hash.update(path.relative(inputDir, file));
     hash.update(fs.readFileSync(file));
   }
+
   const currentHash = hash.digest('hex');
+  var cached = false;
 
-  if (fs.existsSync(SPRITE_CACHE_FILE)) {
-    const cachedHash = fs.readFileSync(SPRITE_CACHE_FILE, 'utf8').trim();
-    if (cachedHash === currentHash) {
-      console.log('Sprites unchanged, skipping build.');
-      process.exit(0);
-    }
+  if (fs.existsSync(hashCacheFile)) {
+    const cachedHash = fs.readFileSync(hashCacheFile, 'utf8').trim();
+    cached = cachedHash === currentHash;
   }
 
-  console.log('Building sprites...');
-  for (const config of CONFIGS) {
-    await buildSpritesheet(config);
-  }
-
-  // Ensure sprite cache directory exists (though it should)
-  fs.mkdirSync(path.dirname(SPRITE_CACHE_FILE), { recursive: true });
-  fs.writeFileSync(SPRITE_CACHE_FILE, currentHash);
-  console.log('Sprites built successfully.');
+  return {
+    cached,
+    currentHash
+  };
 }
 
 async function buildSpritesheet(config) {
-  const { inputDir, outputPng, outputJson } = config;
+  const { inputDir, hashCacheFile, outputPng, outputJson } = config;
   if (!fs.existsSync(inputDir)) {
     console.warn(`Input directory ${inputDir} does not exist, skipping.`);
     return;
@@ -72,6 +65,12 @@ async function buildSpritesheet(config) {
 
   if (files.length === 0) {
     console.warn(`No SVG files found in ${inputDir}, skipping.`);
+    return;
+  }
+
+  const {cached, currentHash} = await checkCache(inputDir, hashCacheFile);
+  if (cached) {
+    console.log(`SVGs in ${inputDir} are cached. Skip creating images.`);
     return;
   }
 
@@ -96,7 +95,9 @@ async function buildSpritesheet(config) {
     // Use sharp to rasterize SVG to PNG buffer
     const pngBuffer = await sharp(svgBuffer)
       .resize(TILE_SIZE, TILE_SIZE)
-      .png()
+      .avif({
+        effort: 9,
+      })
       .toBuffer();
 
     composites.push({
@@ -122,11 +123,23 @@ async function buildSpritesheet(config) {
     },
   })
     .composite(composites)
-    .png()
+    .avif()
     .toFile(outputPng);
 
   fs.writeFileSync(outputJson, JSON.stringify(jsonMap, null, 2));
   console.log(`Generated ${outputPng} and ${outputJson}`);
+
+  fs.mkdirSync(path.dirname(hashCacheFile), { recursive: true });
+  fs.writeFileSync(hashCacheFile, currentHash);
+  console.log(`Update cache file ${hashCacheFile}`);
+}
+
+async function run() {
+  console.log('Building sprites...');
+  for (const config of CONFIGS) {
+    await buildSpritesheet(config);
+  }
+  console.log('Sprites built successfully.');
 }
 
 run().catch(err => {
