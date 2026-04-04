@@ -37,3 +37,14 @@ export const RECRUITMENT_COSTS = {
   SOLDIER: 800,
   PIONEER: 650,
 } as const;
+
+export const COMBAT_CONSTANTS = {
+  UNIT_STRENGTHS: {
+    COLONIST: 1,
+    PIONEER: 1,
+    SOLDIER: 3,
+    SHIP: 2,
+  },
+  BASE_NATIVE_STRENGTH: 2,
+  BASE_COLONY_STRENGTH: 1,
+} as const;

@@ -145,41 +145,67 @@ export class WorldScene extends Phaser.Scene {
           this.events.emit('colonySelected', colonyAtTile.id);
         } else if (nativeSettlementAtTile) {
           const selectedUnitId = useGameStore.getState().selectedUnitId;
-          const selectedUnit = state.players
-            .flatMap((p) => p.units)
-            .find((u) => u.id === selectedUnitId);
+          if (selectedUnitId) {
+            const selectedUnit = state.players
+              .flatMap((p) => p.units)
+              .find((u) => u.id === selectedUnitId);
 
-          if (selectedUnit) {
-            if (
-              selectedUnit.type === UnitType.SOLDIER &&
-              nativeSettlementAtTile.attitude === Attitude.HOSTILE
-            ) {
-              useGameStore.getState().attackNativeSettlement(nativeSettlementAtTile.id, selectedUnitId);
-            } else if (
-              selectedUnit.type === UnitType.COLONIST &&
-              nativeSettlementAtTile.attitude !== Attitude.HOSTILE
-            ) {
-              useGameStore.getState().setNativeTradeModalOpen(true, nativeSettlementAtTile.id);
+            if (selectedUnit) {
+              if (
+                selectedUnit.type === UnitType.SOLDIER &&
+                nativeSettlementAtTile.attitude === Attitude.HOSTILE
+              ) {
+                useGameStore.getState().attackNativeSettlement(nativeSettlementAtTile.id, selectedUnitId);
+              } else if (
+                selectedUnit.type === UnitType.COLONIST &&
+                nativeSettlementAtTile.attitude !== Attitude.HOSTILE
+              ) {
+                useGameStore.getState().setNativeTradeModalOpen(true, nativeSettlementAtTile.id);
+              }
             }
           }
         } else {
           useGameStore.getState().selectUnit(null);
           useGameStore.getState().selectColony(null);
-          this.events.emit('unitSelected', null);
-          this.events.emit('colonySelected', null);
+          this.events.emit('unitSelected', null as any);
+          this.events.emit('colonySelected', null as any);
         }
         this.terrainRenderer.updateSelectionHighlight(x, y);
       } else if (pointer.rightButtonDown()) {
-        // Movement logic
+        // Movement or Combat logic
         if (state.selectedUnitId) {
-          const isReachable = this.reachableTiles.some((t) => t.x === x && t.y === y);
-          if (isReachable) {
-            this.handleMove(state.selectedUnitId, x, y);
-          } else {
-            // Deselect on unreachable right-click
-            useGameStore.getState().selectUnit(null);
-            this.events.emit('unitSelected', null);
-            this.terrainRenderer.updateSelectionHighlight(null, null);
+          const selectedUnit = state.players
+            .flatMap((p) => p.units)
+            .find((u) => u.id === state.selectedUnitId);
+
+          if (selectedUnit) {
+            // Check for combat targets
+            const enemyUnitAtTile = state.players
+              .filter((p) => p.id !== state.currentPlayerId)
+              .flatMap((p) => p.units)
+              .find((u) => u.x === x && u.y === y);
+
+            const enemyColonyAtTile = state.players
+              .filter((p) => p.id !== state.currentPlayerId)
+              .flatMap((p) => p.colonies)
+              .find((c) => c.x === x && c.y === y);
+
+            const settlementAtTile = state.nativeSettlements.find((s) => s.x === x && s.y === y);
+
+            if (selectedUnit.type === UnitType.SOLDIER && (enemyUnitAtTile || enemyColonyAtTile || (settlementAtTile && settlementAtTile.attitude === Attitude.HOSTILE))) {
+              useGameStore.getState().resolveCombat(selectedUnit.id, x, y);
+            } else if (state.selectedUnitId) {
+              // Movement logic
+              const isReachable = this.reachableTiles.some((t) => t.x === x && t.y === y);
+              if (isReachable) {
+                this.handleMove(state.selectedUnitId, x, y);
+              } else {
+                // Deselect on unreachable right-click
+                useGameStore.getState().selectUnit(null);
+                this.events.emit('unitSelected', null as any);
+                this.terrainRenderer.updateSelectionHighlight(null, null);
+              }
+            }
           }
         }
       }
@@ -208,7 +234,7 @@ export class WorldScene extends Phaser.Scene {
     // Escape key for deselection
     this.input.keyboard?.on('keydown-ESC', () => {
       useGameStore.getState().selectUnit(null);
-      this.events.emit('unitSelected', null);
+      this.events.emit('unitSelected', null as any);
       this.terrainRenderer.updateSelectionHighlight(null, null);
     });
 

@@ -9,6 +9,7 @@ import { TurnEngine } from '../systems/TurnEngine';
 import { BUILDING_COSTS, RECRUITMENT_COSTS } from '../constants';
 import { NativeInteractionSystem } from '../systems/NativeInteractionSystem';
 import { CombatSystem } from '../systems/CombatSystem';
+import type { CombatResult } from '../systems/CombatSystem';
 
 export interface GameState {
   players: Player[];
@@ -24,6 +25,7 @@ export interface GameState {
   europePrices: Record<GoodType, number>;
   map: Tile[][];
   nativeSettlements: NativeSettlement[];
+  combatResult: CombatResult | null;
 
   selectUnit: (unitId: string | null) => void;
   selectColony: (colonyId: string | null) => void;
@@ -41,6 +43,8 @@ export interface GameState {
   tradeWithNativeSettlement: (settlementId: string, unitId: string, goodOffered: GoodType) => void;
   learnFromNativeSettlement: (settlementId: string, unitId: string) => void;
   attackNativeSettlement: (settlementId: string, unitId: string) => void;
+  resolveCombat: (attackerId: string, targetX: number, targetY: number) => void;
+  clearCombatResult: () => void;
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -66,6 +70,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
   map: [],
   nativeSettlements: [],
+  combatResult: null,
 
   selectUnit: (unitId) => set({ selectedUnitId: unitId, selectedColonyId: null }),
   selectColony: (colonyId) => set({ selectedColonyId: colonyId, selectedUnitId: null }),
@@ -443,25 +448,149 @@ export const useGameStore = create<GameState>((set, get) => ({
       };
     }),
 
-  attackNativeSettlement: (settlementId, unitId) =>
+  attackNativeSettlement: (settlementId, unitId) => {
+    const state = get();
+    const settlement = state.nativeSettlements.find((s) => s.id === settlementId);
+    if (settlement) {
+      state.resolveCombat(unitId, settlement.x, settlement.y);
+    }
+  },
+
+  clearCombatResult: () => set({ combatResult: null }),
+
+  resolveCombat: (attackerId, targetX, targetY) =>
     set((state) => {
-      const settlement = state.nativeSettlements.find((s) => s.id === settlementId);
       const player = state.players.find((p) => p.id === state.currentPlayerId);
-      const unit = player?.units.find((u) => u.id === unitId);
+      if (!player) return state;
 
-      if (!settlement || !unit) return state;
+      const attacker = player.units.find((u) => u.id === attackerId);
+      if (!attacker) return state;
 
-      const win = CombatSystem.resolveCombat(unit, settlement);
+      // Find defender (Unit, NativeSettlement, or Colony)
+      let defender: Unit | NativeSettlement | Colony | undefined;
+      let defenderColony: Colony | undefined;
 
-      if (win) {
-        // Remove settlement if defeated
-        const updatedSettlements = state.nativeSettlements.filter((s) => s.id !== settlementId);
-        return { nativeSettlements: updatedSettlements };
+      // Check for units (highest priority)
+      for (const p of state.players) {
+        if (p.id !== state.currentPlayerId) {
+          const unit = p.units.find((u) => u.x === targetX && u.y === targetY);
+          if (unit) {
+            defender = unit;
+            break;
+          }
+        }
+      }
+
+      // Check for colonies (always check even if unit is defender to apply Stockade bonus)
+      for (const p of state.players) {
+        const colony = p.colonies.find((c) => c.x === targetX && c.y === targetY);
+        if (colony) {
+          defenderColony = colony;
+          if (!defender && p.id !== state.currentPlayerId) {
+            defender = colony;
+          }
+          break;
+        }
+      }
+
+      // Check for native settlements
+      if (!defender) {
+        defender = state.nativeSettlements.find((s) => s.x === targetX && s.y === targetY);
+      }
+
+      if (!defender) return state;
+
+      const defenderTile = state.map[targetY][targetX];
+      const result = CombatSystem.resolveCombat(attacker, defender, defenderTile, defenderColony);
+
+      let updatedPlayers = [...state.players];
+      let updatedNativeSettlements = [...state.nativeSettlements];
+
+      if (result.winner === 'attacker') {
+        if (defender instanceof Unit) {
+          // Remove defender unit
+          updatedPlayers = updatedPlayers.map((p) => {
+            const updatedUnits = p.units.filter((u) => u !== defender);
+            const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold);
+            newPlayer.units = updatedUnits;
+            newPlayer.colonies = [...p.colonies];
+            return newPlayer;
+          });
+        } else if (defender instanceof NativeSettlement) {
+          // Reduce population or remove settlement
+          if (defender.population > 1) {
+            updatedNativeSettlements = updatedNativeSettlements.map((s) => {
+              if (s.id === defender!.id) {
+                const ns = new NativeSettlement(
+                  s.id,
+                  s.name,
+                  s.tribe,
+                  s.x,
+                  s.y,
+                  s.population - 1,
+                  s.attitude,
+                  new Map(s.goods),
+                );
+                return ns;
+              }
+              return s;
+            });
+          } else {
+            updatedNativeSettlements = updatedNativeSettlements.filter((s) => s.id !== defender!.id);
+          }
+        } else if (defender instanceof Colony) {
+          // Change colony owner and move attacker unit
+          updatedPlayers = updatedPlayers.map((p) => {
+            if (p.id === defender.ownerId) {
+              // Remove colony from previous owner
+              const updatedColonies = p.colonies.filter((c) => c.id !== defender.id);
+              const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold);
+              newPlayer.units = [...p.units];
+              newPlayer.colonies = updatedColonies;
+              return newPlayer;
+            } else if (p.id === state.currentPlayerId) {
+              // Move attacker and add colony to new owner
+              const updatedUnits = p.units.map((u) => {
+                if (u.id === attackerId) {
+                  const nu = new Unit(u.id, u.ownerId, u.type, targetX, targetY, 0);
+                  nu.cargo = new Map(u.cargo);
+                  nu.maxMoves = u.maxMoves;
+                  return nu;
+                }
+                return u;
+              });
+              const capturedColony = new Colony(
+                defender.id,
+                p.id, // New owner
+                defender.name,
+                defender.x,
+                defender.y,
+                defender.population
+              );
+              capturedColony.buildings = [...defender.buildings];
+              capturedColony.inventory = new Map(defender.inventory);
+              capturedColony.productionQueue = [...defender.productionQueue];
+              capturedColony.workforce = new Map(defender.workforce);
+              capturedColony.units = defender.units.map(u => {
+                const nu = new Unit(u.id, p.id, u.type, u.x, u.y, 0);
+                nu.cargo = new Map(u.cargo);
+                nu.maxMoves = u.maxMoves;
+                return nu;
+              });
+
+              const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold);
+              newPlayer.units = updatedUnits;
+              newPlayer.colonies = [...p.colonies, capturedColony];
+              return newPlayer;
+            }
+            return p;
+          });
+        }
       } else {
-        // Remove unit if defeated
-        const updatedPlayers = state.players.map((p) => {
+        // Attacker lost, remove attacker unit
+        updatedPlayers = updatedPlayers.map((p) => {
           if (p.id === state.currentPlayerId) {
-            const updatedUnits = p.units.filter((u) => u.id !== unitId);
+            const updatedUnits = p.units.filter((u) => u.id !== attackerId);
             const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold);
             newPlayer.units = updatedUnits;
             newPlayer.colonies = [...p.colonies];
@@ -469,8 +598,14 @@ export const useGameStore = create<GameState>((set, get) => ({
           }
           return p;
         });
-        return { players: updatedPlayers, selectedUnitId: null };
       }
+
+      return {
+        players: updatedPlayers,
+        nativeSettlements: updatedNativeSettlements,
+        combatResult: result,
+        selectedUnitId: result.winner === 'attacker' ? state.selectedUnitId : null,
+      };
     }),
 
   recruitUnit: (unitType) =>

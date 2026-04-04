@@ -9,6 +9,7 @@ import { MiniMap } from './ui/MiniMap';
 import { ColonyScreen } from './ui/ColonyScreen/ColonyScreen';
 import { EuropeScreen } from './ui/EuropeScreen/EuropeScreen';
 import { NativeTradeModal } from './ui/NativeTradeModal/NativeTradeModal';
+import { CombatResultToast } from './ui/CombatResultToast';
 
 function App() {
   const gameRef = useRef<Phaser.Game | null>(null);
@@ -71,6 +72,7 @@ function App() {
         <ColonyScreen />
         <EuropeScreen />
         <NativeTradeModal />
+        <CombatResultToast />
       </div>
     </div>
   );
