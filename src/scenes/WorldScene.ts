@@ -3,8 +3,8 @@ import { TerrainGenerator } from '../game/map/TerrainGenerator';
 import { TileMap } from '../game/map/TileMap';
 import { TerrainType, ResourceType } from '../game/entities/types';
 import { TerrainRenderer } from '../game/map/TerrainRenderer';
-import { generateTerrainTextures, generateUnitTextures } from '../assets/sprites/terrain';
 import { Tile } from '../game/entities/Tile';
+import { SpriteLoader } from '../game/utils/SpriteLoader';
 import { useGameStore } from '../game/state/gameStore';
 import { Unit } from '../game/entities/Unit';
 import { Player } from '../game/entities/Player';
@@ -36,13 +36,21 @@ export class WorldScene extends Phaser.Scene {
   }
 
   preload() {
-    generateTerrainTextures(this, this.TILE_SIZE);
-    generateUnitTextures(this, this.TILE_SIZE);
+    // Load AVIF spritesheets via SpriteLoader
+    SpriteLoader.preload(this, 'terrain', 'terrain.avif', 'terrain.json');
+    SpriteLoader.preload(this, 'units', 'units.avif', 'units.json');
+    SpriteLoader.preload(this, 'resources', 'resources.avif', 'resources.json');
+    SpriteLoader.preload(this, 'other', 'other.avif', 'other.json');
   }
 
   private reachableTiles: { x: number; y: number; cost: number }[] = [];
 
   create() {
+    // Register frames from manifests via SpriteLoader
+    ['terrain', 'units', 'resources', 'other'].forEach((key) => {
+      SpriteLoader.register(this, key);
+    });
+
     this.terrainRenderer = new TerrainRenderer(this as any, this.TILE_SIZE);
 
     this.unitSprites = this.add.group();
@@ -259,7 +267,8 @@ export class WorldScene extends Phaser.Scene {
     this.unitSprites.getChildren().forEach((child: any) => {
       if (
         child instanceof Phaser.GameObjects.Image &&
-        child.texture.key === `unit-${unit.type}` &&
+          child.texture.key === 'units' &&
+          child.frame.name === unit.type &&
         child.x === startX + this.TILE_SIZE / 2 &&
         child.y === startY + this.TILE_SIZE / 2
       ) {
@@ -270,7 +279,8 @@ export class WorldScene extends Phaser.Scene {
     const tempSprite = this.add.image(
       startX + this.TILE_SIZE / 2,
       startY + this.TILE_SIZE / 2,
-      `unit-${unit.type}`
+      'units',
+      unit.type
     );
     tempSprite.setDepth(300);
 
@@ -313,7 +323,7 @@ export class WorldScene extends Phaser.Scene {
         const ux = worldX + this.TILE_SIZE / 2 - offset;
         const uy = worldY + this.TILE_SIZE / 2 - offset;
 
-        const sprite = this.add.image(ux, uy, `unit-${unit.type}`);
+        const sprite = this.add.image(ux, uy, 'units', unit.type);
         sprite.setDepth(150 + index);
         this.unitSprites?.add(sprite);
 

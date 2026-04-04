@@ -6,19 +6,20 @@ import sharp from 'sharp';
 const TILE_SIZE = 64;
 const SPRITE_CACHE_FILE = '.sprite-cache';
 const INPUT_ROOT_DIR = path.join('src', 'assets', 'sprites');
-const OUTPUT_DIR = 'public'
+const OUTPUT_DIR = 'public';
+const CATEGORIES = ['resources', 'terrain', 'units', 'other']
 
 async function get_config(type) {
   return {
     inputDir: path.join(INPUT_ROOT_DIR, type),
     hashCacheFile: path.join(INPUT_ROOT_DIR, type, SPRITE_CACHE_FILE),
-    outputPng: path.join(OUTPUT_DIR, `${type}.avif`),
+    outputAvif: path.join(OUTPUT_DIR, `${type}.avif`),
     outputJson: path.join(OUTPUT_DIR, `${type}.json`),
   }
 }
 
 const CONFIGS = await Promise.all(
-  ['resources', 'terrain', 'units'].map(key => get_config(key))
+  CATEGORIES.map(key => get_config(key))
 );
 
 async function checkCache(inputDir, hashCacheFile) {
@@ -42,7 +43,6 @@ async function checkCache(inputDir, hashCacheFile) {
 
   const currentHash = hash.digest('hex');
   var cached = false;
-
   if (fs.existsSync(hashCacheFile)) {
     const cachedHash = fs.readFileSync(hashCacheFile, 'utf8').trim();
     cached = cachedHash === currentHash;
@@ -55,7 +55,7 @@ async function checkCache(inputDir, hashCacheFile) {
 }
 
 async function buildSpritesheet(config) {
-  const { inputDir, hashCacheFile, outputPng, outputJson } = config;
+  const { inputDir, hashCacheFile, outputAvif, outputJson } = config;
   if (!fs.existsSync(inputDir)) {
     console.warn(`Input directory ${inputDir} does not exist, skipping.`);
     return;
@@ -94,16 +94,14 @@ async function buildSpritesheet(config) {
 
     const svgBuffer = fs.readFileSync(path.join(inputDir, file));
 
-    // Use sharp to rasterize SVG to PNG buffer
-    const pngBuffer = await sharp(svgBuffer)
+    // Use sharp to rasterize SVG to AVIF buffer
+    const avifBuffer = await sharp(svgBuffer, { density: 96 })
       .resize(TILE_SIZE, TILE_SIZE)
-      .avif({
-        effort: 9,
-      })
+      .avif({ quality: 80, effort: 9 })
       .toBuffer();
 
     composites.push({
-      input: pngBuffer,
+      input: avifBuffer,
       top: y,
       left: x,
     });
@@ -112,7 +110,7 @@ async function buildSpritesheet(config) {
   }
 
   // Ensure output directories exist
-  fs.mkdirSync(path.dirname(outputPng), { recursive: true });
+  fs.mkdirSync(path.dirname(outputAvif), { recursive: true });
   fs.mkdirSync(path.dirname(outputJson), { recursive: true });
 
   // Create base image and composite the tiles
@@ -125,13 +123,12 @@ async function buildSpritesheet(config) {
     },
   })
     .composite(composites)
-    .avif()
-    .toFile(outputPng);
+    .avif({ quality: 80 })
+    .toFile(outputAvif);
 
   fs.writeFileSync(outputJson, JSON.stringify(jsonMap, null, 2));
-  console.log(`Generated ${outputPng} and ${outputJson}`);
+  console.log(`Generated ${outputAvif} and ${outputJson}`);
 
-  fs.mkdirSync(path.dirname(hashCacheFile), { recursive: true });
   fs.writeFileSync(hashCacheFile, currentHash);
   console.log(`Update cache file ${hashCacheFile}`);
 }

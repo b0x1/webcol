@@ -4,9 +4,10 @@ import { TerrainType } from '../entities/types';
 
 export interface SceneLike {
   add: {
-    image: (x: number, y: number, key: string) => { setOrigin: (x: number, y: number) => any; setDepth: (depth: number) => any };
+    image: (x: number, y: number, key: string, frame?: string) => { setOrigin: (x: number, y: number) => any; setDepth: (depth: number) => any };
     graphics: () => any;
     text: (x: number, y: number, text: string, style: any) => { setDepth: (depth: number) => any };
+    group: () => any;
   };
 }
 
@@ -51,7 +52,7 @@ export class TerrainRenderer {
         const { x: worldX, y: worldY } = this.tileToWorld(x, y);
 
         // Base Terrain
-        this.scene.add.image(worldX, worldY, `terrain-${tile.terrainType}`)
+        this.scene.add.image(worldX, worldY, 'terrain', tile.terrainType)
           .setOrigin(0, 0)
           .setDepth(0);
 
@@ -62,7 +63,7 @@ export class TerrainRenderer {
 
         // Resource Overlay
         if (tile.hasResource) {
-          this.scene.add.image(worldX, worldY, `resource-${tile.hasResource}`)
+          this.scene.add.image(worldX, worldY, 'resources', tile.hasResource)
             .setOrigin(0, 0)
             .setDepth(2);
         }
@@ -73,19 +74,14 @@ export class TerrainRenderer {
     if (this.nativeSettlementGraphics) {
       this.nativeSettlementGraphics.destroy();
     }
-    this.nativeSettlementGraphics = this.scene.add.graphics();
-    this.nativeSettlementGraphics.fillStyle(0x8b4513, 1); // Brown
-    this.nativeSettlementGraphics.setDepth(3);
+    this.nativeSettlementGraphics = this.scene.add.group();
 
     nativeSettlements.forEach((settlement) => {
       const { x: worldX, y: worldY } = this.tileToWorld(settlement.x, settlement.y);
-      this.nativeSettlementGraphics.beginPath();
-      this.nativeSettlementGraphics.moveTo(worldX + this.tileSize / 2, worldY);
-      this.nativeSettlementGraphics.lineTo(worldX + this.tileSize, worldY + this.tileSize / 2);
-      this.nativeSettlementGraphics.lineTo(worldX + this.tileSize / 2, worldY + this.tileSize);
-      this.nativeSettlementGraphics.lineTo(worldX, worldY + this.tileSize / 2);
-      this.nativeSettlementGraphics.closePath();
-      this.nativeSettlementGraphics.fillPath();
+      const sprite = this.scene.add.image(worldX, worldY, 'other', 'native_settlement')
+        .setOrigin(0, 0)
+        .setDepth(3);
+      this.nativeSettlementGraphics.add(sprite);
     });
   }
 
