@@ -81,6 +81,7 @@ export const Tribe = {
   IROQUOIS: 'IROQUOIS',
   CHEROKEE: 'CHEROKEE',
   SIOUX: 'SIOUX',
+  APACHE: 'APACHE',
 } as const;
 export type Tribe = (typeof Tribe)[keyof typeof Tribe];
 
