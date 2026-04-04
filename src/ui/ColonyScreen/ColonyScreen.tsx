@@ -43,7 +43,8 @@ export const ColonyScreen: React.FC = () => {
           gridTemplateColumns: '2fr 1fr',
           gridTemplateRows: 'auto 1fr auto',
           gap: '20px',
-          maxHeight: '90%'
+          maxHeight: '80vh',
+          overflowY: 'auto'
         }}
       >
         {/* Header */}

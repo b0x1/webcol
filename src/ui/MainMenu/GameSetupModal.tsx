@@ -65,7 +65,7 @@ export const GameSetupModal: React.FC = () => {
           padding: '30px',
           borderRadius: '8px',
           width: '500px',
-          maxHeight: '90vh',
+          maxHeight: '80vh',
           overflowY: 'auto',
           border: '2px solid #ecf0f1',
         }}

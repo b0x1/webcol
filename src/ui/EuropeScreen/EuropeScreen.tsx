@@ -22,48 +22,70 @@ export const EuropeScreen: React.FC = () => {
         left: 0,
         width: '100%',
         height: '100%',
-        backgroundColor: 'rgba(40, 20, 0, 0.95)',
-        color: 'white',
-        zIndex: 1000,
+        backgroundColor: 'rgba(0, 0, 0, 0.85)',
         display: 'flex',
         flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
         padding: '40px',
-        boxSizing: 'border-box',
+        color: 'white',
+        zIndex: 1000,
         pointerEvents: 'auto',
       }}
     >
       <div
         style={{
+          width: '800px',
+          backgroundColor: '#2c3e50',
+          borderRadius: '12px',
+          padding: '24px',
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '20px',
+          flexDirection: 'column',
+          gap: '20px',
+          maxHeight: '80vh',
+          overflowY: 'auto',
         }}
       >
-        <h2>Europe Trade</h2>
-        <button
-          onClick={() => setEuropeScreenOpen(false)}
-          style={{ padding: '10px 20px', cursor: 'pointer' }}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '20px',
+          }}
         >
-          Return to Colony
-        </button>
-      </div>
+          <h2>Europe Trade</h2>
+          <button
+            onClick={() => setEuropeScreenOpen(false)}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: '#e74c3c',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+            }}
+          >
+            Return to Colony
+          </button>
+        </div>
 
-      <div style={{ flex: 1, overflowY: 'auto' }}>
-        {!isShipSelected ? (
-          <div style={{ textAlign: 'center', marginTop: '50px' }}>
-            <h3>Please select a SHIP to trade or recruit.</h3>
-          </div>
-        ) : (
-          <>
-            <MarketPanel />
-            <RecruitPanel />
-          </>
-        )}
-      </div>
+        <div style={{ flex: 1 }}>
+          {!isShipSelected ? (
+            <div style={{ textAlign: 'center', marginTop: '50px' }}>
+              <h3>Please select a SHIP to trade or recruit.</h3>
+            </div>
+          ) : (
+            <>
+              <MarketPanel />
+              <RecruitPanel />
+            </>
+          )}
+        </div>
 
-      <div style={{ marginTop: '20px', textAlign: 'right' }}>
-        <strong>Current Treasury: {player?.gold ?? 0} gold</strong>
+        <div style={{ marginTop: '20px', textAlign: 'right' }}>
+          <strong>Current Treasury: {player?.gold ?? 0} gold</strong>
+        </div>
       </div>
     </div>
   );

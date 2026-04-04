@@ -19,8 +19,8 @@ export class MainMenuScene extends Phaser.Scene {
   }
 
   create() {
-    const width = 25; // Enough to cover 800px width with 32px tiles
-    const height = 20; // Enough to cover 600px height with 32px tiles
+    const width = Math.ceil(this.cameras.main.width / MAP_CONSTANTS.TILE_SIZE) + 1;
+    const height = Math.ceil(this.cameras.main.height / MAP_CONSTANTS.TILE_SIZE) + 1;
 
     this.terrainRenderer = new TerrainRenderer(this as any, MAP_CONSTANTS.TILE_SIZE);
 
@@ -58,6 +58,14 @@ export class MainMenuScene extends Phaser.Scene {
     );
     title.setOrigin(0.5);
     title.setDepth(101);
+
+    this.scale.on('resize', (gameSize: Phaser.Structs.Size) => {
+      this.cameras.main.setViewport(0, 0, gameSize.width, gameSize.height);
+      overlay.clear();
+      overlay.fillStyle(0x000000, 0.6);
+      overlay.fillRect(0, 0, gameSize.width, gameSize.height);
+      title.setPosition(gameSize.width / 2, gameSize.height / 2 - 100);
+    });
 
     // Event listeners for scene transitions
     eventBus.on('gameStarted', () => {

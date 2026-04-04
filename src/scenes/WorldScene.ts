@@ -220,6 +220,10 @@ export class WorldScene extends Phaser.Scene {
     this.gameLoadedUnsubscribe = eventBus.on('gameLoaded', () => {
       this.scene.restart();
     });
+
+    this.scale.on('resize', (gameSize: Phaser.Structs.Size) => {
+      this.cameras.main.setViewport(0, 0, gameSize.width, gameSize.height);
+    });
   }
 
   private isAnimating = false;

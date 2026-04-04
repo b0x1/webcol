@@ -27,10 +27,14 @@ function App() {
 
     const config: Phaser.Types.Core.GameConfig = {
       type: Phaser.AUTO,
-      width: 800,
-      height: 600,
+      width: window.innerWidth,
+      height: window.innerHeight,
       parent: 'game-container',
       scene: [MainMenuScene, WorldScene],
+      scale: {
+        mode: Phaser.Scale.RESIZE,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+      },
     };
 
     const game = new Phaser.Game(config);
@@ -57,8 +61,8 @@ function App() {
   }, [selectUnit, selectColony]);
 
   return (
-    <div className="App" style={{ position: 'relative', width: '800px', height: '600px' }}>
-      <div id="game-container"></div>
+    <div className="App" style={{ position: 'relative', width: '100vw', height: '100vh' }}>
+      <div id="game-container" style={{ width: '100%', height: '100%' }}></div>
       <div
         className="ui-overlay"
         style={{

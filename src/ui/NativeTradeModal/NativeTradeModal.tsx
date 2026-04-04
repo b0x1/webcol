@@ -30,19 +30,30 @@ export const NativeTradeModal: React.FC = () => {
     <div
       style={{
         position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        backgroundColor: '#2d2d2d',
-        color: '#ffffff',
-        padding: '20px',
-        border: '2px solid #8b4513',
-        borderRadius: '8px',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         zIndex: 1000,
         pointerEvents: 'auto',
-        minWidth: '300px',
       }}
     >
+      <div
+        style={{
+          width: '400px',
+          backgroundColor: '#2d2d2d',
+          color: '#ffffff',
+          padding: '24px',
+          border: '2px solid #8b4513',
+          borderRadius: '12px',
+          maxHeight: '80vh',
+          overflowY: 'auto',
+        }}
+      >
       <h3>{settlement.name}</h3>
       <p>Tribe: {settlement.tribe}</p>
       <p>Attitude: {settlement.attitude}</p>
@@ -85,13 +96,21 @@ export const NativeTradeModal: React.FC = () => {
         </div>
       )}
 
-      <div style={{ marginTop: '30px', textAlign: 'right' }}>
-        <button
-          onClick={() => setNativeTradeModalOpen(false)}
-          style={{ padding: '5px 15px', cursor: 'pointer' }}
-        >
-          Close
-        </button>
+        <div style={{ marginTop: '30px', textAlign: 'right' }}>
+          <button
+            onClick={() => setNativeTradeModalOpen(false)}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: '#e74c3c',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+            }}
+          >
+            Close
+          </button>
+        </div>
       </div>
     </div>
   );
