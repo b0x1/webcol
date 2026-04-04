@@ -15,96 +15,56 @@ export const GameSetupModal: React.FC = () => {
 
   if (!isGameSetupModalOpen) return null;
 
-  const labelStyle: React.CSSProperties = {
-    display: 'block',
-    marginBottom: '8px',
-    fontWeight: 'bold',
-  };
-
-  const inputStyle: React.CSSProperties = {
-    width: '100%',
-    padding: '8px',
-    marginBottom: '20px',
-    backgroundColor: '#34495e',
-    color: 'white',
-    border: '1px solid #7f8c8d',
-    borderRadius: '4px',
-    boxSizing: 'border-box',
-  };
-
-  const nationCardStyle = (n: Nation): React.CSSProperties => ({
-    padding: '10px',
-    marginBottom: '10px',
-    backgroundColor: nation === n ? '#2980b9' : 'rgba(255, 255, 255, 0.05)',
-    border: `2px solid ${nation === n ? '#ecf0f1' : 'transparent'}`,
-    borderRadius: '4px',
-    cursor: 'pointer',
-    position: 'relative',
-  });
+  const labelClass = "block mb-2 font-black uppercase tracking-widest text-xs text-slate-400";
+  const inputClass = "w-full p-3 mb-6 bg-slate-900 text-white border border-slate-700 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all font-bold";
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 2000,
-        pointerEvents: 'auto',
-      }}
-    >
-      <div
-        style={{
-          backgroundColor: '#2c3e50',
-          color: 'white',
-          padding: '30px',
-          borderRadius: '8px',
-          width: '500px',
-          maxHeight: '80vh',
-          overflowY: 'auto',
-          border: '2px solid #ecf0f1',
-        }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-          <h2 style={{ margin: 0 }}>Start New Game</h2>
-          <button onClick={() => setGameSetupModalOpen(false)}>Cancel</button>
+    <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-[2000] pointer-events-auto backdrop-blur-sm">
+      <div className="bg-slate-800 text-white p-8 rounded-xl w-[500px] max-h-[85vh] overflow-y-auto border border-slate-500 shadow-2xl">
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-3xl font-black uppercase tracking-tighter italic">Start New Game</h2>
+          <button
+            onClick={() => setGameSetupModalOpen(false)}
+            className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded transition-colors cursor-pointer text-sm"
+          >
+            Cancel
+          </button>
         </div>
 
-        <label style={labelStyle}>Player Name</label>
+        <label className={labelClass}>Player Name</label>
         <input
-          style={inputStyle}
+          className={inputClass}
           type="text"
           value={playerName}
           onChange={(e) => setPlayerName(e.target.value)}
         />
 
-        <label style={labelStyle}>Select Nation</label>
-        <div style={{ marginBottom: '20px' }}>
+        <label className={labelClass}>Select Nation</label>
+        <div className="grid grid-cols-2 gap-3 mb-8">
           {(Object.keys(Nation) as Nation[]).map((n) => (
             <div
               key={n}
-              style={nationCardStyle(n)}
               onClick={() => setNation(n)}
               title={NATION_BONUSES[n].description}
+              className={`p-4 rounded-lg cursor-pointer transition-all border-2 flex flex-col gap-1 ${
+                nation === n
+                  ? 'bg-blue-600 border-white shadow-lg transform scale-[1.02]'
+                  : 'bg-slate-900/50 border-transparent hover:border-slate-600'
+              }`}
             >
-              <div style={{ fontWeight: 'bold' }}>{NATION_BONUSES[n].name}</div>
-              <div style={{ fontSize: '0.8rem', color: '#bdc3c7' }}>
+              <div className="font-black uppercase tracking-wider text-sm">{NATION_BONUSES[n].name}</div>
+              <div className={`text-[10px] font-bold leading-tight ${nation === n ? 'text-blue-100' : 'text-slate-500'}`}>
                 {NATION_BONUSES[n].bonus}
               </div>
             </div>
           ))}
         </div>
 
-        <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
-          <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Map Size</label>
+        <div className="flex gap-4 mb-8">
+          <div className="flex-1">
+            <label className={labelClass}>Map Size</label>
             <select
-              style={inputStyle}
+              className={inputClass}
               value={mapSize}
               onChange={(e) => setMapSize(e.target.value as any)}
             >
@@ -113,10 +73,10 @@ export const GameSetupModal: React.FC = () => {
               <option value="Large">Large (120x90)</option>
             </select>
           </div>
-          <div style={{ flex: 1 }}>
-            <label style={labelStyle}>AI Opponents</label>
+          <div className="flex-1">
+            <label className={labelClass}>AI Opponents</label>
             <select
-              style={inputStyle}
+              className={inputClass}
               value={aiCount}
               onChange={(e) => setAiCount(parseInt(e.target.value))}
             >
@@ -128,17 +88,7 @@ export const GameSetupModal: React.FC = () => {
         </div>
 
         <button
-          style={{
-            width: '100%',
-            padding: '15px',
-            fontSize: '18px',
-            backgroundColor: '#27ae60',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontWeight: 'bold',
-          }}
+          className="w-full py-4 bg-green-600 hover:bg-green-500 text-white font-black text-xl uppercase tracking-widest rounded shadow-xl transition-all transform active:scale-[0.98] cursor-pointer"
           onClick={() => initGame({ playerName, nation, mapSize, aiCount })}
         >
           Start Game

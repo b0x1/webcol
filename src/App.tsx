@@ -62,20 +62,9 @@ function App() {
   }, [selectUnit, selectColony]);
 
   return (
-    <div className="App" style={{ position: 'relative', width: '100vw', height: '100vh' }}>
-      <div id="game-container" style={{ width: '100%', height: '100%' }}></div>
-      <div
-        className="ui-overlay"
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          pointerEvents: 'none',
-          overflow: 'hidden',
-        }}
-      >
+    <div className="relative w-screen h-screen overflow-hidden">
+      <div id="game-container" className="w-full h-full"></div>
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <HUD />
         <UnitPanel />
         <ColonyPanel />

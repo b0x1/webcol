@@ -21,48 +21,42 @@ export const BuildingSlots: React.FC<Props> = ({ colonyId, ownedBuildings, playe
   const buyBuilding = useGameStore((state) => state.buyBuilding);
 
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(3, 1fr)',
-      gap: '10px',
-      padding: '10px',
-      backgroundColor: '#34495e',
-      borderRadius: '8px'
-    }}>
+    <div className="grid grid-cols-3 gap-2.5 p-2.5 bg-slate-900/50 rounded-lg border border-slate-700">
       {BUILDINGS_LIST.map((b) => {
         const isBuilt = ownedBuildings.includes(b.type);
         const canAfford = playerGold >= b.cost;
 
         return (
-          <div key={b.type} style={{
-            padding: '10px',
-            backgroundColor: isBuilt ? '#27ae60' : '#7f8c8d',
-            borderRadius: '4px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            minHeight: '100px'
-          }}>
-            <div style={{ fontWeight: 'bold', fontSize: '0.9em' }}>{b.name}</div>
-            <div style={{ fontSize: '0.8em' }}>{b.bonus}</div>
-            {!isBuilt && (
+          <div
+            key={b.type}
+            className={`p-2.5 rounded shadow-sm flex flex-col justify-between min-h-[100px] border transition-all ${
+              isBuilt
+                ? 'bg-green-900/40 border-green-700'
+                : 'bg-slate-800 border-slate-700'
+            }`}
+          >
+            <div>
+              <div className="font-black text-[0.8rem] uppercase tracking-wider text-slate-200">{b.name}</div>
+              <div className="text-[0.7rem] text-slate-400 mt-1">{b.bonus}</div>
+            </div>
+
+            {!isBuilt ? (
               <button
                 onClick={() => buyBuilding(colonyId, b.type)}
                 disabled={!canAfford}
-                style={{
-                  marginTop: '5px',
-                  padding: '4px',
-                  fontSize: '0.8em',
-                  cursor: canAfford ? 'pointer' : 'not-allowed',
-                  backgroundColor: canAfford ? '#f1c40f' : '#bdc3c7',
-                  border: 'none',
-                  borderRadius: '2px'
-                }}
+                className={`mt-2 py-1.5 px-2 text-[0.75rem] font-bold rounded transition-colors shadow-inner ${
+                  canAfford
+                    ? 'bg-yellow-600 hover:bg-yellow-500 text-white cursor-pointer'
+                    : 'bg-slate-700 text-slate-500 cursor-not-allowed opacity-50'
+                }`}
               >
                 Build ({b.cost}g)
               </button>
+            ) : (
+              <div className="mt-2 py-1 text-[0.7rem] font-black text-green-400 text-center bg-green-950/50 rounded border border-green-800/30 uppercase tracking-widest">
+                Built
+              </div>
             )}
-            {isBuilt && <div style={{ fontSize: '0.8em', color: '#ecf0f1', textAlign: 'center' }}>Built</div>}
           </div>
         );
       })}

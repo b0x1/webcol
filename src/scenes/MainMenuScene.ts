@@ -52,19 +52,7 @@ export class MainMenuScene extends Phaser.Scene {
     overlay.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height);
     overlay.setDepth(100);
 
-    // Title
-    const title = this.add.text(
-      this.cameras.main.centerX,
-      this.cameras.main.centerY - 100,
-      'Webcol',
-      {
-        fontSize: '64px',
-        color: '#ffffff',
-        fontStyle: 'bold',
-      }
-    );
-    title.setOrigin(0.5);
-    title.setDepth(101);
+    // Title removed - handled by React UI MainMenu.tsx
 
     this.scale.on('resize', (gameSize: Phaser.Structs.Size) => {
       if (this.cameras && this.cameras.main) {
@@ -73,7 +61,6 @@ export class MainMenuScene extends Phaser.Scene {
       overlay.clear();
       overlay.fillStyle(0x000000, 0.6);
       overlay.fillRect(0, 0, gameSize.width, gameSize.height);
-      title.setPosition(gameSize.width / 2, gameSize.height / 2 - 100);
     });
 
     // Event listeners for scene transitions

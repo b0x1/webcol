@@ -36,18 +36,17 @@ export const InventoryPanel: React.FC<Props> = ({ inventory, workforce, building
   const cap = buildings.includes(BuildingType.WAREHOUSE) ? 400 : 200;
 
   return (
-    <div style={{
-      padding: '10px',
-      backgroundColor: '#34495e',
-      borderRadius: '8px'
-    }}>
-      <h3 style={{ marginTop: 0 }}>Inventory (Cap: {cap})</h3>
-      <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
+    <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700 shadow-inner">
+      <h3 className="text-lg font-black uppercase tracking-tight mb-4 text-slate-300 flex justify-between items-center">
+        Inventory
+        <span className="text-[10px] font-mono bg-slate-800 px-2 py-0.5 rounded border border-slate-700">Cap: {cap}</span>
+      </h3>
+      <table className="w-full text-left border-collapse text-sm">
         <thead>
-          <tr style={{ borderBottom: '1px solid #7f8c8d' }}>
-            <th>Good</th>
-            <th>Stock</th>
-            <th>Net/Turn</th>
+          <tr className="border-b border-slate-700 text-slate-500 text-[10px] uppercase tracking-widest">
+            <th className="pb-2 font-bold">Good</th>
+            <th className="pb-2 font-bold">Stock</th>
+            <th className="pb-2 font-bold text-right">Net/Turn</th>
           </tr>
         </thead>
         <tbody>
@@ -55,11 +54,11 @@ export const InventoryPanel: React.FC<Props> = ({ inventory, workforce, building
             const stock = inventory.get(good) || 0;
             const net = calculateProduction(good);
             return (
-              <tr key={good} style={{ borderBottom: '1px solid #2c3e50' }}>
-                <td>{good}</td>
-                <td>{stock}</td>
-                <td style={{ color: net >= 0 ? '#27ae60' : '#e74c3c' }}>
-                  {net >= 0 ? '+' : ''}{net}
+              <tr key={good} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors group">
+                <td className="py-2 text-slate-300 font-medium capitalize">{good.toLowerCase().replace('_', ' ')}</td>
+                <td className="py-2 font-mono font-bold">{stock}</td>
+                <td className={`py-2 text-right font-mono font-bold ${net > 0 ? 'text-green-400' : net < 0 ? 'text-red-400' : 'text-slate-500'}`}>
+                  {net > 0 ? '+' : ''}{net}
                 </td>
               </tr>
             );

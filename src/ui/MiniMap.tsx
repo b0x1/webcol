@@ -86,33 +86,13 @@ export const MiniMap: React.FC = () => {
 
   return (
     <div
-      className="minimap"
+      className="absolute bottom-5 right-5 w-[200px] h-[150px] bg-black/80 border-2 border-slate-600 text-white flex items-center justify-center pointer-events-auto overflow-hidden cursor-crosshair shadow-2xl rounded-sm hover:border-blue-500 transition-colors"
       onPointerDown={handlePointerAction}
       onPointerMove={handlePointerAction}
-      style={{
-        position: 'absolute',
-        bottom: '20px',
-        right: '20px',
-        width: '200px',
-        height: '150px',
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        border: '2px solid #555',
-        color: 'white',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        pointerEvents: 'auto',
-        overflow: 'hidden',
-        cursor: 'crosshair',
-      }}
     >
       <canvas
         ref={canvasRef}
-        style={{
-          width: '100%',
-          height: '100%',
-          imageRendering: 'pixelated',
-        }}
+        className="w-full h-full [image-rendering:pixelated]"
       />
     </div>
   );

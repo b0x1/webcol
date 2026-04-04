@@ -15,21 +15,7 @@ export const NotificationToast: React.FC = () => {
   if (!message) return null;
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        bottom: '20px',
-        left: '20px',
-        backgroundColor: 'rgba(52, 152, 219, 0.9)',
-        color: 'white',
-        padding: '10px 20px',
-        borderRadius: '4px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-        zIndex: 1500,
-        fontWeight: 'bold',
-        transition: 'opacity 0.3s ease-in-out',
-      }}
-    >
+    <div className="absolute bottom-5 left-5 bg-blue-600/90 text-white px-5 py-2.5 rounded shadow-lg z-[1500] font-bold transition-opacity duration-300">
       {message}
     </div>
   );

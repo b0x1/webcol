@@ -9,49 +9,21 @@ export const MainMenu: React.FC = () => {
 
   if (!isMainMenuOpen) return null;
 
-  const buttonStyle: React.CSSProperties = {
-    padding: '12px 24px',
-    fontSize: '20px',
-    backgroundColor: '#34495e',
-    color: 'white',
-    border: '2px solid #ecf0f1',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    width: '200px',
-    marginBottom: '10px',
-    pointerEvents: 'auto',
-  };
+  const buttonClass = "w-64 py-4 px-6 mb-4 bg-slate-800 hover:bg-slate-700 text-white font-black text-xl uppercase tracking-widest border-2 border-slate-100/20 rounded shadow-xl transition-all transform hover:scale-105 active:scale-95 cursor-pointer pointer-events-auto backdrop-blur-sm";
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          marginTop: '100px',
-        }}
-      >
-        <button style={buttonStyle} onClick={() => setGameSetupModalOpen(true)}>
+    <div className="absolute inset-0 flex flex-col items-center justify-center z-[1000] bg-black/20">
+      <div className="flex flex-col items-center mt-24 animate-in fade-in zoom-in duration-500">
+        <h1 className="text-8xl font-black text-white mb-16 drop-shadow-2xl uppercase tracking-tighter italic">
+          WEB<span className="text-blue-500">COL</span>
+        </h1>
+        <button className={buttonClass} onClick={() => setGameSetupModalOpen(true)}>
           New Game
         </button>
-        <button style={buttonStyle} onClick={() => setSaveModalOpen(true)}>
+        <button className={buttonClass} onClick={() => setSaveModalOpen(true)}>
           Load Game
         </button>
-        <button style={buttonStyle} onClick={() => setHowToPlayModalOpen(true)}>
+        <button className={buttonClass} onClick={() => setHowToPlayModalOpen(true)}>
           How to Play
         </button>
       </div>

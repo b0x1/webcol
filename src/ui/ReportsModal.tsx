@@ -14,28 +14,28 @@ export const ReportsModal: React.FC = () => {
   if (!player) return null;
 
   const renderUnitsReport = () => (
-    <div>
-      <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
+    <div className="overflow-x-auto">
+      <table className="w-full text-left border-collapse">
         <thead>
-          <tr style={{ borderBottom: '1px solid #555' }}>
-            <th style={{ padding: '10px' }}>Unit Type</th>
-            <th style={{ padding: '10px' }}>Position (X, Y)</th>
-            <th style={{ padding: '10px' }}>Moves Left</th>
+          <tr className="border-b border-slate-600 bg-slate-800/50">
+            <th className="p-3 font-bold">Unit Type</th>
+            <th className="p-3 font-bold">Position (X, Y)</th>
+            <th className="p-3 font-bold">Moves Left</th>
           </tr>
         </thead>
         <tbody>
           {player.units.map((unit) => (
-            <tr key={unit.id} style={{ borderBottom: '1px solid #333' }}>
-              <td style={{ padding: '10px' }}>{unit.type}</td>
-              <td style={{ padding: '10px' }}>{unit.x}, {unit.y}</td>
-              <td style={{ padding: '10px' }}>{unit.movesRemaining} / {unit.maxMoves}</td>
+            <tr key={unit.id} className="border-b border-slate-700 hover:bg-slate-700/30 transition-colors">
+              <td className="p-3">{unit.type}</td>
+              <td className="p-3">{unit.x}, {unit.y}</td>
+              <td className="p-3 font-mono">{unit.movesRemaining} / {unit.maxMoves}</td>
             </tr>
           ))}
           {player.colonies.flatMap(c => c.units).map((unit) => (
-            <tr key={unit.id} style={{ borderBottom: '1px solid #333', fontStyle: 'italic' }}>
-              <td style={{ padding: '10px' }}>{unit.type} (In Colony)</td>
-              <td style={{ padding: '10px' }}>{unit.x}, {unit.y}</td>
-              <td style={{ padding: '10px' }}>N/A</td>
+            <tr key={unit.id} className="border-b border-slate-700 italic text-slate-400 hover:bg-slate-700/30 transition-colors">
+              <td className="p-3">{unit.type} (In Colony)</td>
+              <td className="p-3">{unit.x}, {unit.y}</td>
+              <td className="p-3 font-mono text-xs opacity-50">N/A</td>
             </tr>
           ))}
         </tbody>
@@ -44,21 +44,21 @@ export const ReportsModal: React.FC = () => {
   );
 
   const renderSettlementsReport = () => (
-    <div>
-      <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
+    <div className="overflow-x-auto">
+      <table className="w-full text-left border-collapse">
         <thead>
-          <tr style={{ borderBottom: '1px solid #555' }}>
-            <th style={{ padding: '10px' }}>Name</th>
-            <th style={{ padding: '10px' }}>Population</th>
-            <th style={{ padding: '10px' }}>Buildings</th>
+          <tr className="border-b border-slate-600 bg-slate-800/50">
+            <th className="p-3 font-bold">Name</th>
+            <th className="p-3 font-bold">Population</th>
+            <th className="p-3 font-bold">Buildings</th>
           </tr>
         </thead>
         <tbody>
           {player.colonies.map((colony) => (
-            <tr key={colony.id} style={{ borderBottom: '1px solid #333' }}>
-              <td style={{ padding: '10px' }}>{colony.name}</td>
-              <td style={{ padding: '10px' }}>{colony.population}</td>
-              <td style={{ padding: '10px' }}>{colony.buildings.join(', ') || 'None'}</td>
+            <tr key={colony.id} className="border-b border-slate-700 hover:bg-slate-700/30 transition-colors">
+              <td className="p-3 font-semibold text-blue-300">{colony.name}</td>
+              <td className="p-3">{colony.population}</td>
+              <td className="p-3 text-sm text-slate-300">{colony.buildings.join(', ') || 'None'}</td>
             </tr>
           ))}
         </tbody>
@@ -69,22 +69,22 @@ export const ReportsModal: React.FC = () => {
   const renderResourcesReport = () => {
     const goods = Object.values(GoodType);
     return (
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse">
           <thead>
-            <tr style={{ borderBottom: '1px solid #555' }}>
-              <th style={{ padding: '10px' }}>Colony</th>
+            <tr className="border-b border-slate-600 bg-slate-800/50">
+              <th className="p-3 font-bold sticky left-0 bg-slate-800">Colony</th>
               {goods.map(good => (
-                <th key={good} style={{ padding: '10px', fontSize: '0.8rem' }}>{good}</th>
+                <th key={good} className="p-3 text-[10px] uppercase tracking-wider font-bold text-slate-400">{good}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {player.colonies.map((colony) => (
-              <tr key={colony.id} style={{ borderBottom: '1px solid #333' }}>
-                <td style={{ padding: '10px', fontWeight: 'bold' }}>{colony.name}</td>
+              <tr key={colony.id} className="border-b border-slate-700 hover:bg-slate-700/30 transition-colors">
+                <td className="p-3 font-bold sticky left-0 bg-slate-800 text-blue-300">{colony.name}</td>
                 {goods.map(good => (
-                  <td key={good} style={{ padding: '10px' }}>
+                  <td key={good} className="p-3 font-mono">
                     {colony.inventory.get(good) || 0}
                   </td>
                 ))}
@@ -97,73 +97,35 @@ export const ReportsModal: React.FC = () => {
   };
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 2500,
-        pointerEvents: 'auto',
-      }}
-    >
-      <div
-        style={{
-          backgroundColor: '#2c3e50',
-          color: 'white',
-          padding: '20px',
-          borderRadius: '8px',
-          width: '80vw',
-          maxHeight: '80vh',
-          display: 'flex',
-          flexDirection: 'column',
-          border: '2px solid #ecf0f1',
-        }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-          <h2 style={{ margin: 0 }}>Reports</h2>
-          <button onClick={() => setReportsModalOpen(false)}>Close</button>
-        </div>
-
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+    <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-[2500] pointer-events-auto backdrop-blur-sm">
+      <div className="bg-slate-800 text-white p-6 rounded-xl w-[90vw] max-w-5xl h-[85vh] flex flex-col border border-slate-500 shadow-2xl">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-3xl font-black uppercase tracking-tight">Reports</h2>
           <button
-            onClick={() => setActiveTab('units')}
-            style={{
-              backgroundColor: activeTab === 'units' ? '#3498db' : '#34495e',
-              flex: 1,
-              padding: '10px',
-            }}
+            onClick={() => setReportsModalOpen(false)}
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded transition-colors cursor-pointer"
           >
-            Units
-          </button>
-          <button
-            onClick={() => setActiveTab('settlements')}
-            style={{
-              backgroundColor: activeTab === 'settlements' ? '#3498db' : '#34495e',
-              flex: 1,
-              padding: '10px',
-            }}
-          >
-            Settlements
-          </button>
-          <button
-            onClick={() => setActiveTab('resources')}
-            style={{
-              backgroundColor: activeTab === 'resources' ? '#3498db' : '#34495e',
-              flex: 1,
-              padding: '10px',
-            }}
-          >
-            Resources
+            Close
           </button>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto' }}>
+        <div className="flex gap-2 mb-6 p-1 bg-slate-900/50 rounded-lg">
+          {(['units', 'settlements', 'resources'] as ReportTab[]).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`flex-1 py-3 px-4 rounded-md font-bold uppercase text-sm tracking-widest transition-all cursor-pointer ${
+                activeTab === tab
+                  ? 'bg-blue-600 text-white shadow-lg'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-700'
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
           {activeTab === 'units' && renderUnitsReport()}
           {activeTab === 'settlements' && renderSettlementsReport()}
           {activeTab === 'resources' && renderResourcesReport()}

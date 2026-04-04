@@ -19,38 +19,37 @@ export const HUD: React.FC = () => {
   const hasShip = currentPlayer?.units.some((u) => u.type === UnitType.SHIP);
 
   return (
-    <div
-      className="hud"
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: '40px',
-        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-        color: 'white',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 20px',
-        pointerEvents: 'auto',
-        zIndex: 1000,
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-        <button onClick={() => setSaveModalOpen(true)}>Load / Save Game</button>
+    <div className="absolute top-0 left-0 right-0 h-10 bg-black/70 text-white flex items-center justify-between px-5 pointer-events-auto z-[1000] font-sans text-sm">
+      <div className="flex items-center gap-5">
+        <button
+          className="hover:text-blue-400 transition-colors cursor-pointer font-bold uppercase tracking-tight"
+          onClick={() => setSaveModalOpen(true)}
+        >
+          Load / Save Game
+        </button>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
-        <button onClick={() => setEuropeScreenOpen(true)} disabled={!hasShip} style={{ cursor: hasShip ? 'pointer' : 'not-allowed' }}>
+      <div className="flex items-center gap-8 font-bold uppercase tracking-widest text-xs">
+        <button
+          className={`transition-colors py-1 px-3 rounded border border-transparent ${hasShip ? 'cursor-pointer hover:text-blue-400 hover:border-blue-400/30 bg-blue-600/10' : 'cursor-not-allowed opacity-30'}`}
+          onClick={() => setEuropeScreenOpen(true)}
+          disabled={!hasShip}
+        >
           Sail to Europe
         </button>
-        <div>Turn: {turn}</div>
+        <div className="text-slate-300">Turn: <span className="text-white">{turn}</span></div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-        <button onClick={() => setReportsModalOpen(true)}>Reports</button>
-        <div style={{ minWidth: '100px' }}>Gold: {currentPlayer?.gold ?? 0}</div>
+      <div className="flex items-center gap-6">
+        <button
+          className="hover:text-blue-400 transition-colors cursor-pointer font-bold uppercase tracking-tight"
+          onClick={() => setReportsModalOpen(true)}
+        >
+          Reports
+        </button>
+        <div className="min-w-[100px] font-mono font-bold bg-slate-900/50 px-3 py-1 rounded border border-white/10">
+          GOLD: <span className="text-yellow-400">{currentPlayer?.gold ?? 0}</span>
+        </div>
       </div>
     </div>
   );

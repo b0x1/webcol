@@ -25,8 +25,9 @@ boundaries in the wrong direction.
 ```
 ┌──────────────────────────────────────────────┐
 │  UI layer       src/ui/                      │
-│  React components. Read from Zustand store.  │
-│  Never import Phaser. Never contain logic.   │
+│  React components with Tailwind CSS.         │
+│  Read from Zustand store. Never import       │
+│  Phaser. Never contain logic.                │
 ├──────────────────────────────────────────────┤
 │  Scene layer    src/scenes/                  │
 │  Phaser scenes. Rendering and input only.    │
@@ -117,6 +118,9 @@ Components are presentational or container, never both. A container
 component connects to Zustand and passes props down. A presentational
 component receives props and renders. Components never call game system
 classes directly.
+
+Styling must be done using **Tailwind CSS** utility classes. Avoid inline
+styles and custom CSS classes in `.css` files where Tailwind can be used.
 
 ---
 

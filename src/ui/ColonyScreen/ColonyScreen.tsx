@@ -15,61 +15,27 @@ export const ColonyScreen: React.FC = () => {
   if (!colony || !player) return null;
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'rgba(0, 0, 0, 0.85)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '40px',
-        color: 'white',
-        zIndex: 1000,
-        pointerEvents: 'auto'
-      }}
-    >
-      <div
-        style={{
-          width: '700px',
-          backgroundColor: '#2c3e50',
-          borderRadius: '12px',
-          padding: '24px',
-          display: 'grid',
-          gridTemplateColumns: '2fr 1fr',
-          gridTemplateRows: 'auto 1fr auto',
-          gap: '20px',
-          maxHeight: '80vh',
-          overflowY: 'auto'
-        }}
-      >
+    <div className="absolute inset-0 bg-black/85 flex flex-col items-center justify-center p-10 text-white z-[1000] pointer-events-auto backdrop-blur-sm">
+      <div className="w-[700px] bg-slate-800 rounded-xl p-6 grid grid-cols-[2fr_1fr] grid-rows-[auto_1fr_auto] gap-5 max-h-[85vh] overflow-y-auto border border-slate-600 shadow-2xl text-white">
         {/* Header */}
-        <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="col-span-2 flex justify-between items-center border-b border-slate-700 pb-4 mb-2">
           <div>
-            <h1 style={{ margin: 0 }}>{colony.name}</h1>
-            <div style={{ color: '#bdc3c7' }}>Population: {colony.population}</div>
+            <h1 className="text-4xl font-black m-0 uppercase tracking-tight text-blue-400">{colony.name}</h1>
+            <div className="text-slate-400 font-bold flex items-center gap-2">
+              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+              Population: {colony.population}
+            </div>
           </div>
           <button
             onClick={() => setColonyScreenOpen(false)}
-            style={{
-              padding: '10px 20px',
-              backgroundColor: '#e74c3c',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}
+            className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded transition-all transform active:scale-95 cursor-pointer shadow-lg"
           >
             Close
           </button>
         </div>
 
         {/* Main Content */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div className="flex flex-col gap-5">
           <BuildingSlots colonyId={colony.id} ownedBuildings={colony.buildings} playerGold={player.gold} />
           <InventoryPanel
             inventory={colony.inventory}
@@ -79,12 +45,12 @@ export const ColonyScreen: React.FC = () => {
           />
         </div>
 
-        <div style={{ height: '100%' }}>
+        <div className="h-full">
           <WorkforcePanel colonyId={colony.id} units={colony.units} workforce={colony.workforce} />
         </div>
 
-        <div style={{ gridColumn: 'span 2', textAlign: 'right', color: '#bdc3c7', fontSize: '0.9em' }}>
-            Available Gold: {player.gold}g
+        <div className="col-span-2 text-right text-slate-400 text-sm font-mono pt-4 border-t border-slate-700">
+            Available Gold: <span className="text-yellow-400 font-bold">{player.gold}g</span>
         </div>
       </div>
     </div>

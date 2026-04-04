@@ -15,76 +15,33 @@ export const EuropeScreen: React.FC = () => {
   const isShipSelected = selectedUnit?.type === UnitType.SHIP;
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'rgba(0, 0, 0, 0.85)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '40px',
-        color: 'white',
-        zIndex: 1000,
-        pointerEvents: 'auto',
-      }}
-    >
-      <div
-        style={{
-          width: '800px',
-          backgroundColor: '#2c3e50',
-          borderRadius: '12px',
-          padding: '24px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '20px',
-          maxHeight: '80vh',
-          overflowY: 'auto',
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '20px',
-          }}
-        >
-          <h2>Europe Trade</h2>
+    <div className="absolute inset-0 bg-black/85 flex flex-col items-center justify-center p-10 z-[1000] pointer-events-auto backdrop-blur-sm">
+      <div className="w-full max-w-4xl bg-slate-800 rounded-xl p-8 flex flex-col gap-6 max-h-[85vh] overflow-y-auto border border-slate-600 shadow-2xl text-white">
+        <div className="flex justify-between items-center border-b border-slate-700 pb-4">
+          <h2 className="text-4xl font-black uppercase tracking-tight text-blue-400">Europe Trade</h2>
           <button
             onClick={() => setEuropeScreenOpen(false)}
-            style={{
-              padding: '10px 20px',
-              backgroundColor: '#e74c3c',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
+            className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded transition-all transform active:scale-95 cursor-pointer shadow-lg"
           >
             Return to Colony
           </button>
         </div>
 
-        <div style={{ flex: 1 }}>
+        <div className="flex-1">
           {!isShipSelected ? (
-            <div style={{ textAlign: 'center', marginTop: '50px' }}>
-              <h3>Please select a SHIP to trade or recruit.</h3>
+            <div className="text-center mt-12 p-10 bg-slate-900/50 rounded-xl border border-slate-700 border-dashed">
+              <h3 className="text-2xl font-bold text-slate-400">Please select a <span className="text-blue-400">SHIP</span> to trade or recruit.</h3>
             </div>
           ) : (
-            <>
+            <div className="space-y-8">
               <MarketPanel />
               <RecruitPanel />
-            </>
+            </div>
           )}
         </div>
 
-        <div style={{ marginTop: '20px', textAlign: 'right' }}>
-          <strong>Current Treasury: {player?.gold ?? 0} gold</strong>
+        <div className="mt-4 pt-4 border-t border-slate-700 text-right">
+          <strong className="text-xl font-black text-yellow-400 font-mono">Current Treasury: {player?.gold ?? 0} gold</strong>
         </div>
       </div>
     </div>

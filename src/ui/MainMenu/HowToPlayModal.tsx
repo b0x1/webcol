@@ -8,53 +8,58 @@ export const HowToPlayModal: React.FC = () => {
   if (!isHowToPlayModalOpen) return null;
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 2000,
-        pointerEvents: 'auto',
-      }}
-    >
-      <div
-        style={{
-          backgroundColor: '#2c3e50',
-          color: 'white',
-          padding: '30px',
-          borderRadius: '8px',
-          width: '600px',
-          maxHeight: '80vh',
-          overflowY: 'auto',
-          border: '2px solid #ecf0f1',
-        }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-          <h2 style={{ margin: 0 }}>How to Play</h2>
-          <button onClick={() => setHowToPlayModalOpen(false)}>Close</button>
+    <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-[2000] pointer-events-auto backdrop-blur-sm">
+      <div className="bg-slate-800 text-white p-8 rounded-xl w-[600px] max-h-[85vh] overflow-y-auto border border-slate-500 shadow-2xl">
+        <div className="flex justify-between items-center mb-8 border-b border-slate-700 pb-4">
+          <h2 className="text-3xl font-black uppercase tracking-tighter italic text-blue-400">How to Play</h2>
+          <button
+            onClick={() => setHowToPlayModalOpen(false)}
+            className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded transition-colors cursor-pointer text-sm"
+          >
+            Close
+          </button>
         </div>
 
-        <div style={{ lineHeight: '1.6' }}>
-          <h3>Objective</h3>
-          <p>Explore the New World, establish thriving colonies, trade goods, and manage relations with native tribes.</p>
+        <div className="space-y-8">
+          <section>
+            <h3 className="text-xl font-black uppercase tracking-widest text-slate-200 mb-2 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+              Objective
+            </h3>
+            <p className="text-slate-400 leading-relaxed font-medium">Explore the New World, establish thriving colonies, trade goods, and manage relations with native tribes.</p>
+          </section>
 
-          <h3>Movement</h3>
-          <p>Select a unit with Left Click. Right Click on a highlighted green tile to move.</p>
+          <section>
+            <h3 className="text-xl font-black uppercase tracking-widest text-slate-200 mb-2 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+              Movement
+            </h3>
+            <p className="text-slate-400 leading-relaxed font-medium">Select a unit with <span className="text-white font-bold underline decoration-blue-500/50">Left Click</span>. <span className="text-white font-bold underline decoration-blue-500/50">Right Click</span> on a highlighted green tile to move.</p>
+          </section>
 
-          <h3>Colonies</h3>
-          <p>Found a colony by selecting a Colonist and clicking the "Found Colony" button in the Unit Panel. Within colonies, you can assign jobs, build structures, and manage inventory.</p>
+          <section>
+            <h3 className="text-xl font-black uppercase tracking-widest text-slate-200 mb-2 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+              Colonies
+            </h3>
+            <p className="text-slate-400 leading-relaxed font-medium">Found a colony by selecting a Colonist and clicking the <span className="text-white font-bold px-1.5 py-0.5 bg-green-900/50 rounded border border-green-700 text-xs">Found Colony</span> button in the Unit Panel. Within colonies, you can assign jobs, build structures, and manage inventory.</p>
+          </section>
 
-          <h3>Trade</h3>
-          <p>Use Ships to transport goods. You can trade with Europe or interact with Native Settlements for unique resources.</p>
+          <section>
+            <h3 className="text-xl font-black uppercase tracking-widest text-slate-200 mb-2 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+              Trade
+            </h3>
+            <p className="text-slate-400 leading-relaxed font-medium">Use Ships to transport goods. You can trade with Europe or interact with Native Settlements for unique resources.</p>
+          </section>
 
-          <h3>Combat</h3>
-          <p>Move Soldier units onto enemy tiles to initiate combat. Combat outcomes depend on unit strength and various terrain/building modifiers.</p>
+          <section>
+            <h3 className="text-xl font-black uppercase tracking-widest text-slate-200 mb-2 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+              Combat
+            </h3>
+            <p className="text-slate-400 leading-relaxed font-medium">Move Soldier units onto enemy tiles to initiate combat. Combat outcomes depend on unit strength and various terrain/building modifiers.</p>
+          </section>
         </div>
       </div>
     </div>

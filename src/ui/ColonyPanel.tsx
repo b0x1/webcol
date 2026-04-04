@@ -14,47 +14,33 @@ export const ColonyPanel: React.FC = () => {
 
   return (
     <div
-      className="colony-modal-overlay"
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        pointerEvents: 'auto',
-      }}
+      className="absolute inset-0 bg-black/50 flex items-center justify-center pointer-events-auto z-[1000]"
       onClick={() => selectColony(null)}
     >
       <div
-        className="colony-panel"
-        style={{
-          width: '400px',
-          backgroundColor: '#2c3e50',
-          color: 'white',
-          padding: '20px',
-          borderRadius: '12px',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
-        }}
+        className="w-[400px] bg-slate-800 text-white p-6 rounded-xl shadow-2xl border border-white/10"
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2>{colony.name}</h2>
-          <button onClick={() => selectColony(null)} style={{ cursor: 'pointer' }}>X</button>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold">{colony.name}</h2>
+          <button
+            onClick={() => selectColony(null)}
+            className="cursor-pointer text-gray-400 hover:text-white transition-colors text-xl font-bold"
+          >
+            ✕
+          </button>
         </div>
-        <p>Population: {colony.population}</p>
-        <div>
-          <h3>Inventory:</h3>
+        <p className="text-gray-300 mb-4">Population: {colony.population}</p>
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold mb-2 border-b border-white/10 pb-1">Inventory:</h3>
           {colony.inventory.size === 0 ? (
-            <p>Empty</p>
+            <p className="text-gray-400 italic">Empty</p>
           ) : (
-            <ul>
+            <ul className="grid grid-cols-2 gap-2">
               {Array.from(colony.inventory.entries()).map(([good, amount]) => (
-                <li key={good}>
-                  {good}: {amount}
+                <li key={good} className="text-sm bg-slate-700/50 p-2 rounded border border-white/5 flex justify-between">
+                  <span className="capitalize">{good.toLowerCase()}:</span>
+                  <span className="font-mono font-bold">{amount}</span>
                 </li>
               ))}
             </ul>
@@ -62,16 +48,7 @@ export const ColonyPanel: React.FC = () => {
         </div>
         <button
           onClick={() => setColonyScreenOpen(true)}
-          style={{
-            marginTop: '20px',
-            width: '100%',
-            padding: '10px',
-            backgroundColor: '#3498db',
-            border: 'none',
-            color: 'white',
-            borderRadius: '4px',
-            cursor: 'pointer',
-          }}
+          className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-all transform active:scale-[0.98] cursor-pointer shadow-lg"
         >
           Manage Colony
         </button>

@@ -14,64 +14,50 @@ export const UnitPanel: React.FC = () => {
   if (!unit) return null;
 
   return (
-    <div
-      className="unit-panel"
-      style={{
-        position: 'absolute',
-        bottom: '20px',
-        left: '20px',
-        width: '250px',
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        color: 'white',
-        padding: '15px',
-        borderRadius: '8px',
-        pointerEvents: 'auto',
-      }}
-    >
-      <h3>Unit: {unit.type}</h3>
-      <p>Moves: {unit.movesRemaining} / {unit.maxMoves}</p>
-      <div>
-        Cargo:
+    <div className="absolute bottom-5 left-5 w-64 bg-black/80 text-white p-5 rounded-xl pointer-events-auto shadow-2xl border border-white/10 backdrop-blur-sm font-sans">
+      <h3 className="text-xl font-black uppercase tracking-tight mb-1 text-blue-400">Unit: {unit.type}</h3>
+      <div className="flex items-center gap-2 mb-4">
+        <div className="h-1.5 flex-1 bg-slate-700 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-blue-500 transition-all duration-500"
+            style={{ width: `${(unit.movesRemaining / unit.maxMoves) * 100}%` }}
+          ></div>
+        </div>
+        <span className="text-[10px] font-mono font-bold text-slate-400">{unit.movesRemaining}/{unit.maxMoves} MOVES</span>
+      </div>
+
+      <div className="text-xs bg-slate-900/50 p-3 rounded-lg border border-white/5 mb-4">
+        <span className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Cargo Inventory</span>
         {unit.cargo.size === 0 ? (
-          <span> Empty</span>
+          <span className="text-slate-600 italic text-center block py-1">Empty Cargo Hold</span>
         ) : (
-          <ul>
+          <ul className="space-y-1">
             {Array.from(unit.cargo.entries()).map(([good, amount]) => (
-              <li key={good}>
-                {good}: {amount}
+              <li key={good} className="flex justify-between items-center border-b border-white/5 pb-1 last:border-0">
+                <span className="capitalize text-slate-300 font-medium">{good.toLowerCase()}</span>
+                <span className="font-mono font-bold text-blue-300">{amount}</span>
               </li>
             ))}
           </ul>
         )}
       </div>
-      {unit.type === 'COLONIST' && (
+
+      <div className="space-y-2">
+        {unit.type === 'COLONIST' && (
+          <button
+            onClick={() => foundColony(unit.id)}
+            className="w-full py-2.5 cursor-pointer bg-green-600 hover:bg-green-500 text-white font-black uppercase tracking-widest text-xs rounded shadow-lg transition-all transform active:scale-95"
+          >
+            Found Colony
+          </button>
+        )}
         <button
-          onClick={() => foundColony(unit.id)}
-          style={{
-            marginTop: '10px',
-            width: '100%',
-            padding: '8px',
-            cursor: 'pointer',
-            backgroundColor: '#27ae60',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-          }}
+          onClick={() => endTurn()}
+          className="w-full py-2.5 cursor-pointer bg-slate-700 hover:bg-slate-600 text-white font-black uppercase tracking-widest text-xs rounded shadow-lg transition-all transform active:scale-95"
         >
-          Found Colony
+          End Turn
         </button>
-      )}
-      <button
-        onClick={() => endTurn()}
-        style={{
-          marginTop: '10px',
-          width: '100%',
-          padding: '8px',
-          cursor: 'pointer',
-        }}
-      >
-        End Turn
-      </button>
+      </div>
     </div>
   );
 };
