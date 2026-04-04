@@ -168,10 +168,15 @@ export class WorldScene extends Phaser.Scene {
     });
 
     // Subscribe to store changes
-    this.storeUnsubscribe = useGameStore.subscribe((state) => {
+    this.storeUnsubscribe = useGameStore.subscribe((state, prevState) => {
       if (!this.scene?.scene) return;
       if (!this.scene.isActive('WorldScene')) return;
-      this.terrainRenderer.renderTileMap(state.map, state.nativeSettlements);
+
+      // Only re-render the map if it or native settlements have changed
+      if (state.map !== prevState.map || state.nativeSettlements !== prevState.nativeSettlements) {
+        this.terrainRenderer.renderTileMap(state.map, state.nativeSettlements);
+      }
+
       this.renderUnits();
 
       const selectedUnit = state.players
@@ -179,7 +184,7 @@ export class WorldScene extends Phaser.Scene {
         .find((u) => u.id === state.selectedUnitId);
 
       if (selectedUnit) {
-        this.reachableTiles = MovementSystem.getReachableTiles(selectedUnit, tiles);
+        this.reachableTiles = MovementSystem.getReachableTiles(selectedUnit, state.map);
         this.terrainRenderer.updateReachableHighlights(this.reachableTiles);
       } else {
         this.reachableTiles = [];
@@ -301,7 +306,7 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private renderUnits() {
-    if (!this.unitSprites?.children || !this.selectionRings?.children || !this.unitBadges?.children) return;
+    if (!this.unitSprites || !this.selectionRings || !this.unitBadges) return;
 
     this.unitSprites.clear(true, true);
     this.selectionRings.clear(true, true);
@@ -367,6 +372,10 @@ export class WorldScene extends Phaser.Scene {
     if (this.gameLoadedUnsubscribe) {
       this.gameLoadedUnsubscribe();
     }
+    this.terrainRenderer.destroy();
+    this.unitSprites.destroy(true);
+    this.selectionRings.destroy(true);
+    this.unitBadges.destroy(true);
   }
 
   update() {

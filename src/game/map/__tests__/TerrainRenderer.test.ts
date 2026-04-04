@@ -1,5 +1,22 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { TerrainRenderer } from '../TerrainRenderer';
+
+// Mock Phaser completely for this test file
+vi.mock('phaser', () => ({
+  default: {
+    Scene: class {},
+    GameObjects: {
+      Graphics: class {},
+      Group: class {},
+      Text: class {},
+      Image: class {},
+    },
+    Tilemaps: {
+      Tilemap: class {},
+      TilemapLayer: class {},
+    },
+  },
+}));
 
 describe('TerrainRenderer', () => {
   // Use a partial mock for scene to avoid Phaser initialization in Node.js
