@@ -2,7 +2,10 @@ import React from 'react';
 import { useGameStore } from '../game/state/gameStore';
 
 export const UnitPanel: React.FC = () => {
-  const { selectedUnitId, players, endTurn } = useGameStore();
+  const { selectedUnitId, players, endTurn, isMainMenuOpen } = useGameStore();
+
+  if (isMainMenuOpen) return null;
+
   const unit = players
     .flatMap((p) => p.units)
     .find((u) => u.id === selectedUnitId);

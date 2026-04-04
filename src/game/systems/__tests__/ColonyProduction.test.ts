@@ -4,11 +4,11 @@ import { Player } from '../../entities/Player';
 import { Colony } from '../../entities/Colony';
 import { GoodType, JobType, BuildingType } from '../../entities/types';
 import { Unit } from '../../entities/Unit';
-import { UnitType } from '../../entities/types';
+import { UnitType, Nation } from '../../entities/types';
 
 describe('Colony Production and Building Logic', () => {
   it('calculates job-based production correctly', () => {
-    const player = new Player('p1', 'Player 1', true, 1000);
+    const player = new Player('p1', 'Player 1', true, 1000, Nation.SPAIN);
     const colony = new Colony('c1', 'p1', 'Colony 1', 0, 0, 1);
     const unit = new Unit('u1', 'p1', UnitType.COLONIST, 0, 0, 1);
     colony.units.push(unit);
@@ -25,7 +25,7 @@ describe('Colony Production and Building Logic', () => {
   });
 
   it('applies building bonuses correctly', () => {
-    const player = new Player('p1', 'Player 1', true, 1000);
+    const player = new Player('p1', 'Player 1', true, 1000, Nation.SPAIN);
     const colony = new Colony('c1', 'p1', 'Colony 1', 0, 0, 1);
     colony.buildings.push(BuildingType.LUMBER_MILL);
     colony.buildings.push(BuildingType.IRON_WORKS);
@@ -40,7 +40,7 @@ describe('Colony Production and Building Logic', () => {
   });
 
   it('respects inventory caps and warehouse bonus', () => {
-    const player = new Player('p1', 'Player 1', true, 1000);
+    const player = new Player('p1', 'Player 1', true, 1000, Nation.NORSEMEN);
     const colony = new Colony('c1', 'p1', 'Colony 1', 0, 0, 1);
     colony.inventory.set(GoodType.FOOD, 250);
     player.colonies.push(colony);
@@ -57,7 +57,7 @@ describe('Colony Production and Building Logic', () => {
   });
 
   it('processes printing press population growth', () => {
-    const player = new Player('p1', 'Player 1', true, 1000);
+    const player = new Player('p1', 'Player 1', true, 1000, Nation.ENGLAND);
     const colony = new Colony('c1', 'p1', 'Colony 1', 0, 0, 1);
     colony.buildings.push(BuildingType.PRINTING_PRESS);
     player.colonies.push(colony);
@@ -77,7 +77,7 @@ describe('Colony Production and Building Logic', () => {
       [BuildingType.WAREHOUSE]: 80,
       [BuildingType.STOCKADE]: 200,
       [BuildingType.PRINTING_PRESS]: 180,
-    };
+      };
 
     expect(buildingCosts[BuildingType.LUMBER_MILL]).toBe(100);
     expect(buildingCosts[BuildingType.IRON_WORKS]).toBe(150);

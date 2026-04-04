@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import Phaser from 'phaser';
 import { useGameStore } from './game/state/gameStore';
 import { WorldScene } from './scenes/WorldScene';
+import { MainMenuScene } from './scenes/MainMenuScene';
 import { HUD } from './ui/HUD';
 import { UnitPanel } from './ui/UnitPanel';
 import { ColonyPanel } from './ui/ColonyPanel';
@@ -12,6 +13,9 @@ import { NativeTradeModal } from './ui/NativeTradeModal/NativeTradeModal';
 import { CombatResultToast } from './ui/CombatResultToast';
 import { SaveLoadModal } from './ui/SaveLoadModal';
 import { NotificationToast } from './ui/NotificationToast';
+import { MainMenu } from './ui/MainMenu/MainMenu';
+import { HowToPlayModal } from './ui/MainMenu/HowToPlayModal';
+import { GameSetupModal } from './ui/MainMenu/GameSetupModal';
 
 function App() {
   const gameRef = useRef<Phaser.Game | null>(null);
@@ -26,7 +30,7 @@ function App() {
       width: 800,
       height: 600,
       parent: 'game-container',
-      scene: [WorldScene],
+      scene: [MainMenuScene, WorldScene],
     };
 
     const game = new Phaser.Game(config);
@@ -77,6 +81,9 @@ function App() {
         <CombatResultToast />
         <SaveLoadModal />
         <NotificationToast />
+        <MainMenu />
+        <HowToPlayModal />
+        <GameSetupModal />
       </div>
     </div>
   );

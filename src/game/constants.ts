@@ -48,3 +48,36 @@ export const COMBAT_CONSTANTS = {
   BASE_NATIVE_STRENGTH: 2,
   BASE_COLONY_STRENGTH: 1,
 } as const;
+
+export const NATION_BONUSES = {
+  ENGLAND: {
+    name: 'England',
+    bonus: '+1 COLONIST at start',
+    description: 'The English crown provides an extra colonist to help jumpstart your colony.',
+  },
+  FRANCE: {
+    name: 'France',
+    bonus: 'Native attitudes start FRIENDLY',
+    description: 'French explorers are skilled at diplomacy, ensuring peaceful relations with natives from the start.',
+  },
+  SPAIN: {
+    name: 'Spain',
+    bonus: 'SOLDIER units cost 600g instead of 800g',
+    description: 'The Spanish Empire maintains a powerful military at a reduced cost.',
+  },
+  NETHERLANDS: {
+    name: 'Netherlands',
+    bonus: 'Starting gold 200 instead of 100',
+    description: 'Dutch merchants start with a larger treasury to fund their colonial ventures.',
+  },
+  NORSEMEN: {
+    name: 'Norsemen',
+    bonus: 'Placeholder bonus',
+    description: 'Descendants of Vikings, skilled in seafaring and exploration.',
+  },
+  PORTUGAL: {
+    name: 'Portugal',
+    bonus: 'Placeholder bonus',
+    description: 'Renowned for their navigation and early exploration of the new world.',
+  },
+} as const;

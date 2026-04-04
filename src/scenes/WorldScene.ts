@@ -49,67 +49,14 @@ export class WorldScene extends Phaser.Scene {
     this.selectionRings = this.add.group();
     this.unitBadges = this.add.group();
 
-    const generator = new TerrainGenerator(this.MAP_WIDTH, this.MAP_HEIGHT);
-    const terrainData = generator.generate();
-    const nativeSettlements = generator.generateNativeSettlements(terrainData);
-    this.tileMap = new TileMap(this.MAP_WIDTH, this.MAP_HEIGHT, terrainData);
-
-    const tiles: Tile[][] = terrainData.map((row, y) =>
-      row.map((type, x) => {
-        let cost = 1;
-        if (type === TerrainType.FOREST || type === TerrainType.HILLS) {
-          cost = 2;
-        }
-        const tile = new Tile(`${x}-${y}`, x, y, type, cost);
-        if (type === TerrainType.OCEAN && Math.random() < 0.05) {
-          tile.hasResource = ResourceType.FISH;
-        } else if (type === TerrainType.FOREST && Math.random() < 0.1) {
-          tile.hasResource = ResourceType.FOREST;
-        } else if (type === TerrainType.PLAINS && Math.random() < 0.05) {
-          tile.hasResource = ResourceType.ORE_DEPOSIT;
-        } else if (type === TerrainType.PLAINS && Math.random() < 0.05) {
-          tile.hasResource = ResourceType.FERTILE_LAND;
-        }
-        return tile;
-      })
-    );
+    const state = useGameStore.getState();
+    const tiles = state.map;
+    const mapWidth = tiles[0].length;
+    const mapHeight = tiles.length;
+    const nativeSettlements = state.nativeSettlements;
+    this.tileMap = new TileMap(mapWidth, mapHeight, tiles.map(row => row.map(t => t.terrainType)));
 
     this.terrainRenderer.renderTileMap(tiles, nativeSettlements);
-
-    // Initialize game state if map is empty
-    if (useGameStore.getState().map.length === 0) {
-      const humanPlayer = new Player('player-1', 'Human Player', true, 100);
-
-      const startX = 40;
-      const startY = 30;
-      humanPlayer.units = [
-        new Unit('u1', 'player-1', UnitType.COLONIST, startX, startY, 3),
-        new Unit('u2', 'player-1', UnitType.COLONIST, startX, startY, 3),
-        new Unit('u3', 'player-1', UnitType.SOLDIER, startX + 1, startY, 3),
-        new Unit('u4', 'player-1', UnitType.PIONEER, startX, startY + 1, 3),
-      ];
-
-      let shipX = startX;
-      let shipY = startY;
-      for (let y = Math.max(0, startY - 5); y < Math.min(this.MAP_HEIGHT, startY + 5); y++) {
-        for (let x = Math.max(0, startX - 5); x < Math.min(this.MAP_WIDTH, startX + 5); x++) {
-          if (tiles[y][x].terrainType === TerrainType.OCEAN) {
-            shipX = x;
-            shipY = y;
-            break;
-          }
-        }
-        if (shipX !== startX) break;
-      }
-      humanPlayer.units.push(new Unit('u5', 'player-1', UnitType.SHIP, shipX, shipY, 6));
-
-      useGameStore.setState({
-        map: tiles,
-        nativeSettlements: nativeSettlements,
-        players: [humanPlayer],
-        currentPlayerId: 'player-1',
-      });
-    }
 
     // Disable context menu for right-click handling
     this.input.mouse?.disableContextMenu();
@@ -118,7 +65,7 @@ export class WorldScene extends Phaser.Scene {
       const worldPoint = pointer.positionToCamera(this.cameras.main) as Phaser.Math.Vector2;
       const { x, y } = this.terrainRenderer.worldToTile(worldPoint.x, worldPoint.y);
 
-      if (x < 0 || x >= this.MAP_WIDTH || y < 0 || y >= this.MAP_HEIGHT) {
+      if (x < 0 || x >= mapWidth || y < 0 || y >= mapHeight) {
         return;
       }
 
@@ -243,7 +190,7 @@ export class WorldScene extends Phaser.Scene {
       const worldPoint = pointer.positionToCamera(this.cameras.main) as Phaser.Math.Vector2;
       const { x, y } = this.terrainRenderer.worldToTile(worldPoint.x, worldPoint.y);
 
-      if (x >= 0 && x < this.MAP_WIDTH && y >= 0 && y < this.MAP_HEIGHT) {
+      if (x >= 0 && x < mapWidth && y >= 0 && y < mapHeight) {
         const settlement = useGameStore.getState().nativeSettlements.find((s) => s.x === x && s.y === y);
         this.terrainRenderer.showTooltip(x, y, worldPoint.x, worldPoint.y, settlement?.name);
       } else {
@@ -258,8 +205,8 @@ export class WorldScene extends Phaser.Scene {
     this.cameras.main.setBounds(
       0,
       0,
-      this.MAP_WIDTH * this.TILE_SIZE,
-      this.MAP_HEIGHT * this.TILE_SIZE,
+      mapWidth * this.TILE_SIZE,
+      mapHeight * this.TILE_SIZE,
     );
 
     if (this.input.keyboard) {

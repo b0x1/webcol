@@ -5,7 +5,7 @@ import { Unit } from '../../entities/Unit';
 import { Colony } from '../../entities/Colony';
 import { Tile } from '../../entities/Tile';
 import { NativeSettlement } from '../../entities/NativeSettlement';
-import { GoodType, UnitType, TerrainType, Tribe, Attitude, JobType, TurnPhase } from '../../entities/types';
+import { GoodType, UnitType, TerrainType, Tribe, Attitude, JobType, TurnPhase, Nation } from '../../entities/types';
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -26,7 +26,7 @@ describe('SaveSystem Serialization Round-trip', () => {
 
   it('should deeply preserve state after save and load', () => {
     // 1. Create a complex mock GameState
-    const player1 = new Player('p1', 'Player 1', true, 1000);
+    const player1 = new Player('p1', 'Player 1', true, 1000, Nation.NORSEMEN);
     const unit1 = new Unit('u1', 'p1', UnitType.COLONIST, 10, 10, 3);
     unit1.cargo.set(GoodType.FOOD, 50);
     player1.units.push(unit1);

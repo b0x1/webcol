@@ -4,10 +4,12 @@ import { Tile } from '../entities/Tile';
 import { Unit } from '../entities/Unit';
 import { Colony } from '../entities/Colony';
 import { NativeSettlement } from '../entities/NativeSettlement';
-import { BuildingType, GoodType, JobType, TurnPhase, UnitType } from '../entities/types';
+import { BuildingType, GoodType, JobType, Nation, TurnPhase, UnitType, TerrainType, Attitude, ResourceType } from '../entities/types';
 import { TurnEngine } from '../systems/TurnEngine';
 import { BUILDING_COSTS, RECRUITMENT_COSTS } from '../constants';
 import { NativeInteractionSystem } from '../systems/NativeInteractionSystem';
+import { TerrainGenerator } from '../map/TerrainGenerator';
+import { eventBus } from './EventBus';
 import { CombatSystem } from '../systems/CombatSystem';
 import type { CombatResult } from '../systems/CombatSystem';
 
@@ -27,6 +29,9 @@ export interface GameState {
   nativeSettlements: NativeSettlement[];
   combatResult: CombatResult | null;
   isSaveModalOpen: boolean;
+  isMainMenuOpen: boolean;
+  isGameSetupModalOpen: boolean;
+  isHowToPlayModalOpen: boolean;
 
   selectUnit: (unitId: string | null) => void;
   selectColony: (colonyId: string | null) => void;
@@ -48,6 +53,11 @@ export interface GameState {
   clearCombatResult: () => void;
   setSaveModalOpen: (isOpen: boolean) => void;
   loadGameState: (state: Partial<GameState>) => void;
+  setMainMenuOpen: (isOpen: boolean) => void;
+  setGameSetupModalOpen: (isOpen: boolean) => void;
+  setHowToPlayModalOpen: (isOpen: boolean) => void;
+  initGame: (params: { playerName: string; nation: Nation; mapSize: 'Small' | 'Medium' | 'Large'; aiCount: number }) => void;
+  resetGame: () => void;
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -75,6 +85,9 @@ export const useGameStore = create<GameState>((set, get) => ({
   nativeSettlements: [],
   combatResult: null,
   isSaveModalOpen: false,
+  isMainMenuOpen: true,
+  isGameSetupModalOpen: false,
+  isHowToPlayModalOpen: false,
 
   selectUnit: (unitId) => set({ selectedUnitId: unitId, selectedColonyId: null }),
   selectColony: (colonyId) => set({ selectedColonyId: colonyId, selectedUnitId: null }),
@@ -83,6 +96,9 @@ export const useGameStore = create<GameState>((set, get) => ({
   setNativeTradeModalOpen: (isOpen, settlementId = null) =>
     set({ isNativeTradeModalOpen: isOpen, activeSettlementId: settlementId }),
   setSaveModalOpen: (isOpen) => set({ isSaveModalOpen: isOpen }),
+  setMainMenuOpen: (isOpen) => set({ isMainMenuOpen: isOpen }),
+  setGameSetupModalOpen: (isOpen) => set({ isGameSetupModalOpen: isOpen }),
+  setHowToPlayModalOpen: (isOpen) => set({ isHowToPlayModalOpen: isOpen }),
 
   moveUnit: (unitId, toX, toY) =>
     set((state) => {
@@ -122,7 +138,7 @@ export const useGameStore = create<GameState>((set, get) => ({
               }
               return u;
             });
-            const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold);
+          const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold, p.nation);
             newPlayer.units = updatedUnits;
             newPlayer.colonies = [...p.colonies];
             return newPlayer;
@@ -179,7 +195,7 @@ export const useGameStore = create<GameState>((set, get) => ({
             newUnit.maxMoves = u.maxMoves;
             return newUnit;
           });
-          const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold);
+          const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold, p.nation);
           newPlayer.units = updatedUnits;
           newPlayer.colonies = [...p.colonies];
           return newPlayer;
@@ -234,7 +250,7 @@ export const useGameStore = create<GameState>((set, get) => ({
 
       const updatedPlayers = state.players.map((p) => {
         if (p.id === state.currentPlayerId) {
-          const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold);
+          const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold, p.nation);
           newPlayer.units = p.units.filter((u) => u.id !== unitId);
           newPlayer.colonies = [...p.colonies, newColony];
           return newPlayer;
@@ -277,7 +293,7 @@ export const useGameStore = create<GameState>((set, get) => ({
             }
             return c;
           });
-          const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold - cost);
+          const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold - cost, p.nation);
           newPlayer.units = [...p.units];
           newPlayer.colonies = updatedColonies;
           return newPlayer;
@@ -305,7 +321,7 @@ export const useGameStore = create<GameState>((set, get) => ({
           }
           return c;
         });
-        const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold);
+        const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold, p.nation);
         newPlayer.units = [...p.units];
         newPlayer.colonies = updatedColonies;
         return newPlayer;
@@ -341,7 +357,7 @@ export const useGameStore = create<GameState>((set, get) => ({
             }
             return u;
           });
-          const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold + goldGained);
+          const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold + goldGained, p.nation);
           newPlayer.units = updatedUnits;
           newPlayer.colonies = [...p.colonies];
           return newPlayer;
@@ -381,7 +397,7 @@ export const useGameStore = create<GameState>((set, get) => ({
             }
             return u;
           });
-          const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold - cost);
+          const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold - cost, p.nation);
           newPlayer.units = updatedUnits;
           newPlayer.colonies = [...p.colonies];
           return newPlayer;
@@ -392,7 +408,10 @@ export const useGameStore = create<GameState>((set, get) => ({
       return { players: updatedPlayers };
     }),
 
-  loadGameState: (state) => set({ ...state, isSaveModalOpen: false }),
+  loadGameState: (state) => {
+    set({ ...state, isSaveModalOpen: false, isMainMenuOpen: false });
+    eventBus.emit('gameStarted');
+  },
 
   tradeWithNativeSettlement: (settlementId, unitId, goodOffered) =>
     set((state) => {
@@ -415,7 +434,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       const updatedPlayers = state.players.map((p) => {
         if (p.id === state.currentPlayerId) {
           const updatedUnits = p.units.map((u) => (u.id === unitId ? updatedUnit : u));
-          const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold);
+          const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold, p.nation);
           newPlayer.units = updatedUnits;
           newPlayer.colonies = [...p.colonies];
           return newPlayer;
@@ -448,7 +467,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       const updatedPlayers = state.players.map((p) => {
         if (p.id === state.currentPlayerId) {
           const updatedUnits = p.units.map((u) => (u.id === unitId ? updatedUnit : u));
-          const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold);
+          const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold, p.nation);
           newPlayer.units = updatedUnits;
           newPlayer.colonies = [...p.colonies];
           return newPlayer;
@@ -527,7 +546,7 @@ export const useGameStore = create<GameState>((set, get) => ({
           // Remove defender unit
           updatedPlayers = updatedPlayers.map((p) => {
             const updatedUnits = p.units.filter((u) => u !== defender);
-            const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold);
+            const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold, p.nation);
             newPlayer.units = updatedUnits;
             newPlayer.colonies = [...p.colonies];
             return newPlayer;
@@ -560,7 +579,7 @@ export const useGameStore = create<GameState>((set, get) => ({
             if (p.id === defender.ownerId) {
               // Remove colony from previous owner
               const updatedColonies = p.colonies.filter((c) => c.id !== defender.id);
-              const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold);
+              const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold, p.nation);
               newPlayer.units = [...p.units];
               newPlayer.colonies = updatedColonies;
               return newPlayer;
@@ -594,7 +613,7 @@ export const useGameStore = create<GameState>((set, get) => ({
                 return nu;
               });
 
-              const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold);
+              const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold, p.nation);
               newPlayer.units = updatedUnits;
               newPlayer.colonies = [...p.colonies, capturedColony];
               return newPlayer;
@@ -607,7 +626,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         updatedPlayers = updatedPlayers.map((p) => {
           if (p.id === state.currentPlayerId) {
             const updatedUnits = p.units.filter((u) => u.id !== attackerId);
-            const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold);
+            const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold, p.nation);
             newPlayer.units = updatedUnits;
             newPlayer.colonies = [...p.colonies];
             return newPlayer;
@@ -637,7 +656,10 @@ export const useGameStore = create<GameState>((set, get) => ({
         [UnitType.SHIP]: 0,
       };
 
-      const goldCost = costs[unitType] || 0;
+      let goldCost = costs[unitType] || 0;
+      if (unitType === UnitType.SOLDIER && player.nation === Nation.SPAIN) {
+        goldCost = 600;
+      }
       if (player.gold < goldCost) return state;
 
       let musketsToConsume = 0;
@@ -672,7 +694,7 @@ export const useGameStore = create<GameState>((set, get) => ({
             return u;
           });
 
-          const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold - goldCost);
+          const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold - goldCost, p.nation);
           newPlayer.units = [...updatedUnits, newUnit];
           newPlayer.colonies = [...p.colonies];
           return newPlayer;
@@ -682,6 +704,131 @@ export const useGameStore = create<GameState>((set, get) => ({
 
       return { players: updatedPlayers };
     }),
+
+  resetGame: () => {
+    set({
+      players: [],
+      currentPlayerId: '',
+      turn: 1,
+      phase: TurnPhase.MOVEMENT,
+      selectedUnitId: null,
+      selectedColonyId: null,
+      map: [],
+      nativeSettlements: [],
+      isMainMenuOpen: true,
+    });
+    eventBus.emit('returnToMainMenu');
+  },
+
+  initGame: ({ playerName, nation, mapSize, aiCount }) => {
+    const dimensions = {
+      Small: { width: 40, height: 30 },
+      Medium: { width: 80, height: 60 },
+      Large: { width: 120, height: 90 },
+    }[mapSize];
+
+    const generator = new TerrainGenerator(dimensions.width, dimensions.height);
+    const terrainData = generator.generate();
+    const nativeSettlements = generator.generateNativeSettlements(terrainData);
+
+    if (nation === Nation.FRANCE) {
+      nativeSettlements.forEach(s => s.attitude = Attitude.FRIENDLY);
+    }
+
+    const tiles: Tile[][] = terrainData.map((row, y) =>
+      row.map((type, x) => {
+        let cost = 1;
+        if (type === TerrainType.FOREST || type === TerrainType.HILLS) {
+          cost = 2;
+        }
+        const tile = new Tile(`${x}-${y}`, x, y, type, cost);
+        if (type === TerrainType.OCEAN && Math.random() < 0.05) {
+          tile.hasResource = ResourceType.FISH;
+        } else if (type === TerrainType.FOREST && Math.random() < 0.1) {
+          tile.hasResource = ResourceType.FOREST;
+        } else if (type === TerrainType.PLAINS && Math.random() < 0.05) {
+          tile.hasResource = ResourceType.ORE_DEPOSIT;
+        } else if (type === TerrainType.PLAINS && Math.random() < 0.05) {
+          tile.hasResource = ResourceType.FERTILE_LAND;
+        }
+        return tile;
+      })
+    );
+
+    const startingGold = nation === Nation.NETHERLANDS ? 200 : 100;
+    const humanPlayer = new Player('player-1', playerName, true, startingGold, nation);
+
+    // Starting position search
+    let startX = Math.floor(dimensions.width / 2);
+    let startY = Math.floor(dimensions.height / 2);
+    let found = false;
+
+    for (let y = 10; y < dimensions.height - 10; y++) {
+      for (let x = 10; x < dimensions.width - 10; x++) {
+        if (tiles[y][x].terrainType !== TerrainType.OCEAN && tiles[y][x].terrainType !== TerrainType.COAST) {
+          startX = x;
+          startY = y;
+          found = true;
+          break;
+        }
+      }
+      if (found) break;
+    }
+
+    const units = [
+      new Unit('u1', 'player-1', UnitType.COLONIST, startX, startY, 3),
+      new Unit('u2', 'player-1', UnitType.COLONIST, startX, startY, 3),
+      new Unit('u3', 'player-1', UnitType.SOLDIER, startX + 1, startY, 3),
+      new Unit('u4', 'player-1', UnitType.PIONEER, startX, startY + 1, 3),
+    ];
+
+    if (nation === Nation.ENGLAND) {
+      units.push(new Unit('u-extra', 'player-1', UnitType.COLONIST, startX, startY, 3));
+    }
+
+    let shipX = startX;
+    let shipY = startY;
+    found = false;
+    for (let d = 1; d < 10; d++) {
+      for (let dy = -d; dy <= d; dy++) {
+        for (let dx = -d; dx <= d; dx++) {
+          const nx = startX + dx;
+          const ny = startY + dy;
+          if (ny >= 0 && ny < dimensions.height && nx >= 0 && nx < dimensions.width) {
+            if (tiles[ny][nx].terrainType === TerrainType.OCEAN) {
+              shipX = nx;
+              shipY = ny;
+              found = true;
+              break;
+            }
+          }
+        }
+        if (found) break;
+      }
+      if (found) break;
+    }
+    units.push(new Unit('u5', 'player-1', UnitType.SHIP, shipX, shipY, 6));
+
+    humanPlayer.units = units;
+
+    const players = [humanPlayer];
+    for (let i = 0; i < aiCount; i++) {
+      players.push(new Player(`ai-${i}`, `AI Opponent ${i + 1}`, false, 100, Nation.PORTUGAL));
+    }
+
+    set({
+      map: tiles,
+      nativeSettlements,
+      players,
+      currentPlayerId: 'player-1',
+      turn: 1,
+      phase: TurnPhase.MOVEMENT,
+      isMainMenuOpen: false,
+      isGameSetupModalOpen: false,
+    });
+
+    eventBus.emit('gameStarted');
+  },
 }));
 
 if (typeof window !== 'undefined') {

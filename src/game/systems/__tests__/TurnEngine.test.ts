@@ -4,7 +4,7 @@ import { Player } from '../../entities/Player';
 import { Tile } from '../../entities/Tile';
 import { Colony } from '../../entities/Colony';
 import { Unit } from '../../entities/Unit';
-import { TerrainType, GoodType, UnitType, JobType } from '../../entities/types';
+import { TerrainType, GoodType, UnitType, JobType, Nation } from '../../entities/types';
 
 describe('TurnEngine', () => {
   const createMap = (width: number, height: number): Tile[][] => {
@@ -21,7 +21,7 @@ describe('TurnEngine', () => {
 
   describe('runProduction', () => {
     it('should calculate food based on workforce and population consumption', () => {
-      const player = new Player('p1', 'Player 1', true, 0);
+      const player = new Player('p1', 'Player 1', true, 0, Nation.FRANCE);
       const colony = new Colony('c1', 'p1', 'Colony 1', 2, 2, 1);
       const unit = new Unit('u1', 'p1', UnitType.COLONIST, 2, 2, 1);
       colony.units.push(unit);
@@ -45,8 +45,8 @@ describe('TurnEngine', () => {
       // Set (5,5) as PLAINS (target)
       map[5][5].terrainType = TerrainType.PLAINS;
 
-      const human = new Player('p1', 'Human', true, 0);
-      const ai = new Player('p2', 'AI', false, 0);
+      const human = new Player('p1', 'Human', true, 0, Nation.SPAIN);
+      const ai = new Player('p2', 'AI', false, 0, Nation.NORSEMEN);
       const unit = new Unit('u1', 'p2', UnitType.SOLDIER, 0, 0, 1);
       ai.units.push(unit);
 
@@ -64,7 +64,7 @@ describe('TurnEngine', () => {
       const map = createMap(10, 10);
       map[2][2].terrainType = TerrainType.PLAINS;
 
-      const ai = new Player('p1', 'AI', false, 0);
+      const ai = new Player('p1', 'AI', false, 0, Nation.PORTUGAL);
       const unit = new Unit('u1', 'p1', UnitType.COLONIST, 2, 2, 1);
       ai.units.push(unit);
 
@@ -81,7 +81,7 @@ describe('TurnEngine', () => {
         const map = createMap(10, 10);
         map[2][2].terrainType = TerrainType.PLAINS;
 
-        const ai = new Player('p1', 'AI', false, 0);
+        const ai = new Player('p1', 'AI', false, 0, Nation.NETHERLANDS);
         const colony = new Colony('c1', 'p1', 'Col1', 3, 3, 1);
         ai.colonies.push(colony);
         const unit = new Unit('u1', 'p1', UnitType.COLONIST, 2, 2, 1);

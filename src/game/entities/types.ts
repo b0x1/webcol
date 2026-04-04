@@ -91,3 +91,13 @@ export const Attitude = {
   HOSTILE: 'HOSTILE',
 } as const;
 export type Attitude = (typeof Attitude)[keyof typeof Attitude];
+
+export const Nation = {
+  ENGLAND: 'ENGLAND',
+  FRANCE: 'FRANCE',
+  SPAIN: 'SPAIN',
+  NETHERLANDS: 'NETHERLANDS',
+  NORSEMEN: 'NORSEMEN',
+  PORTUGAL: 'PORTUGAL',
+} as const;
+export type Nation = (typeof Nation)[keyof typeof Nation];
