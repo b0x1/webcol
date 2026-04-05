@@ -5,25 +5,25 @@
     "w": 64,
     "h": 64
   },
-  "INDIAN_BRAVE": {
+  "PIONEER": {
     "x": 64,
     "y": 0,
     "w": 64,
     "h": 64
   },
-  "PIONEER": {
+  "SHIP": {
     "x": 128,
     "y": 0,
     "w": 64,
     "h": 64
   },
-  "SHIP": {
+  "SOLDIER": {
     "x": 0,
     "y": 64,
     "w": 64,
     "h": 64
   },
-  "SOLDIER": {
+  "VILLAGER": {
     "x": 64,
     "y": 64,
     "w": 64,

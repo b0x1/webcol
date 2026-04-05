@@ -44,7 +44,7 @@ export const COMBAT_CONSTANTS = {
     PIONEER: 1,
     SOLDIER: 3,
     SHIP: 2,
-    INDIAN_BRAVE: 2,
+    VILLAGER: 2,
   },
   BASE_NATIVE_STRENGTH: 2,
   BASE_COLONY_STRENGTH: 1,

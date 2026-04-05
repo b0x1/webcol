@@ -37,7 +37,7 @@ export const UnitPanel: React.FC = () => {
         skipUnit(selectedUnitId);
       } else if (e.key.toLowerCase() === 'b' && selectedUnitId) {
         const unit = players.flatMap((p) => p.units).find((u) => u.id === selectedUnitId);
-        if (unit && (unit.type === UnitType.COLONIST || unit.type === UnitType.INDIAN_BRAVE)) {
+        if (unit && (unit.type === UnitType.COLONIST || unit.type === UnitType.VILLAGER)) {
           e.preventDefault();
           foundSettlement(selectedUnitId);
         }
@@ -85,7 +85,7 @@ export const UnitPanel: React.FC = () => {
       </div>
 
       <div className="space-y-2">
-        {(unit.type === UnitType.COLONIST || unit.type === UnitType.INDIAN_BRAVE) && (
+        {(unit.type === UnitType.COLONIST || unit.type === UnitType.VILLAGER) && (
           <button
             onClick={() => foundSettlement(unit.id)}
             className="w-full py-2.5 cursor-pointer bg-green-600 hover:bg-green-500 text-white font-black uppercase tracking-widest text-xs rounded shadow-lg transition-all transform active:scale-95"

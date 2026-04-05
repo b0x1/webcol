@@ -23,7 +23,7 @@ export const UnitType = {
   SOLDIER: 'SOLDIER',
   PIONEER: 'PIONEER',
   SHIP: 'SHIP',
-  INDIAN_BRAVE: 'INDIAN_BRAVE',
+  VILLAGER: 'VILLAGER',
 } as const;
 export type UnitType = (typeof UnitType)[keyof typeof UnitType];
 

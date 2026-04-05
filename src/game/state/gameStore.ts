@@ -315,7 +315,7 @@ export const useGameStore = create<GameState>((set, get) => ({
 
       const nationData = NATION_BONUSES[player.nation];
       if (nationData.culture === 'EUROPEAN' && unit.type !== UnitType.COLONIST) return state;
-      if (nationData.culture === 'NATIVE' && unit.type !== UnitType.INDIAN_BRAVE) return state;
+      if (nationData.culture === 'NATIVE' && unit.type !== UnitType.VILLAGER) return state;
 
       const newSettlement = new Settlement(
         `settlement-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
@@ -902,9 +902,9 @@ export const useGameStore = create<GameState>((set, get) => ({
     } else {
       // Native nation
       units = [
-        new Unit('u1', 'player-1', UnitType.INDIAN_BRAVE, startX, startY, 3),
-        new Unit('u2', 'player-1', UnitType.INDIAN_BRAVE, startX, startY, 3),
-        new Unit('u3', 'player-1', UnitType.INDIAN_BRAVE, startX, startY, 3),
+        new Unit('u1', 'player-1', UnitType.VILLAGER, startX, startY, 3),
+        new Unit('u2', 'player-1', UnitType.VILLAGER, startX, startY, 3),
+        new Unit('u3', 'player-1', UnitType.VILLAGER, startX, startY, 3),
       ];
       // Native settlement (starts empty but exists)
       const startSettlement = new Settlement(
@@ -932,7 +932,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       // Basic AI initialization (could be expanded)
       const aiNationData = NATION_BONUSES[aiNation];
       if (aiNationData.culture === 'NATIVE') {
-         aiPlayer.units = [new Unit(`ai-${i}-u1`, aiPlayer.id, UnitType.INDIAN_BRAVE, 0, 0, 3)];
+         aiPlayer.units = [new Unit(`ai-${i}-u1`, aiPlayer.id, UnitType.VILLAGER, 0, 0, 3)];
       } else {
          aiPlayer.units = [new Unit(`ai-${i}-u1`, aiPlayer.id, UnitType.COLONIST, 0, 0, 3)];
       }
