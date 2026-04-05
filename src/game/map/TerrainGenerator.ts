@@ -122,6 +122,7 @@ export class TerrainGenerator {
           [GoodType.FURS, 20 + Math.floor(Math.random() * 30)],
         ]),
         attitude: Attitude.FRIENDLY,
+        hammers: 0,
       };
 
       settlements.push(s);

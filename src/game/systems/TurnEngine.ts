@@ -319,6 +319,7 @@ export class TurnEngine {
                 units: [],
                 attitude: 'NEUTRAL',
                 goods: new Map(),
+                hammers: 0,
               };
               player.settlements.push(newSettlement);
               player.units.splice(unitIndex, 1);

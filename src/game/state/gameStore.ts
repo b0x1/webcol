@@ -67,8 +67,14 @@ export const useGameStore = create<GameState>()(
       [GoodType.TOBACCO]: 4,
       [GoodType.COTTON]: 3,
       [GoodType.FURS]: 5,
+      [GoodType.SUGAR]: 3,
+      [GoodType.RUM]: 8,
+      [GoodType.CLOTH]: 8,
+      [GoodType.COATS]: 10,
+      [GoodType.CIGARS]: 10,
+      [GoodType.TOOLS]: 5,
       [GoodType.TRADE_GOODS]: 6,
-      [GoodType.MUSKETS]: 8,
+      [GoodType.MUSKETS]: 12,
     },
     map: [],
     selectedTile: null,
@@ -530,6 +536,7 @@ export const useGameStore = create<GameState>()(
           maxMoves: 1,
           isSkipping: false,
           cargo: new Map(),
+          turnsInJob: 0,
         });
       }),
 

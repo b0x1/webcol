@@ -142,6 +142,7 @@ export class GameSystem {
         units: [],
         attitude: 'NEUTRAL',
         goods: new Map(),
+        hammers: 0,
       };
       humanPlayer.settlements.push(startSettlement);
     }

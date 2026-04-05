@@ -1,6 +1,10 @@
 import React from 'react';
 import { GoodType, JobType, BuildingType, TerrainType } from '../../game/entities/types';
 import type { Tile } from '../../game/entities/Tile';
+import { useGameStore } from '../../game/state/gameStore';
+import type { Settlement } from '../../game/entities/Settlement';
+import type { Unit } from '../../game/entities/Unit';
+import type { Player } from '../../game/entities/Player';
 
 interface Props {
   inventory: Map<GoodType, number>;
@@ -18,7 +22,7 @@ export const InventoryPanel: React.FC<Props> = ({ inventory, workforce, building
 
     // Base production from workforce
     workforce.forEach((assignment, unitId) => {
-      const unit = (useGameStore.getState().players.flatMap(p => p.settlements).flatMap(s => s.units).find(u => u.id === unitId));
+      const unit = (useGameStore.getState().players.flatMap((p: Player) => p.settlements).flatMap((s: Settlement) => s.units).find((u: Unit) => u.id === unitId));
       let amount = 3;
       if (unit?.specialty === assignment) {
         amount *= 2;
