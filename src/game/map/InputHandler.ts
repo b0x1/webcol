@@ -45,19 +45,27 @@ export class InputHandler {
     this.scene.input.keyboard?.on('keydown-ESC', () => {
       useGameStore.getState().selectUnit(null);
       this.scene.events.emit('unitSelected', null as any);
+      useGameStore.getState().selectTile(null);
       this.terrainRenderer.updateSelectionHighlight(null, null);
     });
   }
 
   private handleLeftClick(x: number, y: number) {
     const state = useGameStore.getState();
-    const unitAtTile = state.players.flatMap((p) => p.units).find((u) => u.x === x && u.y === y);
+    const unitsAtTile = state.players.flatMap((p) => p.units).filter((u) => u.x === x && u.y === y);
     const settlementAtTile = state.players.flatMap((p) => p.settlements).find((c) => c.x === x && c.y === y);
     const npcSettlementAtTile = state.npcSettlements.find((s) => s.x === x && s.y === y);
 
-    if (unitAtTile) {
-      useGameStore.getState().selectUnit(unitAtTile.id);
-      this.scene.events.emit('unitSelected', unitAtTile.id);
+    const tile = state.map[y]?.[x] || { x, y, terrainType: 'UNKNOWN', movementCost: 1, hasResource: null };
+    useGameStore.getState().selectTile(tile as any);
+
+    if (unitsAtTile.length === 1) {
+      const unit = unitsAtTile[0];
+      useGameStore.getState().selectUnit(unit.id);
+      this.scene.events.emit('unitSelected', unit.id);
+    } else if (unitsAtTile.length > 1) {
+      useGameStore.getState().selectUnit(null);
+      this.scene.events.emit('unitSelected', null as any);
     } else if (settlementAtTile) {
       useGameStore.getState().selectSettlement(settlementAtTile.id);
       this.scene.events.emit('settlementSelected', settlementAtTile.id);

@@ -6,6 +6,7 @@ import { WorldScene } from './scenes/WorldScene';
 import { MainMenuScene } from './scenes/MainMenuScene';
 import { HUD } from './ui/HUD';
 import { UnitPanel } from './ui/UnitPanel';
+import { FieldPanel } from './ui/FieldPanel';
 import { SettlementPanel } from './ui/SettlementPanel';
 import { MiniMap } from './ui/MiniMap';
 import { SettlementScreen } from './ui/SettlementScreen/SettlementScreen';
@@ -80,6 +81,7 @@ function App() {
       <div id="game-container" className="w-full h-full"></div>
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <HUD />
+        <FieldPanel />
         <UnitPanel />
         <SettlementPanel />
         <MiniMap />

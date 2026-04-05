@@ -13,7 +13,7 @@ export interface Settlement {
   buildings: BuildingType[];
   inventory: Map<GoodType, number>;
   productionQueue: (UnitType | BuildingType)[];
-  workforce: Map<string, JobType>;
+  workforce: Map<string, JobType | string>; // JobType or TileID
   units: Unit[];
   attitude: Attitude;
   goods: Map<GoodType, number>;

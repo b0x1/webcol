@@ -37,9 +37,15 @@ export const SaveLoadModal: React.FC = () => {
     }
   };
 
+  const handleDownload = (slotName: string) => {
+    SaveSystem.downloadSave(slotName);
+  };
+
   const handleDelete = (slotName: string) => {
-    SaveSystem.deleteSave(slotName);
-    setSaves(SaveSystem.listSaves());
+    if (confirm(`Are you sure you want to delete this save (${slotName})?`)) {
+      SaveSystem.deleteSave(slotName);
+      setSaves(SaveSystem.listSaves());
+    }
   };
 
   const slots = ['1', '2', '3', '4', '5'];
@@ -81,12 +87,26 @@ export const SaveLoadModal: React.FC = () => {
                   {new Date(autoSave.timestamp).toLocaleString()}
                 </div>
               </div>
-              <button
-                onClick={() => handleLoad('autosave')}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded transition-colors cursor-pointer"
-              >
-                Load
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleDownload('autosave')}
+                  className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded transition-colors cursor-pointer text-xs"
+                >
+                  Download
+                </button>
+                <button
+                  onClick={() => handleLoad('autosave')}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded transition-colors cursor-pointer text-sm"
+                >
+                  Load
+                </button>
+                <button
+                  onClick={() => handleDelete('autosave')}
+                  className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded transition-colors cursor-pointer text-xs"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           ) : (
             <div className="p-4 text-slate-500 italic bg-slate-900/30 rounded-lg border border-slate-800">No autosave found</div>
@@ -126,6 +146,12 @@ export const SaveLoadModal: React.FC = () => {
                   )}
                   {save && (
                     <>
+                      <button
+                        onClick={() => handleDownload(slot)}
+                        className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded transition-colors cursor-pointer text-xs"
+                      >
+                        Download
+                      </button>
                       <button
                         onClick={() => handleLoad(slot)}
                         className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded transition-colors cursor-pointer text-xs"

@@ -7,7 +7,9 @@ export const UnitPanel: React.FC = () => {
   const {
     currentPlayerId,
     selectedUnitId,
+    selectedTile,
     players,
+    npcSettlements,
     skipUnit,
     selectUnit,
   } = useGameStore();
@@ -53,14 +55,56 @@ export const UnitPanel: React.FC = () => {
 
   if (isMainMenuOpen) return null;
 
-  const unit = players
-    .flatMap((p) => p.units)
-    .find((u) => u.id === selectedUnitId);
+  const allUnits = players.flatMap((p) => p.units);
+  const unit = allUnits.find((u) => u.id === selectedUnitId);
+
+  const unitsAtTile = selectedTile
+    ? allUnits.filter(u => u.x === selectedTile.x && u.y === selectedTile.y)
+    : [];
+
+  if (!unit && unitsAtTile.length > 1) {
+    return (
+      <div className="absolute bottom-5 left-5 w-64 bg-black/80 text-white p-5 rounded-xl pointer-events-auto shadow-2xl border border-white/10 backdrop-blur-sm font-sans">
+        <h3 className="text-xl font-black uppercase tracking-tight mb-4 text-blue-400">Select Unit</h3>
+        <div className="space-y-2 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+          {unitsAtTile.map((u) => {
+            const owner = players.find(p => p.id === u.ownerId);
+            return (
+              <button
+                key={u.id}
+                onClick={() => selectUnit(u.id)}
+                className="w-full p-3 bg-slate-900/50 hover:bg-slate-700/50 border border-white/5 rounded-lg flex items-center gap-3 transition-all text-left group"
+              >
+                <div className="w-10 h-10 bg-slate-800 rounded flex items-center justify-center border border-white/10 group-hover:border-blue-500/50">
+                  <span className="text-xs font-black text-slate-500">{u.type[0]}</span>
+                </div>
+                <div>
+                  <div className="text-xs font-black uppercase tracking-widest text-slate-300">{u.type}</div>
+                  <div className="text-[10px] text-slate-500 font-bold uppercase tracking-tight">{owner?.name}</div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
 
   if (!unit) return null;
 
   const isReadOnly = unit.ownerId !== currentPlayerId;
   const unitOwner = players.find(p => p.id === unit.ownerId);
+
+  const allSettlements = [
+    ...players.flatMap(p => p.settlements),
+    ...npcSettlements
+  ];
+
+  const isAdjacentToSettlement = allSettlements.some(s =>
+    Math.abs(s.x - unit.x) <= 1 && Math.abs(s.y - unit.y) <= 1
+  );
+
+  const canBuildSettlement = (unit.type === UnitType.COLONIST || unit.type === UnitType.VILLAGER) && !isAdjacentToSettlement;
 
   return (
     <div className="absolute bottom-5 left-5 w-64 bg-black/80 text-white p-5 rounded-xl pointer-events-auto shadow-2xl border border-white/10 backdrop-blur-sm font-sans">
@@ -95,12 +139,20 @@ export const UnitPanel: React.FC = () => {
       {!isReadOnly && (
         <div className="space-y-2">
           {(unit.type === UnitType.COLONIST || unit.type === UnitType.VILLAGER) && (
-            <button
-              onClick={() => foundSettlement(unit.id)}
-              className="w-full py-2.5 cursor-pointer bg-green-600 hover:bg-green-500 text-white font-black uppercase tracking-widest text-xs rounded shadow-lg transition-all transform active:scale-95"
-            >
-              <span className="text-yellow-400 font-black">B</span>UILD SETTLEMENT
-            </button>
+            <div className="relative group/tooltip">
+              <button
+                onClick={() => canBuildSettlement && foundSettlement(unit.id)}
+                disabled={!canBuildSettlement}
+                className={`w-full py-2.5 bg-green-600 text-white font-black uppercase tracking-widest text-xs rounded shadow-lg transition-all transform ${canBuildSettlement ? 'cursor-pointer hover:bg-green-500 active:scale-95' : 'opacity-50 cursor-not-allowed'}`}
+              >
+                <span className="text-yellow-400 font-black">B</span>UILD SETTLEMENT
+              </button>
+              {isAdjacentToSettlement && (
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-slate-900 text-white text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none text-center shadow-xl border border-white/10 z-50">
+                  Cannot build adjacent to another settlement.
+                </div>
+              )}
+            </div>
           )}
           <div className="flex gap-2">
             <button

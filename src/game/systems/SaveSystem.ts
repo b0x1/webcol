@@ -57,6 +57,21 @@ export class SaveSystem {
     return JSON.parse(manifestJson);
   }
 
+  static downloadSave(slotName: string): void {
+    const serialized = localStorage.getItem(`${this.SAVE_PREFIX}${slotName}`);
+    if (!serialized) return;
+
+    const blob = new Blob([serialized], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `webcol_save_${slotName}_${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
   static deleteSave(slotName: string): void {
     localStorage.removeItem(`${this.SAVE_PREFIX}${slotName}`);
     const manifest = this.listSaves();

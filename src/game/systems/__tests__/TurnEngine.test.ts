@@ -28,7 +28,7 @@ describe('TurnEngine', () => {
       settlement.workforce.set(unit.id, JobType.FARMER);
       player.settlements.push(settlement);
 
-      const updatedPlayers = TurnEngine.runProduction([player]);
+      const updatedPlayers = TurnEngine.runProduction([player], []);
       const updatedSettlement = updatedPlayers[0].settlements[0];
 
       // Farmer produces 3 FOOD.

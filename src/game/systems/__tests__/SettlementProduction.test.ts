@@ -14,7 +14,7 @@ describe('Settlement Production and Building Logic', () => {
     settlement.workforce.set(unit.id, JobType.LUMBERJACK);
     player.settlements.push(settlement);
 
-    const updatedPlayers = TurnEngine.runProduction([player]);
+    const updatedPlayers = TurnEngine.runProduction([player], []);
     const updatedSettlement = updatedPlayers[0].settlements[0];
 
     // Lumberjack produces 3 LUMBER.
@@ -30,7 +30,7 @@ describe('Settlement Production and Building Logic', () => {
     settlement.buildings.push(BuildingType.IRON_WORKS);
     player.settlements.push(settlement);
 
-    const updatedPlayers = TurnEngine.runProduction([player]);
+    const updatedPlayers = TurnEngine.runProduction([player], []);
     const updatedSettlement = updatedPlayers[0].settlements[0];
 
     // Lumber Mill gives +2 LUMBER. Iron Works gives +2 ORE.
@@ -45,13 +45,13 @@ describe('Settlement Production and Building Logic', () => {
     player.settlements.push(settlement);
 
     // No warehouse, cap is 200
-    let updatedPlayers = TurnEngine.runProduction([player]);
+    let updatedPlayers = TurnEngine.runProduction([player], []);
     expect(updatedPlayers[0].settlements[0].inventory.get(GoodType.FOOD)).toBe(200);
 
     // With warehouse, cap is 400
     settlement.buildings.push(BuildingType.WAREHOUSE);
     settlement.inventory.set(GoodType.FOOD, 350);
-    updatedPlayers = TurnEngine.runProduction([player]);
+    updatedPlayers = TurnEngine.runProduction([player], []);
     expect(updatedPlayers[0].settlements[0].inventory.get(GoodType.FOOD)).toBe(350 - 2); // 350 - (1 pop * 2 food) = 348
   });
 
@@ -61,7 +61,7 @@ describe('Settlement Production and Building Logic', () => {
     settlement.buildings.push(BuildingType.PRINTING_PRESS);
     player.settlements.push(settlement);
 
-    const updatedPlayers = TurnEngine.runProduction([player]);
+    const updatedPlayers = TurnEngine.runProduction([player], []);
     expect(updatedPlayers[0].settlements[0].population).toBe(2);
   });
 

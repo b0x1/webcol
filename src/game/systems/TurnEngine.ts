@@ -13,7 +13,7 @@ export class TurnEngine {
     eventBus.emit('notification', 'Auto-saved');
   }
 
-  static runProduction(players: Player[]): Player[] {
+  static runProduction(players: Player[], map: Tile[][]): Player[] {
     const updatedPlayers = players.map((player) => {
       const newPlayer: Player = {
         ...player,
@@ -30,26 +30,60 @@ export class TurnEngine {
           };
 
           // 1. Process Workforce Production
-          newSettlement.workforce.forEach((job) => {
+          newSettlement.workforce.forEach((assignment) => {
             let good: GoodType | null = null;
             let amount = 3;
 
-            switch (job) {
-              case JobType.FARMER:
-                good = GoodType.FOOD;
-                break;
-              case JobType.LUMBERJACK:
-                good = GoodType.LUMBER;
-                break;
-              case JobType.MINER:
-                good = GoodType.ORE;
-                break;
-              case JobType.TOBACCONIST:
-                good = GoodType.TOBACCO;
-                break;
-              case JobType.WEAVER:
-                good = GoodType.TRADE_GOODS;
-                break;
+            if (Object.values(JobType).includes(assignment as JobType)) {
+              // Building-based production
+              switch (assignment) {
+                case JobType.TOBACCONIST:
+                  good = GoodType.TOBACCO;
+                  break;
+                case JobType.WEAVER:
+                  good = GoodType.TRADE_GOODS;
+                  break;
+                case JobType.FARMER:
+                  good = GoodType.FOOD;
+                  break;
+                case JobType.LUMBERJACK:
+                  good = GoodType.LUMBER;
+                  break;
+                case JobType.MINER:
+                  good = GoodType.ORE;
+                  break;
+              }
+            } else {
+              // Tile-based production
+              const parts = (assignment as string).split('-');
+              if (parts.length === 2) {
+                const tx = parseInt(parts[0]);
+                const ty = parseInt(parts[1]);
+                const tile = map[ty]?.[tx];
+                if (tile) {
+                  switch (tile.terrainType) {
+                    case TerrainType.GRASSLAND:
+                    case TerrainType.PLAINS:
+                    case TerrainType.PRAIRIE:
+                      good = GoodType.FOOD;
+                      break;
+                    case TerrainType.FOREST:
+                      good = GoodType.LUMBER;
+                      break;
+                    case TerrainType.HILLS:
+                    case TerrainType.MOUNTAINS:
+                      good = GoodType.ORE;
+                      break;
+                    case TerrainType.SWAMP:
+                    case TerrainType.MARSH:
+                      good = GoodType.TOBACCO;
+                      break;
+                  }
+                  if (tile.hasResource) {
+                     // specific resource bonus could be added here
+                  }
+                }
+              }
             }
 
             if (good) {

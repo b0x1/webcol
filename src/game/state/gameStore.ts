@@ -25,10 +25,12 @@ export interface GameState {
   selectedSettlementId: string | null;
   europePrices: Record<GoodType, number>;
   map: Tile[][];
+  selectedTile: Tile | null;
   npcSettlements: Settlement[];
   combatResult: CombatResult | null;
 
   selectUnit: (unitId: string | null) => void;
+  selectTile: (tile: Tile | null) => void;
   selectNextUnit: () => void;
   skipUnit: (unitId: string) => void;
   selectSettlement: (settlementId: string | null) => void;
@@ -36,7 +38,7 @@ export interface GameState {
   endTurn: () => void;
   foundSettlement: (unitId: string) => void;
   buyBuilding: (settlementId: string, building: BuildingType) => void;
-  assignJob: (settlementId: string, unitId: string, job: JobType) => void;
+  assignJob: (settlementId: string, unitId: string, job: JobType | string | null) => void;
   sellGood: (unitId: string, good: GoodType, amount: number) => void;
   buyGood: (unitId: string, good: GoodType, amount: number) => void;
   recruitUnit: (unitType: UnitType) => void;
@@ -69,6 +71,7 @@ export const useGameStore = create<GameState>()(
       [GoodType.MUSKETS]: 8,
     },
     map: [],
+    selectedTile: null,
     npcSettlements: [],
     combatResult: null,
 
@@ -76,6 +79,11 @@ export const useGameStore = create<GameState>()(
       set((state) => {
         state.selectedUnitId = unitId;
         state.selectedSettlementId = null;
+      }),
+
+    selectTile: (tile) =>
+      set((state) => {
+        state.selectedTile = tile;
       }),
 
     selectNextUnit: () => {
@@ -208,7 +216,7 @@ export const useGameStore = create<GameState>()(
 
       const state = get();
       if (state.phase === TurnPhase.PRODUCTION) {
-        const updatedPlayers = TurnEngine.runProduction(state.players);
+        const updatedPlayers = TurnEngine.runProduction(state.players, state.map);
         set((s) => {
           s.players = updatedPlayers;
         });
@@ -297,7 +305,11 @@ export const useGameStore = create<GameState>()(
         for (const p of state.players) {
           const settlement = p.settlements.find((s) => s.id === settlementId);
           if (settlement) {
-            settlement.workforce.set(unitId, job);
+            if (job === null) {
+              settlement.workforce.delete(unitId);
+            } else {
+              settlement.workforce.set(unitId, job as JobType);
+            }
             return;
           }
         }

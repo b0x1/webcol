@@ -3,6 +3,8 @@ import { useGameStore } from '../../game/state/gameStore';
 import { useUIStore } from '../../game/state/uiStore';
 import { BuildingSlots } from './BuildingSlots';
 import { WorkforcePanel } from './WorkforcePanel';
+import { MapGrid } from './MapGrid';
+import { AvailableUnits } from './AvailableUnits';
 import { InventoryPanel } from './InventoryPanel';
 import { Flag } from '../Flag';
 
@@ -63,11 +65,19 @@ export const SettlementScreen: React.FC = () => {
             workforce={settlement.workforce}
             buildings={settlement.buildings}
             population={settlement.population}
+            map={useGameStore.getState().map}
+            settlementX={settlement.x}
+            settlementY={settlement.y}
           />
         </div>
 
-        <div className={`h-full ${isReadOnly ? 'pointer-events-none opacity-80' : ''}`}>
+        <div className={`flex flex-col gap-5 ${isReadOnly ? 'pointer-events-none opacity-80' : ''}`}>
+          <MapGrid settlementId={settlement.id} />
           <WorkforcePanel settlementId={settlement.id} units={settlement.units} workforce={settlement.workforce} />
+        </div>
+
+        <div className="col-span-2">
+          <AvailableUnits settlementId={settlement.id} units={settlement.units} />
         </div>
 
         <div className="col-span-2 text-right text-slate-400 text-sm font-mono pt-4 border-t border-slate-700">

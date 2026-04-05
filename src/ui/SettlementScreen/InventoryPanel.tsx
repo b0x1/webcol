@@ -1,24 +1,61 @@
 import React from 'react';
-import { GoodType, JobType, BuildingType } from '../../game/entities/types';
+import { GoodType, JobType, BuildingType, TerrainType } from '../../game/entities/types';
+import type { Tile } from '../../game/entities/Tile';
 
 interface Props {
   inventory: Map<GoodType, number>;
-  workforce: Map<string, JobType>;
+  workforce: Map<string, JobType | string>;
   buildings: BuildingType[];
   population: number;
+  map: Tile[][];
+  settlementX: number;
+  settlementY: number;
 }
 
-export const InventoryPanel: React.FC<Props> = ({ inventory, workforce, buildings, population }) => {
+export const InventoryPanel: React.FC<Props> = ({ inventory, workforce, buildings, population, map, settlementX, settlementY }) => {
   const calculateProduction = (good: GoodType) => {
     let prod = 0;
 
     // Base production from workforce
-    workforce.forEach((job) => {
-      if (job === JobType.FARMER && good === GoodType.FOOD) prod += 3;
-      if (job === JobType.LUMBERJACK && good === GoodType.LUMBER) prod += 3;
-      if (job === JobType.MINER && good === GoodType.ORE) prod += 3;
-      if (job === JobType.TOBACCONIST && good === GoodType.TOBACCO) prod += 3;
-      if (job === JobType.WEAVER && good === GoodType.TRADE_GOODS) prod += 3;
+    workforce.forEach((assignment) => {
+      if (Object.values(JobType).includes(assignment as JobType)) {
+        if (assignment === JobType.FARMER && good === GoodType.FOOD) prod += 3;
+        if (assignment === JobType.LUMBERJACK && good === GoodType.LUMBER) prod += 3;
+        if (assignment === JobType.MINER && good === GoodType.ORE) prod += 3;
+        if (assignment === JobType.TOBACCONIST && good === GoodType.TOBACCO) prod += 3;
+        if (assignment === JobType.WEAVER && good === GoodType.TRADE_GOODS) prod += 3;
+      } else {
+        const parts = (assignment as string).split('-');
+        if (parts.length === 2) {
+          const tx = parseInt(parts[0]);
+          const ty = parseInt(parts[1]);
+          const tile = map[ty]?.[tx];
+          if (tile) {
+            let tileGood: GoodType | null = null;
+            switch (tile.terrainType) {
+              case TerrainType.GRASSLAND:
+              case TerrainType.PLAINS:
+              case TerrainType.PRAIRIE:
+                tileGood = GoodType.FOOD;
+                break;
+              case TerrainType.FOREST:
+                tileGood = GoodType.LUMBER;
+                break;
+              case TerrainType.HILLS:
+              case TerrainType.MOUNTAINS:
+                tileGood = GoodType.ORE;
+                break;
+              case TerrainType.SWAMP:
+              case TerrainType.MARSH:
+                tileGood = GoodType.TOBACCO;
+                break;
+            }
+            if (tileGood === good) {
+              prod += 3;
+            }
+          }
+        }
+      }
     });
 
     // Building bonuses
