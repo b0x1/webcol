@@ -1,11 +1,53 @@
-<svg viewBox="0 0 64 64" width="64" height="64" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" image-rendering="pixelated">
-  <rect width="64" height="64" fill="white" />
-  <!-- Cross of Burgundy -->
-  <line x1="8" y1="8" x2="56" y2="56" stroke="#C32228" stroke-width="6" />
-  <line x1="56" y1="8" x2="8" y2="56" stroke="#C32228" stroke-width="6" />
-  <!-- Knots/Ragguly -->
-  <rect x="18" y="18" width="4" height="4" fill="#C32228" />
-  <rect x="42" y="42" width="4" height="4" fill="#C32228" />
-  <rect x="18" y="42" width="4" height="4" fill="#C32228" />
-  <rect x="42" y="18" width="4" height="4" fill="#C32228" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges" image-rendering="pixelated" width="64" height="64">
+  <!-- White field -->
+  <rect x="0" y="0" width="64" height="64" fill="#FFFFFF"/>
+
+  <!-- ════════════════════════════════════════════════════
+       Cross of Burgundy (Cruz de Borgoña)
+       Two crossed ragged branches in gules (dark red).
+       Main bars: 8×8 stepped blocks forming the saltire.
+       Raguly stubs: 4×4 protrusions simulating cut branches.
+       ════════════════════════════════════════════════════ -->
+
+  <!-- ─── TL → BR diagonal arm ─── -->
+  <rect x="0"  y="0"  width="8" height="8" fill="#C00000"/>
+  <rect x="8"  y="8"  width="8" height="8" fill="#C00000"/>
+  <rect x="16" y="16" width="8" height="8" fill="#C00000"/>
+  <rect x="24" y="24" width="8" height="8" fill="#C00000"/>
+  <rect x="32" y="32" width="8" height="8" fill="#C00000"/>
+  <rect x="40" y="40" width="8" height="8" fill="#C00000"/>
+  <rect x="48" y="48" width="8" height="8" fill="#C00000"/>
+  <rect x="56" y="56" width="8" height="8" fill="#C00000"/>
+
+  <!-- ─── TR → BL diagonal arm ─── -->
+  <rect x="56" y="0"  width="8" height="8" fill="#C00000"/>
+  <rect x="48" y="8"  width="8" height="8" fill="#C00000"/>
+  <rect x="40" y="16" width="8" height="8" fill="#C00000"/>
+  <rect x="32" y="24" width="8" height="8" fill="#C00000"/>
+  <rect x="24" y="32" width="8" height="8" fill="#C00000"/>
+  <rect x="16" y="40" width="8" height="8" fill="#C00000"/>
+  <rect x="8"  y="48" width="8" height="8" fill="#C00000"/>
+  <rect x="0"  y="56" width="8" height="8" fill="#C00000"/>
+
+  <!-- ─── Raguly stubs on TL→BR arm (alternating sides) ─── -->
+  <!-- upper-right protrusions -->
+  <rect x="8"  y="0"  width="4" height="4" fill="#C00000"/>
+  <rect x="24" y="16" width="4" height="4" fill="#C00000"/>
+  <rect x="40" y="32" width="4" height="4" fill="#C00000"/>
+  <rect x="56" y="48" width="4" height="4" fill="#C00000"/>
+  <!-- lower-left protrusions -->
+  <rect x="8"  y="16" width="4" height="4" fill="#C00000"/>
+  <rect x="20" y="28" width="4" height="4" fill="#C00000"/>
+  <rect x="40" y="48" width="4" height="4" fill="#C00000"/>
+
+  <!-- ─── Raguly stubs on TR→BL arm (alternating sides) ─── -->
+  <!-- upper-left protrusions -->
+  <rect x="52" y="0"  width="4" height="4" fill="#C00000"/>
+  <rect x="36" y="16" width="4" height="4" fill="#C00000"/>
+  <rect x="20" y="32" width="4" height="4" fill="#C00000"/>
+  <rect x="4"  y="48" width="4" height="4" fill="#C00000"/>
+  <!-- lower-right protrusions -->
+  <rect x="52" y="16" width="4" height="4" fill="#C00000"/>
+  <rect x="44" y="24" width="4" height="4" fill="#C00000"/>
+  <rect x="20" y="48" width="4" height="4" fill="#C00000"/>
 </svg>
