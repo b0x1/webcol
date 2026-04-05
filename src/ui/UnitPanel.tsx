@@ -32,7 +32,7 @@ export const UnitPanel: React.FC = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isMainMenuOpen || isAnyModalOpen) return;
 
-      if ((e.code === 'Space' || e.key.toLowerCase() === 's') && selectedUnitId) {
+      if ((e.code === 'Space') && selectedUnitId) {
         e.preventDefault();
         skipUnit(selectedUnitId);
       } else if (e.key.toLowerCase() === 'b' && selectedUnitId) {
@@ -98,7 +98,7 @@ export const UnitPanel: React.FC = () => {
             onClick={() => skipUnit(unit.id)}
             className="flex-1 py-2.5 cursor-pointer bg-red-700 hover:bg-red-600 text-white font-black uppercase tracking-widest text-[10px] rounded shadow-lg transition-all transform active:scale-95"
           >
-            <span className="text-yellow-400 font-black">S</span>KIP (Space)
+            SKIP (Space)
           </button>
           <button
             onClick={() => selectUnit(null)}
