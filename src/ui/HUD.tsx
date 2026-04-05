@@ -18,6 +18,8 @@ export const HUD: React.FC = () => {
     isNativeTradeModalOpen,
     isHowToPlayModalOpen,
     isGameSetupModalOpen,
+    isDebugMode,
+    toggleDebugMode,
   } = useGameStore();
 
   const isAnyModalOpen =
@@ -62,6 +64,14 @@ export const HUD: React.FC = () => {
           onClick={() => setSaveModalOpen(true)}
         >
           <span className="text-yellow-400 font-black">L</span>OAD / SAVE GAME
+        </button>
+        <button
+          className={`transition-colors cursor-pointer font-bold uppercase tracking-tight px-3 py-1 rounded border ${
+            isDebugMode ? 'bg-red-600 border-red-400 text-white shadow-[0_0_10px_rgba(220,38,38,0.5)]' : 'bg-slate-800/50 border-slate-600 text-slate-400 hover:text-white'
+          }`}
+          onClick={() => toggleDebugMode()}
+        >
+          DEBUG: {isDebugMode ? 'ON' : 'OFF'}
         </button>
       </div>
 

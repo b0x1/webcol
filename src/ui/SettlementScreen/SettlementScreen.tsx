@@ -3,6 +3,7 @@ import { useGameStore } from '../../game/state/gameStore';
 import { BuildingSlots } from './BuildingSlots';
 import { WorkforcePanel } from './WorkforcePanel';
 import { InventoryPanel } from './InventoryPanel';
+import { Flag } from '../Flag';
 
 export const SettlementScreen: React.FC = () => {
   const { isSettlementScreenOpen, selectedSettlementId, players, setSettlementScreenOpen, currentPlayerId } = useGameStore();
@@ -21,20 +22,27 @@ export const SettlementScreen: React.FC = () => {
   if (!isSettlementScreenOpen || !selectedSettlementId) return null;
 
   const player = players.find((p) => p.id === currentPlayerId);
-  const settlement = player?.settlements.find((c) => c.id === selectedSettlementId);
+  const settlementOwner = players.find((p) => p.settlements.some((s) => s.id === selectedSettlementId));
+  const settlement = settlementOwner?.settlements.find((c) => c.id === selectedSettlementId);
 
-  if (!settlement || !player) return null;
+  if (!settlement || !player || !settlementOwner) return null;
+
+  const isReadOnly = settlement.ownerId !== currentPlayerId;
 
   return (
     <div className="absolute inset-0 bg-black/85 flex flex-col items-center justify-center p-10 text-white z-[1000] pointer-events-auto backdrop-blur-sm">
       <div className="w-[700px] bg-slate-800 rounded-xl p-6 grid grid-cols-[2fr_1fr] grid-rows-[auto_1fr_auto] gap-5 max-h-[85vh] overflow-y-auto border border-slate-600 shadow-2xl text-white">
         {/* Header */}
         <div className="col-span-2 flex justify-between items-center border-b border-slate-700 pb-4 mb-2">
-          <div>
-            <h1 className="text-4xl font-black m-0 uppercase tracking-tight text-blue-400">{settlement.name}</h1>
-            <div className="text-slate-400 font-bold flex items-center gap-2">
-              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-              Population: {settlement.population}
+          <div className="flex items-center gap-4">
+            <Flag nation={settlementOwner.nation} size={48} />
+            <div>
+              <h1 className="text-4xl font-black m-0 uppercase tracking-tight text-blue-400">{settlement.name}</h1>
+              <div className="text-slate-400 font-bold flex items-center gap-2">
+                <span className={`w-2 h-2 rounded-full animate-pulse ${isReadOnly ? 'bg-red-500' : 'bg-green-500'}`}></span>
+                Population: {settlement.population}
+                {isReadOnly && <span className="ml-2 text-red-500 text-xs font-black uppercase tracking-widest">[READ ONLY - {settlementOwner.name}]</span>}
+              </div>
             </div>
           </div>
           <button
@@ -46,7 +54,7 @@ export const SettlementScreen: React.FC = () => {
         </div>
 
         {/* Main Content */}
-        <div className="flex flex-col gap-5">
+        <div className={`flex flex-col gap-5 ${isReadOnly ? 'pointer-events-none opacity-80' : ''}`}>
           <BuildingSlots settlementId={settlement.id} ownedBuildings={settlement.buildings} playerGold={player.gold} />
           <InventoryPanel
             inventory={settlement.inventory}
@@ -56,7 +64,7 @@ export const SettlementScreen: React.FC = () => {
           />
         </div>
 
-        <div className="h-full">
+        <div className={`h-full ${isReadOnly ? 'pointer-events-none opacity-80' : ''}`}>
           <WorkforcePanel settlementId={settlement.id} units={settlement.units} workforce={settlement.workforce} />
         </div>
 

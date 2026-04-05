@@ -32,6 +32,8 @@ export interface GameState {
   isGameSetupModalOpen: boolean;
   isHowToPlayModalOpen: boolean;
   isReportsModalOpen: boolean;
+  isDebugMode: boolean;
+  showEndTurnConfirm: boolean;
 
   selectUnit: (unitId: string | null) => void;
   selectNextUnit: () => void;
@@ -59,6 +61,8 @@ export interface GameState {
   setMainMenuOpen: (isOpen: boolean) => void;
   setGameSetupModalOpen: (isOpen: boolean) => void;
   setHowToPlayModalOpen: (isOpen: boolean) => void;
+  toggleDebugMode: () => void;
+  setShowEndTurnConfirm: (show: boolean) => void;
   initGame: (params: { playerName: string; nation: Nation; mapSize: 'Small' | 'Medium' | 'Large'; aiCount: number }) => void;
   resetGame: () => void;
 }
@@ -92,6 +96,8 @@ export const useGameStore = create<GameState>((set, get) => ({
   isGameSetupModalOpen: false,
   isHowToPlayModalOpen: false,
   isReportsModalOpen: false,
+  isDebugMode: false,
+  showEndTurnConfirm: false,
 
   selectUnit: (unitId) => set({ selectedUnitId: unitId, selectedSettlementId: null }),
 
@@ -169,6 +175,8 @@ export const useGameStore = create<GameState>((set, get) => ({
   setMainMenuOpen: (isOpen) => set({ isMainMenuOpen: isOpen }),
   setGameSetupModalOpen: (isOpen) => set({ isGameSetupModalOpen: isOpen }),
   setHowToPlayModalOpen: (isOpen) => set({ isHowToPlayModalOpen: isOpen }),
+  toggleDebugMode: () => set((state) => ({ isDebugMode: !state.isDebugMode })),
+  setShowEndTurnConfirm: (show) => set({ showEndTurnConfirm: show }),
 
   moveUnit: (unitId, toX, toY) =>
     set((state) => {

@@ -17,11 +17,22 @@ import { NotificationToast } from './ui/NotificationToast';
 import { MainMenu } from './ui/MainMenu/MainMenu';
 import { HowToPlayModal } from './ui/MainMenu/HowToPlayModal';
 import { GameSetupModal } from './ui/MainMenu/GameSetupModal';
+import { EndTurnConfirmationModal } from './ui/EndTurnConfirmationModal';
 
 function App() {
   const gameRef = useRef<Phaser.Game | null>(null);
-  const selectUnit = useGameStore((state) => state.selectUnit);
-  const selectSettlement = useGameStore((state) => state.selectSettlement);
+  const {
+    selectUnit,
+    selectSettlement,
+    showEndTurnConfirm,
+    setShowEndTurnConfirm,
+    endTurn,
+    players,
+    currentPlayerId
+  } = useGameStore();
+
+  const currentPlayer = players.find(p => p.id === currentPlayerId);
+  const availableUnits = currentPlayer?.units.filter(u => u.movesRemaining > 0 && !u.isSkipping) || [];
 
   useEffect(() => {
     if (gameRef.current) return;
@@ -79,6 +90,17 @@ function App() {
         <MainMenu />
         <HowToPlayModal />
         <GameSetupModal />
+
+        {showEndTurnConfirm && (
+          <EndTurnConfirmationModal
+            remainingUnits={availableUnits.length}
+            onConfirm={() => {
+              setShowEndTurnConfirm(false);
+              endTurn();
+            }}
+            onCancel={() => setShowEndTurnConfirm(false)}
+          />
+        )}
       </div>
     </div>
   );

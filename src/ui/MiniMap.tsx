@@ -2,7 +2,6 @@ import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react'
 import { useGameStore } from '../game/state/gameStore';
 import { TerrainType } from '../game/entities/types';
 import { eventBus } from '../game/state/EventBus';
-import { EndTurnConfirmationModal } from './EndTurnConfirmationModal';
 
 export const MiniMap: React.FC = () => {
   const {
@@ -18,7 +17,9 @@ export const MiniMap: React.FC = () => {
     players,
     currentPlayerId,
     selectNextUnit,
-    endTurn
+    endTurn,
+    showEndTurnConfirm,
+    setShowEndTurnConfirm
   } = useGameStore();
 
   const isAnyModalOpen =
@@ -32,7 +33,6 @@ export const MiniMap: React.FC = () => {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [viewport, setViewport] = useState({ x: 0, y: 0, width: 0, height: 0 });
-  const [showEndTurnConfirm, setShowEndTurnConfirm] = useState(false);
 
   const currentPlayer = useMemo(() => players.find((p) => p.id === currentPlayerId), [players, currentPlayerId]);
   const availableUnits = useMemo(() => currentPlayer?.units.filter((u) => u.movesRemaining > 0 && !u.isSkipping) || [], [currentPlayer]);
@@ -156,17 +156,6 @@ export const MiniMap: React.FC = () => {
       >
         {hasAvailableUnits ? `Next Unit (${availableUnits.length})` : 'End Turn'}
       </button>
-
-      {showEndTurnConfirm && (
-        <EndTurnConfirmationModal
-          remainingUnits={availableUnits.length}
-          onConfirm={() => {
-            setShowEndTurnConfirm(false);
-            endTurn();
-          }}
-          onCancel={() => setShowEndTurnConfirm(false)}
-        />
-      )}
     </div>
   );
 };

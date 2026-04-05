@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useGameStore } from '../../game/state/gameStore';
 import { Nation } from '../../game/entities/types';
 import { NATION_BONUSES } from '../../game/constants';
+import { Flag } from '../Flag';
 
 export const GameSetupModal: React.FC = () => {
   const isGameSetupModalOpen = useGameStore((state) => state.isGameSetupModalOpen);
@@ -46,15 +47,18 @@ export const GameSetupModal: React.FC = () => {
               key={n}
               onClick={() => setNation(n)}
               title={NATION_BONUSES[n].description}
-              className={`p-4 rounded-lg cursor-pointer transition-all border-2 flex flex-col gap-1 ${
+              className={`p-4 rounded-lg cursor-pointer transition-all border-2 flex flex-row items-center gap-4 ${
                 nation === n
                   ? 'bg-blue-600 border-white shadow-lg transform scale-[1.02]'
                   : 'bg-slate-900/50 border-transparent hover:border-slate-600'
               }`}
             >
-              <div className="font-black uppercase tracking-wider text-sm">{NATION_BONUSES[n].name}</div>
-              <div className={`text-[10px] font-bold leading-tight ${nation === n ? 'text-blue-100' : 'text-slate-500'}`}>
-                {NATION_BONUSES[n].bonus}
+              <Flag nation={n} size={40} className="shrink-0" />
+              <div className="flex flex-col gap-1 overflow-hidden">
+                <div className="font-black uppercase tracking-wider text-sm truncate">{NATION_BONUSES[n].name}</div>
+                <div className={`text-[10px] font-bold leading-tight ${nation === n ? 'text-blue-100' : 'text-slate-500'}`}>
+                  {NATION_BONUSES[n].bonus}
+                </div>
               </div>
             </div>
           ))}

@@ -1,11 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../game/state/gameStore';
 import { GoodType } from '../game/entities/types';
+import { Flag } from './Flag';
+import { eventBus } from '../game/state/EventBus';
 
 type ReportTab = 'units' | 'settlements' | 'resources';
 
 export const ReportsModal: React.FC = () => {
-  const { isReportsModalOpen, setReportsModalOpen, players, currentPlayerId } = useGameStore();
+  const {
+    isReportsModalOpen,
+    setReportsModalOpen,
+    players,
+    currentPlayerId,
+    isDebugMode,
+    selectUnit,
+    selectSettlement,
+    setSettlementScreenOpen
+  } = useGameStore();
   const [activeTab, setActiveTab] = useState<ReportTab>('units');
 
   useEffect(() => {
@@ -21,33 +32,63 @@ export const ReportsModal: React.FC = () => {
 
   if (!isReportsModalOpen) return null;
 
-  const player = players.find((p) => p.id === currentPlayerId);
-  if (!player) return null;
+  const currentPlayer = players.find((p) => p.id === currentPlayerId);
+  if (!currentPlayer) return null;
+
+  const displayedPlayers = isDebugMode ? players : [currentPlayer];
+
+  const handleUnitClick = (unitId: string, x: number, y: number) => {
+    eventBus.emit('cameraJump', { x, y });
+    selectUnit(unitId);
+    setReportsModalOpen(false);
+  };
+
+  const handleSettlementClick = (settlementId: string, x: number, y: number) => {
+    eventBus.emit('cameraJump', { x, y });
+    selectSettlement(settlementId);
+    setSettlementScreenOpen(true);
+    setReportsModalOpen(false);
+  };
 
   const renderUnitsReport = () => (
     <div className="overflow-x-auto">
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="border-b border-slate-600 bg-slate-800/50">
+            <th className="p-3 font-bold">Flag</th>
             <th className="p-3 font-bold">Unit Type</th>
             <th className="p-3 font-bold">Position (X, Y)</th>
             <th className="p-3 font-bold">Moves Left</th>
           </tr>
         </thead>
         <tbody>
-          {player.units.map((unit) => (
-            <tr key={unit.id} className="border-b border-slate-700 hover:bg-slate-700/30 transition-colors">
-              <td className="p-3">{unit.type}</td>
-              <td className="p-3">{unit.x}, {unit.y}</td>
-              <td className="p-3 font-mono">{unit.movesRemaining} / {unit.maxMoves}</td>
-            </tr>
-          ))}
-          {player.settlements.flatMap(c => c.units).map((unit) => (
-            <tr key={unit.id} className="border-b border-slate-700 italic text-slate-400 hover:bg-slate-700/30 transition-colors">
-              <td className="p-3">{unit.type} (In Settlement)</td>
-              <td className="p-3">{unit.x}, {unit.y}</td>
-              <td className="p-3 font-mono text-xs opacity-50">N/A</td>
-            </tr>
+          {displayedPlayers.map(player => (
+            <React.Fragment key={player.id}>
+              {player.units.map((unit) => (
+                <tr
+                  key={unit.id}
+                  className="border-b border-slate-700 hover:bg-slate-700/30 transition-colors cursor-pointer"
+                  onClick={() => handleUnitClick(unit.id, unit.x, unit.y)}
+                >
+                  <td className="p-3"><Flag nation={player.nation} size={24} /></td>
+                  <td className="p-3">{unit.type}</td>
+                  <td className="p-3">{unit.x}, {unit.y}</td>
+                  <td className="p-3 font-mono">{unit.movesRemaining} / {unit.maxMoves}</td>
+                </tr>
+              ))}
+              {player.settlements.flatMap(c => c.units).map((unit) => (
+                <tr
+                  key={unit.id}
+                  className="border-b border-slate-700 italic text-slate-400 hover:bg-slate-700/30 transition-colors cursor-pointer"
+                  onClick={() => handleUnitClick(unit.id, unit.x, unit.y)}
+                >
+                  <td className="p-3"><Flag nation={player.nation} size={24} /></td>
+                  <td className="p-3">{unit.type} (In Settlement)</td>
+                  <td className="p-3">{unit.x}, {unit.y}</td>
+                  <td className="p-3 font-mono text-xs opacity-50">N/A</td>
+                </tr>
+              ))}
+            </React.Fragment>
           ))}
         </tbody>
       </table>
@@ -59,19 +100,27 @@ export const ReportsModal: React.FC = () => {
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="border-b border-slate-600 bg-slate-800/50">
+            <th className="p-3 font-bold">Flag</th>
             <th className="p-3 font-bold">Name</th>
             <th className="p-3 font-bold">Population</th>
             <th className="p-3 font-bold">Buildings</th>
           </tr>
         </thead>
         <tbody>
-          {player.settlements.map((settlement) => (
-            <tr key={settlement.id} className="border-b border-slate-700 hover:bg-slate-700/30 transition-colors">
-              <td className="p-3 font-semibold text-blue-300">{settlement.name}</td>
-              <td className="p-3">{settlement.population}</td>
-              <td className="p-3 text-sm text-slate-300">{settlement.buildings.join(', ') || 'None'}</td>
-            </tr>
-          ))}
+          {displayedPlayers.map(player =>
+            player.settlements.map((settlement) => (
+              <tr
+                key={settlement.id}
+                className="border-b border-slate-700 hover:bg-slate-700/30 transition-colors cursor-pointer"
+                onClick={() => handleSettlementClick(settlement.id, settlement.x, settlement.y)}
+              >
+                <td className="p-3"><Flag nation={player.nation} size={24} /></td>
+                <td className="p-3 font-semibold text-blue-300">{settlement.name}</td>
+                <td className="p-3">{settlement.population}</td>
+                <td className="p-3 text-sm text-slate-300">{settlement.buildings.join(', ') || 'None'}</td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>
@@ -84,23 +133,31 @@ export const ReportsModal: React.FC = () => {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-slate-600 bg-slate-800/50">
-              <th className="p-3 font-bold sticky left-0 bg-slate-800">Settlement</th>
+              <th className="p-3 font-bold sticky left-0 bg-slate-800 z-10">Flag</th>
+              <th className="p-3 font-bold sticky left-[64px] bg-slate-800 z-10">Settlement</th>
               {goods.map(good => (
                 <th key={good} className="p-3 text-[10px] uppercase tracking-wider font-bold text-slate-400">{good}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {player.settlements.map((settlement) => (
-              <tr key={settlement.id} className="border-b border-slate-700 hover:bg-slate-700/30 transition-colors">
-                <td className="p-3 font-bold sticky left-0 bg-slate-800 text-blue-300">{settlement.name}</td>
-                {goods.map(good => (
-                  <td key={good} className="p-3 font-mono">
-                    {settlement.inventory.get(good) || 0}
-                  </td>
-                ))}
-              </tr>
-            ))}
+            {displayedPlayers.map(player =>
+              player.settlements.map((settlement) => (
+                <tr
+                  key={settlement.id}
+                  className="border-b border-slate-700 hover:bg-slate-700/30 transition-colors cursor-pointer"
+                  onClick={() => handleSettlementClick(settlement.id, settlement.x, settlement.y)}
+                >
+                  <td className="p-3 sticky left-0 bg-slate-800"><Flag nation={player.nation} size={24} /></td>
+                  <td className="p-3 font-bold sticky left-[64px] bg-slate-800 text-blue-300">{settlement.name}</td>
+                  {goods.map(good => (
+                    <td key={good} className="p-3 font-mono">
+                      {settlement.inventory.get(good) || 0}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

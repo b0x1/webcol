@@ -55,9 +55,13 @@ export const UnitPanel: React.FC = () => {
 
   if (!unit) return null;
 
+  const isReadOnly = unit.ownerId !== currentPlayerId;
+  const unitOwner = players.find(p => p.id === unit.ownerId);
+
   return (
     <div className="absolute bottom-5 left-5 w-64 bg-black/80 text-white p-5 rounded-xl pointer-events-auto shadow-2xl border border-white/10 backdrop-blur-sm font-sans">
       <h3 className="text-xl font-black uppercase tracking-tight mb-1 text-blue-400">Unit: {unit.type}</h3>
+      {isReadOnly && <div className="text-[10px] font-black uppercase tracking-widest text-red-500 mb-2">[READ ONLY - {unitOwner?.name}]</div>}
       <div className="flex items-center gap-2 mb-4">
         <div className="h-1.5 flex-1 bg-slate-700 rounded-full overflow-hidden">
           <div
@@ -84,30 +88,40 @@ export const UnitPanel: React.FC = () => {
         )}
       </div>
 
-      <div className="space-y-2">
-        {(unit.type === UnitType.COLONIST || unit.type === UnitType.VILLAGER) && (
-          <button
-            onClick={() => foundSettlement(unit.id)}
-            className="w-full py-2.5 cursor-pointer bg-green-600 hover:bg-green-500 text-white font-black uppercase tracking-widest text-xs rounded shadow-lg transition-all transform active:scale-95"
-          >
-            <span className="text-yellow-400 font-black">B</span>UILD SETTLEMENT
-          </button>
-        )}
-        <div className="flex gap-2">
-          <button
-            onClick={() => skipUnit(unit.id)}
-            className="flex-1 py-2.5 cursor-pointer bg-red-700 hover:bg-red-600 text-white font-black uppercase tracking-widest text-[10px] rounded shadow-lg transition-all transform active:scale-95"
-          >
-            SKIP (Space)
-          </button>
-          <button
-            onClick={() => selectUnit(null)}
-            className="flex-1 py-2.5 cursor-pointer bg-slate-700 hover:bg-slate-600 text-white font-black uppercase tracking-widest text-[10px] rounded shadow-lg transition-all transform active:scale-95"
-          >
-            Wait
-          </button>
+      {!isReadOnly && (
+        <div className="space-y-2">
+          {(unit.type === UnitType.COLONIST || unit.type === UnitType.VILLAGER) && (
+            <button
+              onClick={() => foundSettlement(unit.id)}
+              className="w-full py-2.5 cursor-pointer bg-green-600 hover:bg-green-500 text-white font-black uppercase tracking-widest text-xs rounded shadow-lg transition-all transform active:scale-95"
+            >
+              <span className="text-yellow-400 font-black">B</span>UILD SETTLEMENT
+            </button>
+          )}
+          <div className="flex gap-2">
+            <button
+              onClick={() => skipUnit(unit.id)}
+              className="flex-1 py-2.5 cursor-pointer bg-red-700 hover:bg-red-600 text-white font-black uppercase tracking-widest text-[10px] rounded shadow-lg transition-all transform active:scale-95"
+            >
+              SKIP (Space)
+            </button>
+            <button
+              onClick={() => selectUnit(null)}
+              className="flex-1 py-2.5 cursor-pointer bg-slate-700 hover:bg-slate-600 text-white font-black uppercase tracking-widest text-[10px] rounded shadow-lg transition-all transform active:scale-95"
+            >
+              Wait
+            </button>
+          </div>
         </div>
-      </div>
+      )}
+      {isReadOnly && (
+        <button
+          onClick={() => selectUnit(null)}
+          className="w-full py-2.5 cursor-pointer bg-slate-700 hover:bg-slate-600 text-white font-black uppercase tracking-widest text-[10px] rounded shadow-lg transition-all transform active:scale-95"
+        >
+          Close
+        </button>
+      )}
     </div>
   );
 };
