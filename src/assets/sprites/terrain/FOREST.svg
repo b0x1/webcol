@@ -1,3 +1,11 @@
 <svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" image-rendering="pixelated">
-  <rect width="64" height="64" fill="#2d6e2d"/><path d="M5 25 L10 10 L15 25 Z M15 30 L20 15 L25 30 Z M25 25 L30 10 L35 25 Z" fill="#1a4d1a"/>
+  <!-- Plains base -->
+  <rect width="64" height="64" fill="#6ba33d"/>
+  <!-- Dark green forest canopy clusters -->
+  <rect x="8" y="8" width="16" height="12" fill="#2d5e1e"/>
+  <rect x="12" y="4" width="8" height="4" fill="#2d5e1e"/>
+  <rect x="40" y="32" width="16" height="12" fill="#2d5e1e"/>
+  <rect x="44" y="28" width="8" height="4" fill="#2d5e1e"/>
+  <rect x="16" y="40" width="12" height="16" fill="#2d5e1e"/>
+  <rect x="36" y="8" width="12" height="8" fill="#2d5e1e"/>
 </svg>

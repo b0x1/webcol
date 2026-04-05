@@ -251,10 +251,22 @@ export class WorldScene extends Phaser.Scene {
     this.scale.on('resize', (gameSize: Phaser.Structs.Size) => {
       if (this.cameras && this.cameras.main) {
         this.cameras.main.setViewport(0, 0, gameSize.width, gameSize.height);
+        this.emitViewportUpdate();
       }
     });
 
     this.renderUnits();
+    this.emitViewportUpdate();
+  }
+
+  private emitViewportUpdate() {
+    const cam = this.cameras.main;
+    eventBus.emit('viewportUpdated', {
+      x: cam.scrollX / this.TILE_SIZE,
+      y: cam.scrollY / this.TILE_SIZE,
+      width: cam.width / (this.TILE_SIZE * cam.zoom),
+      height: cam.height / (this.TILE_SIZE * cam.zoom),
+    });
   }
 
   private isAnimating = false;
@@ -420,5 +432,9 @@ export class WorldScene extends Phaser.Scene {
     }
 
     cam.zoom = Phaser.Math.Clamp(cam.zoom, 0.5, 2.0);
+
+    if (cam.dirty) {
+        this.emitViewportUpdate();
+    }
   }
 }

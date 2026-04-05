@@ -4,6 +4,8 @@ export class Unit {
   public cargo: Map<GoodType, number> = new Map();
   public maxMoves: number;
 
+  public isSkipping: boolean = false;
+
   constructor(
     public readonly id: string,
     public readonly ownerId: string,

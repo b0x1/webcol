@@ -1,3 +1,8 @@
 <svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" image-rendering="pixelated">
-  <rect width="64" height="64" fill="#d1b46b"/>
+  <!-- Sandy tan -->
+  <rect width="64" height="64" fill="#d2b48c"/>
+  <!-- Sand dunes/shadows -->
+  <rect x="8" y="16" width="24" height="4" fill="#c19a6b"/>
+  <rect x="32" y="32" width="16" height="4" fill="#c19a6b"/>
+  <rect x="12" y="48" width="32" height="4" fill="#c19a6b"/>
 </svg>

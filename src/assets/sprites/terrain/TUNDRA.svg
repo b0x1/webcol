@@ -1,3 +1,9 @@
 <svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" image-rendering="pixelated">
-  <rect width="64" height="64" fill="#99a6a6"/>
+  <!-- Cold gray-blue -->
+  <rect width="64" height="64" fill="#a0b0c0"/>
+  <!-- Sparse vegetation/rock patches -->
+  <rect x="8" y="8" width="4" height="4" fill="#6ba33d"/>
+  <rect x="32" y="24" width="8" height="4" fill="#6ba33d"/>
+  <rect x="16" y="48" width="12" height="4" fill="#6ba33d"/>
+  <rect x="48" y="40" width="4" height="4" fill="#6ba33d"/>
 </svg>

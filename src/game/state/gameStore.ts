@@ -35,6 +35,8 @@ export interface GameState {
   isReportsModalOpen: boolean;
 
   selectUnit: (unitId: string | null) => void;
+  selectNextUnit: () => void;
+  skipUnit: (unitId: string) => void;
   selectColony: (colonyId: string | null) => void;
   setColonyScreenOpen: (isOpen: boolean) => void;
   setEuropeScreenOpen: (isOpen: boolean) => void;
@@ -93,6 +95,71 @@ export const useGameStore = create<GameState>((set, get) => ({
   isReportsModalOpen: false,
 
   selectUnit: (unitId) => set({ selectedUnitId: unitId, selectedColonyId: null }),
+
+  selectNextUnit: () => {
+    const state = get();
+    const player = state.players.find((p) => p.id === state.currentPlayerId);
+    if (!player) return;
+
+    const currentUnit = player.units.find((u) => u.id === state.selectedUnitId);
+    const availableUnits = player.units.filter((u) => u.movesRemaining > 0 && !u.isSkipping);
+
+    if (availableUnits.length === 0) return;
+
+    let nextUnit: Unit;
+    if (currentUnit) {
+      // Find the closest unit among available units
+      nextUnit = availableUnits.reduce((prev, curr) => {
+        // If current unit is on the same tile, cycle through them
+        if (curr.x === currentUnit.x && curr.y === currentUnit.y) {
+           // We need a way to ensure we don't just pick the first one on the same tile every time
+           // Find the index of the current unit in the full list and look for the next one on the same tile
+           const currentIdx = player.units.indexOf(currentUnit);
+           const nextSameTile = player.units.slice(currentIdx + 1).find(u => u.x === currentUnit.x && u.y === currentUnit.y && u.movesRemaining > 0 && !u.isSkipping);
+           if (nextSameTile) return nextSameTile;
+        }
+
+        const distPrev = Math.abs(prev.x - currentUnit.x) + Math.abs(prev.y - currentUnit.y);
+        const distCurr = Math.abs(curr.x - currentUnit.x) + Math.abs(curr.y - currentUnit.y);
+
+        // Prefer same tile first
+        if (curr.x === currentUnit.x && curr.y === currentUnit.y) return curr;
+        if (prev.x === currentUnit.x && prev.y === currentUnit.y) return prev;
+
+        return distCurr < distPrev ? curr : prev;
+      }, availableUnits[0]);
+    } else {
+      nextUnit = availableUnits[0];
+    }
+
+    set({ selectedUnitId: nextUnit.id, selectedColonyId: null });
+    eventBus.emit('cameraJump', { x: nextUnit.x, y: nextUnit.y });
+  },
+
+  skipUnit: (unitId) =>
+    set((state) => {
+      const updatedPlayers = state.players.map((p) => {
+        if (p.id === state.currentPlayerId) {
+          const updatedUnits = p.units.map((u) => {
+            if (u.id === unitId) {
+              const nu = new Unit(u.id, u.ownerId, u.type, u.x, u.y, u.movesRemaining);
+              nu.cargo = new Map(u.cargo);
+              nu.maxMoves = u.maxMoves;
+              nu.isSkipping = true;
+              return nu;
+            }
+            return u;
+          });
+          const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold, p.nation);
+          newPlayer.units = updatedUnits;
+          newPlayer.colonies = [...p.colonies];
+          return newPlayer;
+        }
+        return p;
+      });
+      return { players: updatedPlayers, selectedUnitId: state.selectedUnitId === unitId ? null : state.selectedUnitId };
+    }),
+
   selectColony: (colonyId) => set({ selectedColonyId: colonyId, selectedUnitId: null }),
   setColonyScreenOpen: (isOpen) => set({ isColonyScreenOpen: isOpen }),
   setEuropeScreenOpen: (isOpen) => set({ isEuropeScreenOpen: isOpen }),
@@ -197,6 +264,7 @@ export const useGameStore = create<GameState>((set, get) => ({
             const newUnit = new Unit(u.id, u.ownerId, u.type, u.x, u.y, u.maxMoves);
             newUnit.cargo = new Map(u.cargo);
             newUnit.maxMoves = u.maxMoves;
+            newUnit.isSkipping = false; // Reset skipping
             return newUnit;
           });
           const newPlayer = new Player(p.id, p.name, p.isHuman, p.gold, p.nation);

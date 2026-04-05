@@ -1,9 +1,20 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useGameStore } from '../game/state/gameStore';
 
 export const UnitPanel: React.FC = () => {
-  const { selectedUnitId, players, endTurn, isMainMenuOpen } = useGameStore();
+  const { selectedUnitId, players, isMainMenuOpen, skipUnit, selectUnit } = useGameStore();
   const foundColony = useGameStore((state) => state.foundColony);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space' && selectedUnitId) {
+        e.preventDefault();
+        skipUnit(selectedUnitId);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedUnitId, skipUnit]);
 
   if (isMainMenuOpen) return null;
 
@@ -51,12 +62,20 @@ export const UnitPanel: React.FC = () => {
             Found Colony
           </button>
         )}
-        <button
-          onClick={() => endTurn()}
-          className="w-full py-2.5 cursor-pointer bg-slate-700 hover:bg-slate-600 text-white font-black uppercase tracking-widest text-xs rounded shadow-lg transition-all transform active:scale-95"
-        >
-          End Turn
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => skipUnit(unit.id)}
+            className="flex-1 py-2.5 cursor-pointer bg-red-700 hover:bg-red-600 text-white font-black uppercase tracking-widest text-[10px] rounded shadow-lg transition-all transform active:scale-95"
+          >
+            Skip (Space)
+          </button>
+          <button
+            onClick={() => selectUnit(null)}
+            className="flex-1 py-2.5 cursor-pointer bg-slate-700 hover:bg-slate-600 text-white font-black uppercase tracking-widest text-[10px] rounded shadow-lg transition-all transform active:scale-95"
+          >
+            Wait
+          </button>
+        </div>
       </div>
     </div>
   );

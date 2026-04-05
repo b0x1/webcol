@@ -1,3 +1,9 @@
 <svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" image-rendering="pixelated">
-  <rect width="64" height="64" fill="#4a5e35"/>
+  <!-- Murky brown swamp water -->
+  <rect width="64" height="64" fill="#4a5a3a"/>
+  <!-- Trees/logs sticking out -->
+  <rect x="16" y="8" width="4" height="12" fill="#2a1a0a"/>
+  <rect x="36" y="24" width="8" height="8" fill="#1a3a1a"/>
+  <rect x="12" y="40" width="12" height="12" fill="#1a3a1a"/>
+  <rect x="44" y="44" width="4" height="8" fill="#2a1a0a"/>
 </svg>
