@@ -1,20 +1,22 @@
 import { describe, it, expect } from 'vitest';
 import { NativeInteractionSystem } from '../NativeInteractionSystem';
-import { NativeSettlement } from '../../entities/NativeSettlement';
+import { Settlement } from '../../entities/Settlement';
 import { Unit } from '../../entities/Unit';
-import { Tribe, Attitude, GoodType, UnitType } from '../../entities/types';
+import { Nation, Attitude, GoodType, UnitType } from '../../entities/types';
 
 describe('NativeInteractionSystem', () => {
-  const mockSettlement = new NativeSettlement(
+  const mockSettlement = new Settlement(
     's1',
+    'npc-AZTEC',
     'Aztec Village',
-    Tribe.AZTEC,
     10,
     10,
     5,
-    Attitude.FRIENDLY,
-    new Map([[GoodType.FOOD, 100], [GoodType.FURS, 50]])
+    'NATIVE',
+    'STATE'
   );
+  mockSettlement.attitude = Attitude.FRIENDLY;
+  mockSettlement.goods = new Map([[GoodType.FOOD, 100], [GoodType.FURS, 50]]);
 
   const mockUnit = new Unit('u1', 'player-1', UnitType.COLONIST, 10, 10, 3);
   mockUnit.cargo.set(GoodType.TRADE_GOODS, 50);
@@ -48,15 +50,17 @@ describe('NativeInteractionSystem', () => {
   });
 
   it('should throw error when learning from non-friendly settlement', () => {
-    const neutralSettlement = new NativeSettlement(
+    const neutralSettlement = new Settlement(
       's2',
+      'npc-IROQUOIS',
       'Sioux Village',
-      Tribe.SIOUX,
       20,
       20,
       5,
-      Attitude.NEUTRAL
+      'NATIVE',
+      'TRIBE'
     );
+    neutralSettlement.attitude = Attitude.NEUTRAL;
     expect(() => NativeInteractionSystem.learn(neutralSettlement, mockUnit)).toThrow();
   });
 

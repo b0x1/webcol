@@ -1,11 +1,10 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { SaveSystem } from '../SaveSystem';
 import { Player } from '../../entities/Player';
 import { Unit } from '../../entities/Unit';
-import { Colony } from '../../entities/Colony';
+import { Settlement } from '../../entities/Settlement';
 import { Tile } from '../../entities/Tile';
-import { NativeSettlement } from '../../entities/NativeSettlement';
-import { GoodType, UnitType, TerrainType, Tribe, Attitude, JobType, TurnPhase, Nation } from '../../entities/types';
+import { GoodType, UnitType, TerrainType, Nation, Attitude, JobType, TurnPhase } from '../../entities/types';
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -31,16 +30,17 @@ describe('SaveSystem Serialization Round-trip', () => {
     unit1.cargo.set(GoodType.FOOD, 50);
     player1.units.push(unit1);
 
-    const colony1 = new Colony('c1', 'p1', 'Colony 1', 10, 10, 2);
-    colony1.buildings.push('WAREHOUSE' as any);
-    colony1.inventory.set(GoodType.LUMBER, 100);
-    colony1.workforce.set('u1', JobType.FARMER);
-    player1.colonies.push(colony1);
+    const settlement1 = new Settlement('c1', 'p1', 'Settlement 1', 10, 10, 2, 'EUROPEAN', 'STATE');
+    settlement1.buildings.push('WAREHOUSE' as any);
+    settlement1.inventory.set(GoodType.LUMBER, 100);
+    settlement1.workforce.set('u1', JobType.FARMER);
+    player1.settlements.push(settlement1);
 
     const tile = new Tile('10-10', 10, 10, TerrainType.PLAINS, 1);
 
-    const settlement = new NativeSettlement('s1', 'Settlement 1', Tribe.APACHE, 15, 15, 5, Attitude.NEUTRAL);
+    const settlement = new Settlement('s1', 'npc-IROQUOIS', 'Settlement 1', 15, 15, 5, 'NATIVE', 'TRIBE');
     settlement.goods.set(GoodType.TRADE_GOODS, 20);
+    settlement.attitude = Attitude.NEUTRAL;
 
     const mockState: any = {
       players: [player1],
@@ -49,7 +49,7 @@ describe('SaveSystem Serialization Round-trip', () => {
       phase: TurnPhase.MOVEMENT,
       europePrices: { [GoodType.FOOD]: 2 },
       map: [[tile]],
-      nativeSettlements: [settlement],
+      npcSettlements: [settlement],
     };
 
     // 2. Save
@@ -78,19 +78,19 @@ describe('SaveSystem Serialization Round-trip', () => {
     expect(loadedUnit.cargo).toBeInstanceOf(Map);
     expect(loadedUnit.cargo.get(GoodType.FOOD)).toBe(50);
 
-    // Check Colony instance and its properties
-    const loadedColony = loadedState.players[0].colonies[0];
-    expect(loadedColony).toBeInstanceOf(Colony);
-    expect(loadedColony.inventory.get(GoodType.LUMBER)).toBe(100);
-    expect(loadedColony.workforce.get('u1')).toBe(JobType.FARMER);
+    // Check Settlement instance and its properties
+    const loadedSettlement = loadedState.players[0].settlements[0];
+    expect(loadedSettlement).toBeInstanceOf(Settlement);
+    expect(loadedSettlement.inventory.get(GoodType.LUMBER)).toBe(100);
+    expect(loadedSettlement.workforce.get('u1')).toBe(JobType.FARMER);
 
     // Check Tile instance
     expect(loadedState.map[0][0]).toBeInstanceOf(Tile);
     expect(loadedState.map[0][0].terrainType).toBe(TerrainType.PLAINS);
 
-    // Check NativeSettlement instance and Map
-    expect(loadedState.nativeSettlements[0]).toBeInstanceOf(NativeSettlement);
-    expect(loadedState.nativeSettlements[0].goods.get(GoodType.TRADE_GOODS)).toBe(20);
+    // Check NPC Settlement instance and Map
+    expect(loadedState.npcSettlements[0]).toBeInstanceOf(Settlement);
+    expect(loadedState.npcSettlements[0].goods.get(GoodType.TRADE_GOODS)).toBe(20);
   });
 
   it('should manage manifest correctly', () => {

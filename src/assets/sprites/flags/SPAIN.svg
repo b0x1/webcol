@@ -1,0 +1,11 @@
+<svg viewBox="0 0 64 64" width="64" height="64" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" image-rendering="pixelated">
+  <rect width="64" height="64" fill="white" />
+  <!-- Cross of Burgundy -->
+  <line x1="8" y1="8" x2="56" y2="56" stroke="#C32228" stroke-width="6" />
+  <line x1="56" y1="8" x2="8" y2="56" stroke="#C32228" stroke-width="6" />
+  <!-- Knots/Ragguly -->
+  <rect x="18" y="18" width="4" height="4" fill="#C32228" />
+  <rect x="42" y="42" width="4" height="4" fill="#C32228" />
+  <rect x="18" y="42" width="4" height="4" fill="#C32228" />
+  <rect x="42" y="18" width="4" height="4" fill="#C32228" />
+</svg>

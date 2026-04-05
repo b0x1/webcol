@@ -4,12 +4,12 @@ import { Unit } from '../../game/entities/Unit';
 import { useGameStore } from '../../game/state/gameStore';
 
 interface Props {
-  colonyId: string;
+  settlementId: string;
   units: Unit[];
   workforce: Map<string, JobType>;
 }
 
-export const WorkforcePanel: React.FC<Props> = ({ colonyId, units, workforce }) => {
+export const WorkforcePanel: React.FC<Props> = ({ settlementId, units, workforce }) => {
   const assignJob = useGameStore((state) => state.assignJob);
 
   return (
@@ -29,7 +29,7 @@ export const WorkforcePanel: React.FC<Props> = ({ colonyId, units, workforce }) 
               </div>
               <select
                 value={currentJob}
-                onChange={(e) => assignJob(colonyId, unit.id, e.target.value as JobType)}
+                onChange={(e) => assignJob(settlementId, unit.id, e.target.value as JobType)}
                 className="bg-slate-900 text-white border border-slate-600 rounded px-2 py-1 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer hover:bg-slate-700 transition-colors"
               >
                 {Object.values(JobType).map((job) => (

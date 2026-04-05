@@ -1,8 +1,7 @@
 import Phaser from 'phaser';
 import { Tile } from '../entities/Tile';
-import { NativeSettlement } from '../entities/NativeSettlement';
+import { Settlement } from '../entities/Settlement';
 import { TerrainType } from '../entities/types';
-import type { Colony } from '../entities/Colony';
 
 export class TerrainRenderer {
   private scene: Phaser.Scene;
@@ -14,8 +13,8 @@ export class TerrainRenderer {
   private reachableHighlights: Phaser.GameObjects.Graphics | null = null;
   private hoverTooltip: Phaser.GameObjects.Text | null = null;
   private coastBorders: Phaser.GameObjects.Graphics | null = null;
-  private nativeSettlementGraphics: Phaser.GameObjects.Group | null = null;
-  private colonyGraphics: Phaser.GameObjects.Group | null = null;
+  private npcSettlementGraphics: Phaser.GameObjects.Group | null = null;
+  private playerSettlementGraphics: Phaser.GameObjects.Group | null = null;
 
   private terrainIndexMap: Map<string, number> = new Map();
   private resourceIndexMap: Map<string, number> = new Map();
@@ -55,8 +54,8 @@ export class TerrainRenderer {
 
   public renderTileMap(
     tiles: Tile[][],
-    nativeSettlements: NativeSettlement[] = [],
-    colonies: Colony[] = [],
+    npcSettlements: Settlement[] = [],
+    playerSettlements: Settlement[] = [],
   ) {
     const height = tiles.length;
     const width = tiles[0]?.length || 0;
@@ -115,37 +114,39 @@ export class TerrainRenderer {
       });
     });
 
-    this.renderNativeSettlements(nativeSettlements);
-    this.renderColonies(colonies);
+    this.renderNPCSettlements(npcSettlements);
+    this.renderPlayerSettlements(playerSettlements);
   }
 
-  private renderNativeSettlements(nativeSettlements: NativeSettlement[]) {
-    if (this.nativeSettlementGraphics) {
-      this.nativeSettlementGraphics.destroy(true, true);
+  private renderNPCSettlements(npcSettlements: Settlement[]) {
+    if (this.npcSettlementGraphics) {
+      this.npcSettlementGraphics.destroy(true, true);
     }
-    this.nativeSettlementGraphics = this.scene.add.group();
+    this.npcSettlementGraphics = this.scene.add.group();
 
-    nativeSettlements.forEach((settlement) => {
+    npcSettlements.forEach((settlement) => {
       const { x: worldX, y: worldY } = this.tileToWorld(settlement.x, settlement.y);
-      const sprite = this.scene.add.image(worldX, worldY, 'other', 'native_settlement')
+      const frame = `settlement_${settlement.organization.toLowerCase()}`;
+      const sprite = this.scene.add.image(worldX, worldY, 'other', frame)
         .setOrigin(0, 0)
         .setDepth(3);
-      this.nativeSettlementGraphics?.add(sprite);
+      this.npcSettlementGraphics?.add(sprite);
     });
   }
 
-  private renderColonies(colonies: Colony[]) {
-    if (this.colonyGraphics) {
-      this.colonyGraphics.destroy(true, true);
+  private renderPlayerSettlements(playerSettlements: Settlement[]) {
+    if (this.playerSettlementGraphics) {
+      this.playerSettlementGraphics.destroy(true, true);
     }
-    this.colonyGraphics = this.scene.add.group();
+    this.playerSettlementGraphics = this.scene.add.group();
 
-    colonies.forEach((colony) => {
-      const { x: worldX, y: worldY } = this.tileToWorld(colony.x, colony.y);
-      const sprite = this.scene.add.image(worldX, worldY, 'other', 'colony')
+    playerSettlements.forEach((settlement) => {
+      const { x: worldX, y: worldY } = this.tileToWorld(settlement.x, settlement.y);
+      const frame = `settlement_${settlement.organization.toLowerCase()}`;
+      const sprite = this.scene.add.image(worldX, worldY, 'other', frame)
         .setOrigin(0, 0)
         .setDepth(3);
-      this.colonyGraphics?.add(sprite);
+      this.playerSettlementGraphics?.add(sprite);
     });
   }
 
@@ -256,7 +257,7 @@ export class TerrainRenderer {
     if (this.reachableHighlights) this.reachableHighlights.destroy();
     if (this.hoverTooltip) this.hoverTooltip.destroy();
     if (this.coastBorders) this.coastBorders.destroy();
-    if (this.nativeSettlementGraphics) this.nativeSettlementGraphics.destroy(true, true);
-    if (this.colonyGraphics) this.colonyGraphics.destroy(true, true);
+    if (this.npcSettlementGraphics) this.npcSettlementGraphics.destroy(true, true);
+    if (this.playerSettlementGraphics) this.playerSettlementGraphics.destroy(true, true);
   }
 }

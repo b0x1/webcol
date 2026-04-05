@@ -23,6 +23,7 @@ export const UnitType = {
   SOLDIER: 'SOLDIER',
   PIONEER: 'PIONEER',
   SHIP: 'SHIP',
+  INDIAN_BRAVE: 'INDIAN_BRAVE',
 } as const;
 export type UnitType = (typeof UnitType)[keyof typeof UnitType];
 
@@ -76,14 +77,18 @@ export const TurnPhase = {
 } as const;
 export type TurnPhase = (typeof TurnPhase)[keyof typeof TurnPhase];
 
-export const Tribe = {
-  AZTEC: 'AZTEC',
-  IROQUOIS: 'IROQUOIS',
-  CHEROKEE: 'CHEROKEE',
-  SIOUX: 'SIOUX',
-  APACHE: 'APACHE',
+export const Culture = {
+  EUROPEAN: 'EUROPEAN',
+  NATIVE: 'NATIVE',
 } as const;
-export type Tribe = (typeof Tribe)[keyof typeof Tribe];
+export type Culture = (typeof Culture)[keyof typeof Culture];
+
+export const Organization = {
+  TRIBE: 'TRIBE',
+  CHIEFDOM: 'CHIEFDOM',
+  STATE: 'STATE',
+} as const;
+export type Organization = (typeof Organization)[keyof typeof Organization];
 
 export const Attitude = {
   FRIENDLY: 'FRIENDLY',
@@ -93,11 +98,26 @@ export const Attitude = {
 export type Attitude = (typeof Attitude)[keyof typeof Attitude];
 
 export const Nation = {
+  // European States
   ENGLAND: 'ENGLAND',
   FRANCE: 'FRANCE',
   SPAIN: 'SPAIN',
   NETHERLANDS: 'NETHERLANDS',
   NORSEMEN: 'NORSEMEN',
   PORTUGAL: 'PORTUGAL',
+  // Native States
+  AZTEC: 'AZTEC',
+  INCA: 'INCA',
+  MAYA: 'MAYA',
+  // Native Chiefdoms
+  CAHOKIA: 'CAHOKIA',
+  MUISCA: 'MUISCA',
+  POWHATAN: 'POWHATAN',
+  ARAWAK: 'ARAWAK',
+  // Native Tribes
+  IROQUOIS: 'IROQUOIS',
+  HOHOKAM: 'HOHOKAM',
+  PUEBLO: 'PUEBLO',
+  OMAHA: 'OMAHA',
 } as const;
 export type Nation = (typeof Nation)[keyof typeof Nation];

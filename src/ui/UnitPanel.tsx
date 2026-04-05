@@ -1,20 +1,51 @@
 import React, { useEffect } from 'react';
 import { useGameStore } from '../game/state/gameStore';
+import { UnitType } from '../game/entities/types';
 
 export const UnitPanel: React.FC = () => {
-  const { selectedUnitId, players, isMainMenuOpen, skipUnit, selectUnit } = useGameStore();
-  const foundColony = useGameStore((state) => state.foundColony);
+  const {
+    selectedUnitId,
+    players,
+    isMainMenuOpen,
+    skipUnit,
+    selectUnit,
+    isSettlementScreenOpen,
+    isEuropeScreenOpen,
+    isReportsModalOpen,
+    isSaveModalOpen,
+    isNativeTradeModalOpen,
+    isHowToPlayModalOpen,
+    isGameSetupModalOpen,
+  } = useGameStore();
+  const foundSettlement = useGameStore((state) => state.foundSettlement);
+
+  const isAnyModalOpen =
+    isSettlementScreenOpen ||
+    isEuropeScreenOpen ||
+    isReportsModalOpen ||
+    isSaveModalOpen ||
+    isNativeTradeModalOpen ||
+    isHowToPlayModalOpen ||
+    isGameSetupModalOpen;
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === 'Space' && selectedUnitId) {
+      if (isMainMenuOpen || isAnyModalOpen) return;
+
+      if ((e.code === 'Space' || e.key.toLowerCase() === 's') && selectedUnitId) {
         e.preventDefault();
         skipUnit(selectedUnitId);
+      } else if (e.key.toLowerCase() === 'b' && selectedUnitId) {
+        const unit = players.flatMap((p) => p.units).find((u) => u.id === selectedUnitId);
+        if (unit && (unit.type === UnitType.COLONIST || unit.type === UnitType.INDIAN_BRAVE)) {
+          e.preventDefault();
+          foundSettlement(selectedUnitId);
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedUnitId, skipUnit]);
+  }, [selectedUnitId, skipUnit, isMainMenuOpen, isAnyModalOpen, players, foundSettlement]);
 
   if (isMainMenuOpen) return null;
 
@@ -54,12 +85,12 @@ export const UnitPanel: React.FC = () => {
       </div>
 
       <div className="space-y-2">
-        {unit.type === 'COLONIST' && (
+        {(unit.type === UnitType.COLONIST || unit.type === UnitType.INDIAN_BRAVE) && (
           <button
-            onClick={() => foundColony(unit.id)}
+            onClick={() => foundSettlement(unit.id)}
             className="w-full py-2.5 cursor-pointer bg-green-600 hover:bg-green-500 text-white font-black uppercase tracking-widest text-xs rounded shadow-lg transition-all transform active:scale-95"
           >
-            Found Colony
+            <span className="text-yellow-400 font-black">B</span>UILD SETTLEMENT
           </button>
         )}
         <div className="flex gap-2">
@@ -67,7 +98,7 @@ export const UnitPanel: React.FC = () => {
             onClick={() => skipUnit(unit.id)}
             className="flex-1 py-2.5 cursor-pointer bg-red-700 hover:bg-red-600 text-white font-black uppercase tracking-widest text-[10px] rounded shadow-lg transition-all transform active:scale-95"
           >
-            Skip (Space)
+            <span className="text-yellow-400 font-black">S</span>KIP (Space)
           </button>
           <button
             onClick={() => selectUnit(null)}

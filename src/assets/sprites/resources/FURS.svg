@@ -1,3 +1,6 @@
-<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" image-rendering="pixelated">
-  <rect x="24" y="24" width="16" height="16" fill="#a0522d" stroke="black" stroke-width="1"/>
+<svg viewBox="0 0 64 64" width="64" height="64" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" image-rendering="pixelated">
+  <!-- Pelt representation -->
+  <path d="M15 15 L49 15 L55 32 L49 49 L15 49 L9 32 Z" fill="#5D4037" stroke="black" stroke-width="2" />
+  <!-- Shading/texture -->
+  <rect x="25" y="25" width="14" height="14" fill="#4E342E" opacity="0.3" />
 </svg>

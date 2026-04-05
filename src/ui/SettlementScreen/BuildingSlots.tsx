@@ -12,12 +12,12 @@ const BUILDINGS_LIST = [
 ];
 
 interface Props {
-  colonyId: string;
+  settlementId: string;
   ownedBuildings: BuildingType[];
   playerGold: number;
 }
 
-export const BuildingSlots: React.FC<Props> = ({ colonyId, ownedBuildings, playerGold }) => {
+export const BuildingSlots: React.FC<Props> = ({ settlementId, ownedBuildings, playerGold }) => {
   const buyBuilding = useGameStore((state) => state.buyBuilding);
 
   return (
@@ -42,7 +42,7 @@ export const BuildingSlots: React.FC<Props> = ({ colonyId, ownedBuildings, playe
 
             {!isBuilt ? (
               <button
-                onClick={() => buyBuilding(colonyId, b.type)}
+                onClick={() => buyBuilding(settlementId, b.type)}
                 disabled={!canAfford}
                 className={`mt-2 py-1.5 px-2 text-[0.75rem] font-bold rounded transition-colors shadow-inner ${
                   canAfford

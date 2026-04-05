@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../game/state/gameStore';
 import { GoodType } from '../game/entities/types';
 
@@ -7,6 +7,17 @@ type ReportTab = 'units' | 'settlements' | 'resources';
 export const ReportsModal: React.FC = () => {
   const { isReportsModalOpen, setReportsModalOpen, players, currentPlayerId } = useGameStore();
   const [activeTab, setActiveTab] = useState<ReportTab>('units');
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isReportsModalOpen && e.key === 'Escape') {
+        e.preventDefault();
+        setReportsModalOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isReportsModalOpen, setReportsModalOpen]);
 
   if (!isReportsModalOpen) return null;
 
@@ -31,9 +42,9 @@ export const ReportsModal: React.FC = () => {
               <td className="p-3 font-mono">{unit.movesRemaining} / {unit.maxMoves}</td>
             </tr>
           ))}
-          {player.colonies.flatMap(c => c.units).map((unit) => (
+          {player.settlements.flatMap(c => c.units).map((unit) => (
             <tr key={unit.id} className="border-b border-slate-700 italic text-slate-400 hover:bg-slate-700/30 transition-colors">
-              <td className="p-3">{unit.type} (In Colony)</td>
+              <td className="p-3">{unit.type} (In Settlement)</td>
               <td className="p-3">{unit.x}, {unit.y}</td>
               <td className="p-3 font-mono text-xs opacity-50">N/A</td>
             </tr>
@@ -54,11 +65,11 @@ export const ReportsModal: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {player.colonies.map((colony) => (
-            <tr key={colony.id} className="border-b border-slate-700 hover:bg-slate-700/30 transition-colors">
-              <td className="p-3 font-semibold text-blue-300">{colony.name}</td>
-              <td className="p-3">{colony.population}</td>
-              <td className="p-3 text-sm text-slate-300">{colony.buildings.join(', ') || 'None'}</td>
+          {player.settlements.map((settlement) => (
+            <tr key={settlement.id} className="border-b border-slate-700 hover:bg-slate-700/30 transition-colors">
+              <td className="p-3 font-semibold text-blue-300">{settlement.name}</td>
+              <td className="p-3">{settlement.population}</td>
+              <td className="p-3 text-sm text-slate-300">{settlement.buildings.join(', ') || 'None'}</td>
             </tr>
           ))}
         </tbody>
@@ -73,19 +84,19 @@ export const ReportsModal: React.FC = () => {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-slate-600 bg-slate-800/50">
-              <th className="p-3 font-bold sticky left-0 bg-slate-800">Colony</th>
+              <th className="p-3 font-bold sticky left-0 bg-slate-800">Settlement</th>
               {goods.map(good => (
                 <th key={good} className="p-3 text-[10px] uppercase tracking-wider font-bold text-slate-400">{good}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {player.colonies.map((colony) => (
-              <tr key={colony.id} className="border-b border-slate-700 hover:bg-slate-700/30 transition-colors">
-                <td className="p-3 font-bold sticky left-0 bg-slate-800 text-blue-300">{colony.name}</td>
+            {player.settlements.map((settlement) => (
+              <tr key={settlement.id} className="border-b border-slate-700 hover:bg-slate-700/30 transition-colors">
+                <td className="p-3 font-bold sticky left-0 bg-slate-800 text-blue-300">{settlement.name}</td>
                 {goods.map(good => (
                   <td key={good} className="p-3 font-mono">
-                    {colony.inventory.get(good) || 0}
+                    {settlement.inventory.get(good) || 0}
                   </td>
                 ))}
               </tr>
@@ -105,7 +116,7 @@ export const ReportsModal: React.FC = () => {
             onClick={() => setReportsModalOpen(false)}
             className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded transition-colors cursor-pointer"
           >
-            Close
+            Close (Esc)
           </button>
         </div>
 

@@ -1,7 +1,7 @@
 import { createNoise2D } from 'simplex-noise';
-import { TerrainType, Tribe, Attitude, GoodType } from '../entities/types';
-import { NativeSettlement } from '../entities/NativeSettlement';
-import { MAP_CONSTANTS } from '../constants';
+import { TerrainType, Attitude, GoodType, Nation, Culture, Organization } from '../entities/types';
+import { Settlement } from '../entities/Settlement';
+import { MAP_CONSTANTS, NATION_BONUSES } from '../constants';
 
 export class TerrainGenerator {
   private width: number;
@@ -64,8 +64,8 @@ export class TerrainGenerator {
     return map;
   }
 
-  generateNativeSettlements(terrain: TerrainType[][]): NativeSettlement[] {
-    const settlements: NativeSettlement[] = [];
+  generateSettlements(terrain: TerrainType[][]): Settlement[] {
+    const settlements: Settlement[] = [];
     const count =
       MAP_CONSTANTS.NATIVE_SETTLEMENT_MIN_COUNT +
       Math.floor(
@@ -75,6 +75,10 @@ export class TerrainGenerator {
 
     const margin = MAP_CONSTANTS.NATIVE_SETTLEMENT_EDGE_MARGIN;
     const minDistance = MAP_CONSTANTS.NATIVE_SETTLEMENT_MIN_DISTANCE;
+
+    const nativeNations = Object.entries(NATION_BONUSES)
+      .filter(([_, data]) => data.culture === 'NATIVE')
+      .map(([key, _]) => key as Nation);
 
     let attempts = 0;
     while (settlements.length < count && attempts < 500) {
@@ -94,27 +98,27 @@ export class TerrainGenerator {
 
       if (tooClose) continue;
 
-      const tribeKeys = Object.values(Tribe);
-      const tribe = tribeKeys[Math.floor(Math.random() * tribeKeys.length)];
+      const nationKey = nativeNations[Math.floor(Math.random() * nativeNations.length)];
+      const nationData = NATION_BONUSES[nationKey];
       const id = `native-${settlements.length}-${Date.now()}`;
-      const name = `${tribe} Village`;
+      const name = `${nationData.name} Settlement`;
 
-      const goods = new Map<GoodType, number>();
-      goods.set(GoodType.FOOD, 50 + Math.floor(Math.random() * 50));
-      goods.set(GoodType.FURS, 20 + Math.floor(Math.random() * 30));
-
-      settlements.push(
-        new NativeSettlement(
-          id,
-          name,
-          tribe,
-          x,
-          y,
-          3 + Math.floor(Math.random() * 5),
-          Attitude.FRIENDLY,
-          goods,
-        ),
+      const s = new Settlement(
+        id,
+        `npc-${nationKey}`,
+        name,
+        x,
+        y,
+        3 + Math.floor(Math.random() * 5),
+        'NATIVE',
+        nationData.organization
       );
+
+      s.goods.set(GoodType.FOOD, 50 + Math.floor(Math.random() * 50));
+      s.goods.set(GoodType.FURS, 20 + Math.floor(Math.random() * 30));
+      s.attitude = Attitude.FRIENDLY;
+
+      settlements.push(s);
     }
 
     return settlements;

@@ -1,9 +1,8 @@
 import type { GameState } from '../state/gameStore';
 import { Player } from '../entities/Player';
 import { Unit } from '../entities/Unit';
-import { Colony } from '../entities/Colony';
+import { Settlement } from '../entities/Settlement';
 import { Tile } from '../entities/Tile';
-import { NativeSettlement } from '../entities/NativeSettlement';
 
 export interface SaveMeta {
   slotName: string;
@@ -19,7 +18,7 @@ export interface SaveData {
   phase: any;
   europePrices: any;
   map: any[][];
-  nativeSettlements: any[];
+  npcSettlements: any[];
 }
 
 export class SaveSystem {
@@ -34,7 +33,7 @@ export class SaveSystem {
       phase: state.phase,
       europePrices: state.europePrices,
       map: state.map,
-      nativeSettlements: state.nativeSettlements,
+      npcSettlements: state.npcSettlements,
     };
 
     const serialized = JSON.stringify(data, this.replacer);
@@ -124,20 +123,22 @@ export class SaveSystem {
         unit.maxMoves = uData.maxMoves;
         return unit;
       });
-      player.colonies = pData.colonies.map((cData: any) => {
-        const colony = new Colony(
+      player.settlements = pData.settlements.map((cData: any) => {
+        const settlement = new Settlement(
           cData.id,
           cData.ownerId,
           cData.name,
           cData.x,
           cData.y,
-          cData.population
+          cData.population,
+          cData.culture || 'EUROPEAN',
+          cData.organization || 'STATE'
         );
-        colony.buildings = cData.buildings;
-        colony.inventory = cData.inventory;
-        colony.productionQueue = cData.productionQueue;
-        colony.workforce = cData.workforce;
-        colony.units = cData.units.map((uData: any) => {
+        settlement.buildings = cData.buildings;
+        settlement.inventory = cData.inventory;
+        settlement.productionQueue = cData.productionQueue;
+        settlement.workforce = cData.workforce;
+        settlement.units = cData.units.map((uData: any) => {
           const unit = new Unit(
             uData.id,
             uData.ownerId,
@@ -150,7 +151,7 @@ export class SaveSystem {
           unit.maxMoves = uData.maxMoves;
           return unit;
         });
-        return colony;
+        return settlement;
       });
       return player;
     });
@@ -169,17 +170,19 @@ export class SaveSystem {
       })
     );
 
-    const nativeSettlements = data.nativeSettlements.map((sData) => {
-      const settlement = new NativeSettlement(
+    const npcSettlements = data.npcSettlements.map((sData) => {
+      const settlement = new Settlement(
         sData.id,
+        sData.ownerId,
         sData.name,
-        sData.tribe,
         sData.x,
         sData.y,
         sData.population,
-        sData.attitude,
-        sData.goods
+        sData.culture || 'NATIVE',
+        sData.organization || 'TRIBE'
       );
+      settlement.attitude = sData.attitude;
+      settlement.goods = sData.goods;
       return settlement;
     });
 
@@ -190,7 +193,7 @@ export class SaveSystem {
       phase: data.phase,
       europePrices: data.europePrices,
       map,
-      nativeSettlements,
+      npcSettlements,
     };
   }
 }

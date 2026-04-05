@@ -5,9 +5,9 @@ import { WorldScene } from './scenes/WorldScene';
 import { MainMenuScene } from './scenes/MainMenuScene';
 import { HUD } from './ui/HUD';
 import { UnitPanel } from './ui/UnitPanel';
-import { ColonyPanel } from './ui/ColonyPanel';
+import { SettlementPanel } from './ui/SettlementPanel';
 import { MiniMap } from './ui/MiniMap';
-import { ColonyScreen } from './ui/ColonyScreen/ColonyScreen';
+import { SettlementScreen } from './ui/SettlementScreen/SettlementScreen';
 import { EuropeScreen } from './ui/EuropeScreen/EuropeScreen';
 import { NativeTradeModal } from './ui/NativeTradeModal/NativeTradeModal';
 import { CombatResultToast } from './ui/CombatResultToast';
@@ -21,7 +21,7 @@ import { GameSetupModal } from './ui/MainMenu/GameSetupModal';
 function App() {
   const gameRef = useRef<Phaser.Game | null>(null);
   const selectUnit = useGameStore((state) => state.selectUnit);
-  const selectColony = useGameStore((state) => state.selectColony);
+  const selectSettlement = useGameStore((state) => state.selectSettlement);
 
   useEffect(() => {
     if (gameRef.current) return;
@@ -47,8 +47,8 @@ function App() {
         worldScene.events.on('unitSelected', (unitId: string | null) => {
           selectUnit(unitId);
         });
-        worldScene.events.on('colonySelected', (colonyId: string | null) => {
-          selectColony(colonyId);
+        worldScene.events.on('settlementSelected', (settlementId: string | null) => {
+          selectSettlement(settlementId);
         });
       }
     });
@@ -59,7 +59,7 @@ function App() {
         gameRef.current = null;
       }
     };
-  }, [selectUnit, selectColony]);
+  }, [selectUnit, selectSettlement]);
 
   return (
     <div className="relative w-screen h-screen overflow-hidden">
@@ -67,9 +67,9 @@ function App() {
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <HUD />
         <UnitPanel />
-        <ColonyPanel />
+        <SettlementPanel />
         <MiniMap />
-        <ColonyScreen />
+        <SettlementScreen />
         <EuropeScreen />
         <NativeTradeModal />
         <CombatResultToast />

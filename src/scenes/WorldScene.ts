@@ -62,11 +62,11 @@ export class WorldScene extends Phaser.Scene {
     const tiles = state.map;
     const mapWidth = tiles[0].length;
     const mapHeight = tiles.length;
-    const nativeSettlements = state.nativeSettlements;
-    const colonies = state.players.flatMap(p => p.colonies);
+    const npcSettlements = state.npcSettlements;
+    const playerSettlements = state.players.flatMap(p => p.settlements);
     this.tileMap = new TileMap(mapWidth, mapHeight, tiles.map(row => row.map(t => t.terrainType)));
 
-    this.terrainRenderer.renderTileMap(tiles, nativeSettlements, colonies);
+    this.terrainRenderer.renderTileMap(tiles, npcSettlements, playerSettlements);
 
     // Disable context menu for right-click handling
     this.input.mouse?.disableContextMenu();
@@ -87,21 +87,21 @@ export class WorldScene extends Phaser.Scene {
           .flatMap((p) => p.units)
           .find((u) => u.x === x && u.y === y);
 
-        const colonyAtTile = state.players
-          .flatMap((p) => p.colonies)
+        const settlementAtTile = state.players
+          .flatMap((p) => p.settlements)
           .find((c) => c.x === x && c.y === y);
 
-        const nativeSettlementAtTile = state.nativeSettlements.find((s) => s.x === x && s.y === y);
+        const npcSettlementAtTile = state.npcSettlements.find((s) => s.x === x && s.y === y);
 
         if (unitAtTile) {
           console.log(`Selecting unit ${unitAtTile.id} at ${x}, ${y}`);
           useGameStore.getState().selectUnit(unitAtTile.id);
           this.events.emit('unitSelected', unitAtTile.id);
-        } else if (colonyAtTile) {
-          console.log(`Selecting colony ${colonyAtTile.id} at ${x}, ${y}`);
-          useGameStore.getState().selectColony(colonyAtTile.id);
-          this.events.emit('colonySelected', colonyAtTile.id);
-        } else if (nativeSettlementAtTile) {
+        } else if (settlementAtTile) {
+          console.log(`Selecting settlement ${settlementAtTile.id} at ${x}, ${y}`);
+          useGameStore.getState().selectSettlement(settlementAtTile.id);
+          this.events.emit('settlementSelected', settlementAtTile.id);
+        } else if (npcSettlementAtTile) {
           const selectedUnitId = useGameStore.getState().selectedUnitId;
           if (selectedUnitId) {
             const selectedUnit = state.players
@@ -111,22 +111,22 @@ export class WorldScene extends Phaser.Scene {
             if (selectedUnit) {
               if (
                 selectedUnit.type === UnitType.SOLDIER &&
-                nativeSettlementAtTile.attitude === Attitude.HOSTILE
+                npcSettlementAtTile.attitude === Attitude.HOSTILE
               ) {
-                useGameStore.getState().attackNativeSettlement(nativeSettlementAtTile.id, selectedUnitId);
+                useGameStore.getState().attackSettlement(npcSettlementAtTile.id, selectedUnitId);
               } else if (
                 selectedUnit.type === UnitType.COLONIST &&
-                nativeSettlementAtTile.attitude !== Attitude.HOSTILE
+                npcSettlementAtTile.attitude !== Attitude.HOSTILE
               ) {
-                useGameStore.getState().setNativeTradeModalOpen(true, nativeSettlementAtTile.id);
+                useGameStore.getState().setNativeTradeModalOpen(true, npcSettlementAtTile.id);
               }
             }
           }
         } else {
           useGameStore.getState().selectUnit(null);
-          useGameStore.getState().selectColony(null);
+          useGameStore.getState().selectSettlement(null);
           this.events.emit('unitSelected', null as any);
-          this.events.emit('colonySelected', null as any);
+          this.events.emit('settlementSelected', null as any);
         }
         this.terrainRenderer.updateSelectionHighlight(x, y);
       } else if (pointer.rightButtonDown()) {
@@ -143,14 +143,14 @@ export class WorldScene extends Phaser.Scene {
               .flatMap((p) => p.units)
               .find((u) => u.x === x && u.y === y);
 
-            const enemyColonyAtTile = state.players
+            const enemySettlementAtTile = state.players
               .filter((p) => p.id !== state.currentPlayerId)
-              .flatMap((p) => p.colonies)
+              .flatMap((p) => p.settlements)
               .find((c) => c.x === x && c.y === y);
 
-            const settlementAtTile = state.nativeSettlements.find((s) => s.x === x && s.y === y);
+            const npcSettlementAtTile = state.npcSettlements.find((s) => s.x === x && s.y === y);
 
-            if (selectedUnit.type === UnitType.SOLDIER && (enemyUnitAtTile || enemyColonyAtTile || (settlementAtTile && settlementAtTile.attitude === Attitude.HOSTILE))) {
+            if (selectedUnit.type === UnitType.SOLDIER && (enemyUnitAtTile || enemySettlementAtTile || (npcSettlementAtTile && npcSettlementAtTile.attitude === Attitude.HOSTILE))) {
               useGameStore.getState().resolveCombat(selectedUnit.id, x, y);
             } else if (state.selectedUnitId) {
               // Movement logic
@@ -174,16 +174,16 @@ export class WorldScene extends Phaser.Scene {
       if (!this.scene?.scene) return;
       if (!this.scene.isActive('WorldScene')) return;
 
-      // Only re-render the map if it, native settlements, or colonies have changed
-      const colonies = state.players.flatMap(p => p.colonies);
-      const prevColonies = prevState.players.flatMap(p => p.colonies);
+      // Only re-render the map if it, npc settlements, or player settlements have changed
+      const playerSettlements = state.players.flatMap(p => p.settlements);
+      const prevPlayerSettlements = prevState.players.flatMap(p => p.settlements);
       if (
         state.map !== prevState.map ||
-        state.nativeSettlements !== prevState.nativeSettlements ||
-        colonies.length !== prevColonies.length ||
-        !colonies.every((c, i) => c === prevColonies[i])
+        state.npcSettlements !== prevState.npcSettlements ||
+        playerSettlements.length !== prevPlayerSettlements.length ||
+        !playerSettlements.every((c, i) => c === prevPlayerSettlements[i])
       ) {
-        this.terrainRenderer.renderTileMap(state.map, state.nativeSettlements, colonies);
+        this.terrainRenderer.renderTileMap(state.map, state.npcSettlements, playerSettlements);
       }
 
       this.renderUnits();
@@ -213,7 +213,7 @@ export class WorldScene extends Phaser.Scene {
       const { x, y } = this.terrainRenderer.worldToTile(worldPoint.x, worldPoint.y);
 
       if (x >= 0 && x < mapWidth && y >= 0 && y < mapHeight) {
-        const settlement = useGameStore.getState().nativeSettlements.find((s) => s.x === x && s.y === y);
+        const settlement = useGameStore.getState().npcSettlements.find((s) => s.x === x && s.y === y);
         this.terrainRenderer.showTooltip(x, y, worldPoint.x, worldPoint.y, settlement?.name);
       } else {
         this.terrainRenderer.hideTooltip();

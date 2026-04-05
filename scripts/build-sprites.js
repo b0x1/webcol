@@ -7,7 +7,7 @@ const TILE_SIZE = 64;
 const SPRITE_CACHE_FILE = '.sprite-cache';
 const INPUT_ROOT_DIR = path.join('src', 'assets', 'sprites');
 const OUTPUT_DIR = 'public';
-const CATEGORIES = ['resources', 'terrain', 'units', 'other']
+const CATEGORIES = ['resources', 'terrain', 'units', 'other', 'flags']
 
 async function get_config(type) {
   return {

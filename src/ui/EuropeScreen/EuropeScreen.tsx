@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useGameStore } from '../../game/state/gameStore';
 import { MarketPanel } from './MarketPanel';
 import { RecruitPanel } from './RecruitPanel';
@@ -9,6 +9,17 @@ export const EuropeScreen: React.FC = () => {
     useGameStore();
   const player = players.find((p) => p.id === currentPlayerId);
   const selectedUnit = player?.units.find((u) => u.id === selectedUnitId);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isEuropeScreenOpen && e.key === 'Escape') {
+        e.preventDefault();
+        setEuropeScreenOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isEuropeScreenOpen, setEuropeScreenOpen]);
 
   if (!isEuropeScreenOpen) return null;
 
@@ -23,7 +34,7 @@ export const EuropeScreen: React.FC = () => {
             onClick={() => setEuropeScreenOpen(false)}
             className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded transition-all transform active:scale-95 cursor-pointer shadow-lg"
           >
-            Return to Colony
+            Return to Settlement (Esc)
           </button>
         </div>
 

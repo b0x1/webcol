@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { TurnEngine } from '../TurnEngine';
 import { Player } from '../../entities/Player';
 import { Tile } from '../../entities/Tile';
-import { Colony } from '../../entities/Colony';
+import { Settlement } from '../../entities/Settlement';
 import { Unit } from '../../entities/Unit';
 import { TerrainType, GoodType, UnitType, JobType, Nation } from '../../entities/types';
 
@@ -22,19 +22,19 @@ describe('TurnEngine', () => {
   describe('runProduction', () => {
     it('should calculate food based on workforce and population consumption', () => {
       const player = new Player('p1', 'Player 1', true, 0, Nation.FRANCE);
-      const colony = new Colony('c1', 'p1', 'Colony 1', 2, 2, 1);
+      const settlement = new Settlement('c1', 'p1', 'Settlement 1', 2, 2, 1, 'EUROPEAN', 'STATE');
       const unit = new Unit('u1', 'p1', UnitType.COLONIST, 2, 2, 1);
-      colony.units.push(unit);
-      colony.workforce.set(unit.id, JobType.FARMER);
-      player.colonies.push(colony);
+      settlement.units.push(unit);
+      settlement.workforce.set(unit.id, JobType.FARMER);
+      player.settlements.push(settlement);
 
       const updatedPlayers = TurnEngine.runProduction([player]);
-      const updatedColony = updatedPlayers[0].colonies[0];
+      const updatedSettlement = updatedPlayers[0].settlements[0];
 
       // Farmer produces 3 FOOD.
       // Pop 1 consumes 2 FOOD.
       // Net = 1 FOOD.
-      expect(updatedColony.inventory.get(GoodType.FOOD)).toBe(1);
+      expect(updatedSettlement.inventory.get(GoodType.FOOD)).toBe(1);
     });
   });
 
@@ -60,7 +60,7 @@ describe('TurnEngine', () => {
       expect(updatedUnit.movesRemaining).toBe(0);
     });
 
-    it('should found a colony if AI COLONIST is on PLAINS and no adjacent friendly colony', () => {
+    it('should found a settlement if AI COLONIST is on PLAINS and no adjacent friendly settlement', () => {
       const map = createMap(10, 10);
       map[2][2].terrainType = TerrainType.PLAINS;
 
@@ -71,26 +71,26 @@ describe('TurnEngine', () => {
       const updatedPlayers = TurnEngine.runAITurn([ai], map);
       const updatedAI = updatedPlayers[0];
 
-      expect(updatedAI.colonies.length).toBe(1);
+      expect(updatedAI.settlements.length).toBe(1);
       expect(updatedAI.units.length).toBe(0);
-      expect(updatedAI.colonies[0].x).toBe(2);
-      expect(updatedAI.colonies[0].y).toBe(2);
+      expect(updatedAI.settlements[0].x).toBe(2);
+      expect(updatedAI.settlements[0].y).toBe(2);
     });
 
-    it('should not found a colony if there is an adjacent friendly colony', () => {
+    it('should not found a settlement if there is an adjacent friendly settlement', () => {
         const map = createMap(10, 10);
         map[2][2].terrainType = TerrainType.PLAINS;
 
         const ai = new Player('p1', 'AI', false, 0, Nation.NETHERLANDS);
-        const colony = new Colony('c1', 'p1', 'Col1', 3, 3, 1);
-        ai.colonies.push(colony);
+        const settlement = new Settlement('c1', 'p1', 'Col1', 3, 3, 1, 'EUROPEAN', 'STATE');
+        ai.settlements.push(settlement);
         const unit = new Unit('u1', 'p1', UnitType.COLONIST, 2, 2, 1);
         ai.units.push(unit);
 
         const updatedPlayers = TurnEngine.runAITurn([ai], map);
         const updatedAI = updatedPlayers[0];
 
-        expect(updatedAI.colonies.length).toBe(1); // Only the existing one
+        expect(updatedAI.settlements.length).toBe(1); // Only the existing one
         expect(updatedAI.units.length).toBe(1);
         expect(updatedAI.units[0].x).toBe(2);
         expect(updatedAI.units[0].y).toBe(2);

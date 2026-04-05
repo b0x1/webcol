@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useGameStore } from '../game/state/gameStore';
 import { UnitType } from '../game/entities/types';
 
@@ -10,13 +10,49 @@ export const HUD: React.FC = () => {
     setEuropeScreenOpen,
     setSaveModalOpen,
     setReportsModalOpen,
-    isMainMenuOpen
+    isMainMenuOpen,
+    isSettlementScreenOpen,
+    isEuropeScreenOpen,
+    isReportsModalOpen,
+    isSaveModalOpen,
+    isNativeTradeModalOpen,
+    isHowToPlayModalOpen,
+    isGameSetupModalOpen,
   } = useGameStore();
 
-  if (isMainMenuOpen) return null;
+  const isAnyModalOpen =
+    isSettlementScreenOpen ||
+    isEuropeScreenOpen ||
+    isReportsModalOpen ||
+    isSaveModalOpen ||
+    isNativeTradeModalOpen ||
+    isHowToPlayModalOpen ||
+    isGameSetupModalOpen;
 
   const currentPlayer = players.find((p) => p.id === currentPlayerId);
   const hasShip = currentPlayer?.units.some((u) => u.type === UnitType.SHIP);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isMainMenuOpen || isAnyModalOpen) return;
+
+      if (e.key.toLowerCase() === 'l') {
+        e.preventDefault();
+        setSaveModalOpen(true);
+      } else if (e.key.toLowerCase() === 'e' && hasShip) {
+        e.preventDefault();
+        setEuropeScreenOpen(true);
+      } else if (e.key.toLowerCase() === 'r') {
+        e.preventDefault();
+        setReportsModalOpen(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isMainMenuOpen, isAnyModalOpen, hasShip, setSaveModalOpen, setEuropeScreenOpen, setReportsModalOpen]);
+
+  if (isMainMenuOpen) return null;
 
   return (
     <div className="absolute top-0 left-0 right-0 h-10 bg-black/70 text-white flex items-center justify-between px-5 pointer-events-auto z-[1000] font-sans text-sm">
@@ -25,7 +61,7 @@ export const HUD: React.FC = () => {
           className="hover:text-blue-400 transition-colors cursor-pointer font-bold uppercase tracking-tight"
           onClick={() => setSaveModalOpen(true)}
         >
-          Load / Save Game
+          <span className="text-yellow-400 font-black">L</span>OAD / SAVE GAME
         </button>
       </div>
 
@@ -35,7 +71,7 @@ export const HUD: React.FC = () => {
           onClick={() => setEuropeScreenOpen(true)}
           disabled={!hasShip}
         >
-          Sail to Europe
+          SAIL TO <span className="text-yellow-400 font-black">E</span>UROPE
         </button>
         <div className="text-slate-300">Turn: <span className="text-white">{turn}</span></div>
       </div>
@@ -45,7 +81,7 @@ export const HUD: React.FC = () => {
           className="hover:text-blue-400 transition-colors cursor-pointer font-bold uppercase tracking-tight"
           onClick={() => setReportsModalOpen(true)}
         >
-          Reports
+          <span className="text-yellow-400 font-black">R</span>EPORTS
         </button>
         <div className="min-w-[100px] font-mono font-bold bg-slate-900/50 px-3 py-1 rounded border border-white/10">
           GOLD: <span className="text-yellow-400">{currentPlayer?.gold ?? 0}</span>

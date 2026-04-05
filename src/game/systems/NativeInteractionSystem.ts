@@ -1,14 +1,14 @@
-import { NativeSettlement } from '../entities/NativeSettlement';
+import { Settlement } from '../entities/Settlement';
 import { Unit } from '../entities/Unit';
 import { GoodType, Attitude, UnitType } from '../entities/types';
 
 export class NativeInteractionSystem {
   static trade(
-    settlement: NativeSettlement,
+    settlement: Settlement,
     unit: Unit,
     goodOffered: GoodType
   ): {
-    updatedSettlement: NativeSettlement;
+    updatedSettlement: Settlement;
     updatedUnit: Unit;
     goodReceived: GoodType;
   } {
@@ -39,16 +39,18 @@ export class NativeInteractionSystem {
       Math.max(0, (updatedSettlementGoods.get(goodReceived) || 0) - amountReceived)
     );
 
-    const updatedSettlement = new NativeSettlement(
+    const updatedSettlement = new Settlement(
       settlement.id,
+      settlement.ownerId,
       settlement.name,
-      settlement.tribe,
       settlement.x,
       settlement.y,
       settlement.population,
-      this.shiftAttitude(settlement.attitude),
-      updatedSettlementGoods
+      settlement.culture,
+      settlement.organization
     );
+    updatedSettlement.attitude = this.shiftAttitude(settlement.attitude);
+    updatedSettlement.goods = updatedSettlementGoods;
 
     const updatedUnit = new Unit(
       unit.id,
@@ -65,10 +67,10 @@ export class NativeInteractionSystem {
   }
 
   static learn(
-    settlement: NativeSettlement,
+    settlement: Settlement,
     unit: Unit
   ): {
-    updatedSettlement: NativeSettlement;
+    updatedSettlement: Settlement;
     updatedUnit: Unit;
   } {
     if (settlement.attitude !== Attitude.FRIENDLY) {
@@ -90,16 +92,18 @@ export class NativeInteractionSystem {
     updatedUnit.cargo = new Map(unit.cargo);
     updatedUnit.maxMoves = unit.maxMoves;
 
-    const updatedSettlement = new NativeSettlement(
+    const updatedSettlement = new Settlement(
       settlement.id,
+      settlement.ownerId,
       settlement.name,
-      settlement.tribe,
       settlement.x,
       settlement.y,
       settlement.population,
-      Attitude.NEUTRAL,
-      new Map(settlement.goods)
+      settlement.culture,
+      settlement.organization
     );
+    updatedSettlement.attitude = Attitude.NEUTRAL;
+    updatedSettlement.goods = new Map(settlement.goods);
 
     return { updatedSettlement, updatedUnit };
   }

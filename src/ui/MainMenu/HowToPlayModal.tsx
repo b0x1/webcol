@@ -26,7 +26,7 @@ export const HowToPlayModal: React.FC = () => {
               <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
               Objective
             </h3>
-            <p className="text-slate-400 leading-relaxed font-medium">Explore the New World, establish thriving colonies, trade goods, and manage relations with native tribes.</p>
+            <p className="text-slate-400 leading-relaxed font-medium">Explore the New World, establish thriving settlements, trade goods, and manage relations with native tribes.</p>
           </section>
 
           <section>
@@ -42,7 +42,7 @@ export const HowToPlayModal: React.FC = () => {
               <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
               Colonies
             </h3>
-            <p className="text-slate-400 leading-relaxed font-medium">Found a colony by selecting a Colonist and clicking the <span className="text-white font-bold px-1.5 py-0.5 bg-green-900/50 rounded border border-green-700 text-xs">Found Colony</span> button in the Unit Panel. Within colonies, you can assign jobs, build structures, and manage inventory.</p>
+            <p className="text-slate-400 leading-relaxed font-medium">Found a settlement by selecting a Colonist and clicking the <span className="text-white font-bold px-1.5 py-0.5 bg-green-900/50 rounded border border-green-700 text-xs">Found Settlement</span> button in the Unit Panel. Within settlements, you can assign jobs, build structures, and manage inventory.</p>
           </section>
 
           <section>

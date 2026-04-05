@@ -1,7 +1,6 @@
 import { Unit } from '../entities/Unit';
-import { NativeSettlement } from '../entities/NativeSettlement';
+import { Settlement } from '../entities/Settlement';
 import { Tile } from '../entities/Tile';
-import { Colony } from '../entities/Colony';
 import { UnitType, TerrainType, BuildingType, Attitude, GoodType } from '../entities/types';
 import { COMBAT_CONSTANTS } from '../constants';
 
@@ -15,9 +14,9 @@ export interface CombatResult {
 export class CombatSystem {
   static resolveCombat(
     attacker: Unit,
-    defender: Unit | NativeSettlement | Colony,
+    defender: Unit | Settlement,
     defenderTile: Tile,
-    defenderColony?: Colony
+    defenderSettlement?: Settlement
   ): CombatResult {
     const attackerBaseStrength = COMBAT_CONSTANTS.UNIT_STRENGTHS[attacker.type as keyof typeof COMBAT_CONSTANTS.UNIT_STRENGTHS] || 1;
     let attackerModifier = 1.0;
@@ -34,13 +33,15 @@ export class CombatSystem {
 
     if (defender instanceof Unit) {
       defenderBaseStrength = COMBAT_CONSTANTS.UNIT_STRENGTHS[defender.type as keyof typeof COMBAT_CONSTANTS.UNIT_STRENGTHS] || 1;
-    } else if (defender instanceof NativeSettlement) {
-      defenderBaseStrength = COMBAT_CONSTANTS.BASE_NATIVE_STRENGTH;
-      if (defender.attitude === Attitude.HOSTILE) {
-        defenderModifier *= 1.2;
+    } else if (defender instanceof Settlement) {
+      if (defender.ownerId.startsWith('npc-')) {
+        defenderBaseStrength = COMBAT_CONSTANTS.BASE_NATIVE_STRENGTH;
+        if (defender.attitude === Attitude.HOSTILE) {
+          defenderModifier *= 1.2;
+        }
+      } else {
+        defenderBaseStrength = COMBAT_CONSTANTS.BASE_COLONY_STRENGTH;
       }
-    } else if (defender instanceof Colony) {
-      defenderBaseStrength = COMBAT_CONSTANTS.BASE_COLONY_STRENGTH;
     }
 
     // Defender on HILLS: ×1.5
@@ -52,8 +53,8 @@ export class CombatSystem {
       defenderModifier *= 2.0;
     }
 
-    // Defender in Colony with Stockade: ×1.5
-    if (defenderColony && defenderColony.buildings.includes(BuildingType.STOCKADE)) {
+    // Defender in Settlement with Stockade: ×1.5
+    if (defenderSettlement && defenderSettlement.buildings.includes(BuildingType.STOCKADE)) {
       defenderModifier *= 1.5;
     }
 
@@ -72,7 +73,7 @@ export class CombatSystem {
     };
 
     const attackerName = attacker.type;
-    const defenderName = (defender instanceof Unit) ? defender.type : (defender instanceof NativeSettlement ? 'Settlement' : 'Colony');
+    const defenderName = (defender instanceof Unit) ? defender.type : 'Settlement';
 
     if (attackerWins) {
       result.message = `Your ${attackerName} defeated the enemy ${defenderName}!`;

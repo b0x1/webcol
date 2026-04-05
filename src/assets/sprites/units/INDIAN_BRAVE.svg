@@ -1,0 +1,23 @@
+<svg viewBox="0 0 64 64" width="64" height="64" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" image-rendering="pixelated">
+  <!-- Skin -->
+  <rect x="28" y="8" width="8" height="8" fill="#D2B48C"/>
+  <!-- Feather headband -->
+  <rect x="26" y="6" width="12" height="4" fill="#654321" />
+  <rect x="36" y="2" width="2" height="8" fill="#C32228" />
+  <!-- Loincloth/Tunic -->
+  <rect x="24" y="16" width="16" height="24" fill="#CD853F"/>
+  <!-- Arm paint/decoration -->
+  <rect x="20" y="16" width="4" height="20" fill="#D2B48C"/>
+  <rect x="40" y="16" width="4" height="20" fill="#D2B48C"/>
+  <rect x="20" y="25" width="4" height="2" fill="#C32228" />
+  <rect x="40" y="25" width="4" height="2" fill="#C32228" />
+  <!-- Legs -->
+  <rect x="24" y="40" width="8" height="16" fill="#D2B48C"/>
+  <rect x="32" y="40" width="8" height="16" fill="#D2B48C"/>
+  <!-- Moccasins -->
+  <rect x="24" y="56" width="8" height="4" fill="#8B4513"/>
+  <rect x="32" y="56" width="8" height="4" fill="#8B4513"/>
+  <!-- Bow -->
+  <path d="M48 10 Q60 32 48 54" stroke="#654321" stroke-width="2" fill="none" />
+  <line x1="48" y1="10" x2="48" y2="54" stroke="#E0E0E0" stroke-width="1" />
+</svg>

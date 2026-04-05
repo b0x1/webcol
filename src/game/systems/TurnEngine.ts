@@ -1,6 +1,6 @@
 import { Player } from '../entities/Player';
 import { Tile } from '../entities/Tile';
-import { Colony } from '../entities/Colony';
+import { Settlement } from '../entities/Settlement';
 import { Unit } from '../entities/Unit';
 import { TerrainType, GoodType, ResourceType, UnitType, JobType, BuildingType } from '../entities/types';
 import { eventBus } from '../state/EventBus';
@@ -23,24 +23,26 @@ export class TurnEngine {
         nu.maxMoves = u.maxMoves;
         return nu;
       });
-      // Deep clone colonies and process production
-      newPlayer.colonies = player.colonies.map((colony) => {
-        const newColony = new Colony(
-          colony.id,
-          colony.ownerId,
-          colony.name,
-          colony.x,
-          colony.y,
-          colony.population,
+      // Deep clone settlements and process production
+      newPlayer.settlements = player.settlements.map((settlement) => {
+        const newSettlement = new Settlement(
+          settlement.id,
+          settlement.ownerId,
+          settlement.name,
+          settlement.x,
+          settlement.y,
+          settlement.population,
+          settlement.culture,
+          settlement.organization
         );
-        newColony.buildings = [...colony.buildings];
-        newColony.productionQueue = [...colony.productionQueue];
-        newColony.inventory = new Map(colony.inventory);
-        newColony.workforce = new Map(colony.workforce);
-        newColony.units = [...colony.units];
+        newSettlement.buildings = [...settlement.buildings];
+        newSettlement.productionQueue = [...settlement.productionQueue];
+        newSettlement.inventory = new Map(settlement.inventory);
+        newSettlement.workforce = new Map(settlement.workforce);
+        newSettlement.units = [...settlement.units];
 
         // 1. Process Workforce Production
-        newColony.workforce.forEach((job) => {
+        newSettlement.workforce.forEach((job) => {
           let good: GoodType | null = null;
           let amount = 3;
 
@@ -63,58 +65,41 @@ export class TurnEngine {
           }
 
           if (good) {
-            newColony.inventory.set(good, (newColony.inventory.get(good) || 0) + amount);
+            newSettlement.inventory.set(good, (newSettlement.inventory.get(good) || 0) + amount);
           }
         });
 
         // 2. Add Building Bonuses
-        if (newColony.buildings.includes(BuildingType.LUMBER_MILL)) {
-          newColony.inventory.set(
+        if (newSettlement.buildings.includes(BuildingType.LUMBER_MILL)) {
+          newSettlement.inventory.set(
             GoodType.LUMBER,
-            (newColony.inventory.get(GoodType.LUMBER) || 0) + 2,
+            (newSettlement.inventory.get(GoodType.LUMBER) || 0) + 2,
           );
         }
-        if (newColony.buildings.includes(BuildingType.IRON_WORKS)) {
-          newColony.inventory.set(GoodType.ORE, (newColony.inventory.get(GoodType.ORE) || 0) + 2);
+        if (newSettlement.buildings.includes(BuildingType.IRON_WORKS)) {
+          newSettlement.inventory.set(GoodType.ORE, (newSettlement.inventory.get(GoodType.ORE) || 0) + 2);
         }
 
         // 3. Population Growth & Food Consumption
-        if (newColony.buildings.includes(BuildingType.PRINTING_PRESS)) {
+        if (newSettlement.buildings.includes(BuildingType.PRINTING_PRESS)) {
           // The issue says +1 population growth/turn
           // For simplicity, we just add it to population
-          newColony.population += 1;
+          newSettlement.population += 1;
         }
 
-        const foodNeeded = newColony.population * 2;
-        const currentFood = newColony.inventory.get(GoodType.FOOD) || 0;
-        newColony.inventory.set(GoodType.FOOD, Math.max(0, currentFood - foodNeeded));
+        const foodNeeded = newSettlement.population * 2;
+        const currentFood = newSettlement.inventory.get(GoodType.FOOD) || 0;
+        newSettlement.inventory.set(GoodType.FOOD, Math.max(0, currentFood - foodNeeded));
 
         // 4. Inventory Cap
-        const cap = newColony.buildings.includes(BuildingType.WAREHOUSE) ? 400 : 200;
-        newColony.inventory.forEach((amount, good) => {
+        const cap = newSettlement.buildings.includes(BuildingType.WAREHOUSE) ? 400 : 200;
+        newSettlement.inventory.forEach((amount, good) => {
           if (amount > cap) {
-            newColony.inventory.set(good, cap);
+            newSettlement.inventory.set(good, cap);
           }
         });
 
-        // (Keeping the original tile production logic if any - but wait, the instructions imply job-based now)
-        // Original code had this:
-        /*
-        for (let dy = -1; dy <= 1; dy++) {
-          for (let dx = -1; dx <= 1; dx++) {
-            const tx = colony.x + dx;
-            const ty = colony.y + dy;
-            if (ty >= 0 && ty < map.length && tx >= 0 && tx < map[ty].length) {
-              const tile = map[ty][tx];
-              this.addTileProduction(newColony, tile);
-            }
-          }
-        }
-        */
-        // Based on the prompt "WorkforcePanel: list of colonist units assigned to this colony. Each colonist has a dropdown to assign their job",
-        // it seems I should replace the tile-based production with job-based production.
-
-        return newColony;
+        return newSettlement;
       });
       return newPlayer;
     });
@@ -135,8 +120,8 @@ export class TurnEngine {
         nu.maxMoves = u.maxMoves;
         return nu;
       });
-      np.colonies = p.colonies.map((c) => {
-        const nc = new Colony(c.id, c.ownerId, c.name, c.x, c.y, c.population);
+      np.settlements = p.settlements.map((c) => {
+        const nc = new Settlement(c.id, c.ownerId, c.name, c.x, c.y, c.population, c.culture, c.organization);
         nc.buildings = [...c.buildings];
         nc.productionQueue = [...c.productionQueue];
         nc.inventory = new Map(c.inventory);
@@ -159,27 +144,29 @@ export class TurnEngine {
 
         let unitRemoved = false;
 
-        // Check if colonist can found a colony
+        // Check if colonist can found a settlement
         if (unit.type === UnitType.COLONIST) {
           const currentTile = map[unit.y][unit.x];
           if (currentTile.terrainType === TerrainType.PLAINS) {
-            const hasAdjacentFriendlyColony = player.colonies.some(
+            const hasAdjacentFriendlySettlement = player.settlements.some(
               (c) => Math.abs(c.x - unit.x) <= 1 && Math.abs(c.y - unit.y) <= 1,
             );
-            if (!hasAdjacentFriendlyColony) {
-              // Found colony
-              const newColony = new Colony(
-                `colony-ai-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+            if (!hasAdjacentFriendlySettlement) {
+              // Found settlement
+              const newSettlement = new Settlement(
+                `settlement-ai-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
                 player.id,
-                `${player.name}'s Colony`,
+                `${player.name}'s Settlement`,
                 unit.x,
                 unit.y,
                 1,
+                'EUROPEAN',
+                'STATE'
               );
-              player.colonies.push(newColony);
+              player.settlements.push(newSettlement);
               // Remove unit from player
               player.units.splice(unitIndex, 1);
-              eventBus.emit('colonyFounded', newColony);
+              eventBus.emit('settlementFounded', newSettlement);
               unitRemoved = true;
             }
           }
@@ -187,8 +174,8 @@ export class TurnEngine {
 
         if (!unitRemoved) {
           // Move toward nearest uncolonized PLAINS or FOREST
-          const allColonies = updatedPlayers.flatMap((p) => p.colonies);
-          const target = this.findNearestTarget(unit, map, allColonies);
+          const allSettlements = updatedPlayers.flatMap((p) => p.settlements);
+          const target = this.findNearestTarget(unit, map, allSettlements);
           if (target) {
             const dx = Math.sign(target.x - unit.x);
             const dy = Math.sign(target.y - unit.y);
@@ -218,7 +205,7 @@ export class TurnEngine {
   private static findNearestTarget(
     unit: Unit,
     map: Tile[][],
-    allColonies: Colony[],
+    allSettlements: Settlement[],
   ): { x: number; y: number } | null {
     let nearest: { x: number; y: number } | null = null;
     let minDistance = Infinity;
@@ -230,7 +217,7 @@ export class TurnEngine {
           tile.terrainType === TerrainType.PLAINS || tile.hasResource === ResourceType.FOREST;
         if (!isTargetType) continue;
 
-        const isColonized = allColonies.some((c) => c.x === x && c.y === y);
+        const isColonized = allSettlements.some((c) => c.x === x && c.y === y);
         if (isColonized) continue;
 
         // Chebyshev distance for grid movement including diagonals

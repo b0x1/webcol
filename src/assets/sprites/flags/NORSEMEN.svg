@@ -1,0 +1,5 @@
+<svg viewBox="0 0 64 64" width="64" height="64" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" image-rendering="pixelated">
+  <rect width="64" height="64" fill="#C32228" />
+  <!-- Raven outline -->
+  <path d="M12 40 L32 15 L52 40 L32 30 Z" fill="black" />
+</svg>

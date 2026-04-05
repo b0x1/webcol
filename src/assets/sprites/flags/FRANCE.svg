@@ -1,0 +1,6 @@
+<svg viewBox="0 0 64 64" width="64" height="64" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" image-rendering="pixelated">
+  <rect width="64" height="64" fill="white" />
+  <!-- Simple Fleur-de-lis representation -->
+  <rect x="30" y="20" width="4" height="24" fill="#E8B923" />
+  <rect x="24" y="32" width="16" height="4" fill="#E8B923" />
+</svg>
