@@ -1,11 +1,13 @@
 import React from 'react';
-import { useGameStore } from '../../game/state/gameStore';
+import { useUIStore } from '../../game/state/uiStore';
 
 export const MainMenu: React.FC = () => {
-  const isMainMenuOpen = useGameStore((state) => state.isMainMenuOpen);
-  const setGameSetupModalOpen = useGameStore((state) => state.setGameSetupModalOpen);
-  const setHowToPlayModalOpen = useGameStore((state) => state.setHowToPlayModalOpen);
-  const setSaveModalOpen = useGameStore((state) => state.setSaveModalOpen);
+  const {
+    isMainMenuOpen,
+    setGameSetupModalOpen,
+    setHowToPlayModalOpen,
+    setSaveModalOpen
+  } = useUIStore();
 
   if (!isMainMenuOpen) return null;
 

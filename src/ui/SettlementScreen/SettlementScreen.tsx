@@ -1,12 +1,14 @@
 import React, { useEffect } from 'react';
 import { useGameStore } from '../../game/state/gameStore';
+import { useUIStore } from '../../game/state/uiStore';
 import { BuildingSlots } from './BuildingSlots';
 import { WorkforcePanel } from './WorkforcePanel';
 import { InventoryPanel } from './InventoryPanel';
 import { Flag } from '../Flag';
 
 export const SettlementScreen: React.FC = () => {
-  const { isSettlementScreenOpen, selectedSettlementId, players, setSettlementScreenOpen, currentPlayerId } = useGameStore();
+  const { selectedSettlementId, players, currentPlayerId } = useGameStore();
+  const { isSettlementScreenOpen, setSettlementScreenOpen } = useUIStore();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../game/state/gameStore';
+import { useUIStore } from '../game/state/uiStore';
 import { SaveSystem } from '../game/systems/SaveSystem';
 import type { SaveMeta } from '../game/systems/SaveSystem';
 import { eventBus } from '../game/state/EventBus';
 
 export const SaveLoadModal: React.FC = () => {
-  const isSaveModalOpen = useGameStore((state) => state.isSaveModalOpen);
-  const isMainMenuOpen = useGameStore((state) => state.isMainMenuOpen);
-  const setSaveModalOpen = useGameStore((state) => state.setSaveModalOpen);
+  const { isSaveModalOpen, isMainMenuOpen, setSaveModalOpen } = useUIStore();
   const loadGameState = useGameStore((state) => state.loadGameState);
   const gameState = useGameStore((state) => state);
   const resetGame = useGameStore((state) => state.resetGame);

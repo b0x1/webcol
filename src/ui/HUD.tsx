@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useGameStore } from '../game/state/gameStore';
+import { useUIStore } from '../game/state/uiStore';
 import { UnitType } from '../game/entities/types';
 
 export const HUD: React.FC = () => {
@@ -7,6 +8,9 @@ export const HUD: React.FC = () => {
     players,
     currentPlayerId,
     turn,
+  } = useGameStore();
+
+  const {
     setEuropeScreenOpen,
     setSaveModalOpen,
     setReportsModalOpen,
@@ -20,7 +24,7 @@ export const HUD: React.FC = () => {
     isGameSetupModalOpen,
     isDebugMode,
     toggleDebugMode,
-  } = useGameStore();
+  } = useUIStore();
 
   const isAnyModalOpen =
     isSettlementScreenOpen ||

@@ -1,8 +1,8 @@
-import { Unit } from '../entities/Unit';
-import { Settlement } from '../entities/Settlement';
-import { Tile } from '../entities/Tile';
-import { UnitType, TerrainType, BuildingType, Attitude, GoodType } from '../entities/types';
+import { GoodType, UnitType, TerrainType, Attitude } from '../entities/types';
 import { COMBAT_CONSTANTS } from '../constants';
+import type { Unit } from '../entities/Unit';
+import type { Settlement } from '../entities/Settlement';
+import type { Tile } from '../entities/Tile';
 
 export interface CombatResult {
   winner: 'attacker' | 'defender';
@@ -21,7 +21,6 @@ export class CombatSystem {
     const attackerBaseStrength = COMBAT_CONSTANTS.UNIT_STRENGTHS[attacker.type as keyof typeof COMBAT_CONSTANTS.UNIT_STRENGTHS] || 1;
     let attackerModifier = 1.0;
 
-    // Attacker is SOLDIER with muskets in cargo (≥10): ×1.3
     if (attacker.type === UnitType.SOLDIER && (attacker.cargo.get(GoodType.MUSKETS) || 0) >= 10) {
       attackerModifier *= 1.3;
     }
@@ -31,9 +30,12 @@ export class CombatSystem {
     let defenderBaseStrength = 1.0;
     let defenderModifier = 1.0;
 
-    if (defender instanceof Unit) {
+    const isUnit = 'maxMoves' in defender;
+    const isSettlement = 'buildings' in defender;
+
+    if (isUnit) {
       defenderBaseStrength = COMBAT_CONSTANTS.UNIT_STRENGTHS[defender.type as keyof typeof COMBAT_CONSTANTS.UNIT_STRENGTHS] || 1;
-    } else if (defender instanceof Settlement) {
+    } else if (isSettlement) {
       if (defender.ownerId.startsWith('npc-')) {
         defenderBaseStrength = COMBAT_CONSTANTS.BASE_NATIVE_STRENGTH;
         if (defender.attitude === Attitude.HOSTILE) {
@@ -44,17 +46,14 @@ export class CombatSystem {
       }
     }
 
-    // Defender on HILLS: ×1.5
     if (defenderTile.terrainType === TerrainType.HILLS) {
       defenderModifier *= 1.5;
     }
-    // Defender on MOUNTAINS: ×2.0
     if (defenderTile.terrainType === TerrainType.MOUNTAINS) {
       defenderModifier *= 2.0;
     }
 
-    // Defender in Settlement with Stockade: ×1.5
-    if (defenderSettlement && defenderSettlement.buildings.includes(BuildingType.STOCKADE)) {
+    if (defenderSettlement && defenderSettlement.buildings.includes('STOCKADE')) {
       defenderModifier *= 1.5;
     }
 
@@ -73,7 +72,7 @@ export class CombatSystem {
     };
 
     const attackerName = attacker.type;
-    const defenderName = (defender instanceof Unit) ? defender.type : 'Settlement';
+    const defenderName = isUnit ? defender.type : 'Settlement';
 
     if (attackerWins) {
       result.message = `Your ${attackerName} defeated the enemy ${defenderName}!`;

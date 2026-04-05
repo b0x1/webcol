@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { SaveSystem } from '../SaveSystem';
-import { Player } from '../../entities/Player';
-import { Unit } from '../../entities/Unit';
-import { Settlement } from '../../entities/Settlement';
-import { Tile } from '../../entities/Tile';
+import { createPlayer } from '../../entities/Player';
+import { createUnit } from '../../entities/Unit';
+import { createSettlement } from '../../entities/Settlement';
+import { createTile } from '../../entities/Tile';
 import { GoodType, UnitType, TerrainType, Nation, Attitude, JobType, TurnPhase } from '../../entities/types';
 
 // Mock localStorage
@@ -25,22 +25,22 @@ describe('SaveSystem Serialization Round-trip', () => {
 
   it('should deeply preserve state after save and load', () => {
     // 1. Create a complex mock GameState
-    const player1 = new Player('p1', 'Player 1', true, 1000, Nation.NORSEMEN);
-    const unit1 = new Unit('u1', 'p1', UnitType.COLONIST, 10, 10, 3);
+    const player1 = createPlayer('p1', 'Player 1', true, 1000, Nation.NORSEMEN);
+    const unit1 = createUnit('u1', 'p1', UnitType.COLONIST, 10, 10, 3);
     unit1.cargo.set(GoodType.FOOD, 50);
     player1.units.push(unit1);
 
-    const settlement1 = new Settlement('c1', 'p1', 'Settlement 1', 10, 10, 2, 'EUROPEAN', 'STATE');
+    const settlement1 = createSettlement('c1', 'p1', 'Settlement 1', 10, 10, 2, 'EUROPEAN', 'STATE');
     settlement1.buildings.push('WAREHOUSE' as any);
     settlement1.inventory.set(GoodType.LUMBER, 100);
     settlement1.workforce.set('u1', JobType.FARMER);
     player1.settlements.push(settlement1);
 
-    const tile = new Tile('10-10', 10, 10, TerrainType.PLAINS, 1);
+    const tile = createTile('10-10', 10, 10, TerrainType.PLAINS, 1);
 
-    const settlement = new Settlement('s1', 'npc-IROQUOIS', 'Settlement 1', 15, 15, 5, 'NATIVE', 'TRIBE');
-    settlement.goods.set(GoodType.TRADE_GOODS, 20);
-    settlement.attitude = Attitude.NEUTRAL;
+    const npcSettlement = createSettlement('s1', 'npc-IROQUOIS', 'Settlement 1', 15, 15, 5, 'NATIVE', 'TRIBE');
+    npcSettlement.goods.set(GoodType.TRADE_GOODS, 20);
+    npcSettlement.attitude = Attitude.NEUTRAL;
 
     const mockState: any = {
       players: [player1],
@@ -49,7 +49,7 @@ describe('SaveSystem Serialization Round-trip', () => {
       phase: TurnPhase.MOVEMENT,
       europePrices: { [GoodType.FOOD]: 2 },
       map: [[tile]],
-      npcSettlements: [settlement],
+      npcSettlements: [npcSettlement],
     };
 
     // 2. Save
@@ -67,30 +67,25 @@ describe('SaveSystem Serialization Round-trip', () => {
     expect(loadedState.currentPlayerId).toBe(mockState.currentPlayerId);
     expect(loadedState.phase).toBe(mockState.phase);
 
-    // Check Player instance and its properties
-    expect(loadedState.players[0]).toBeInstanceOf(Player);
-    expect(loadedState.players[0].name).toBe('Player 1');
-    expect(loadedState.players[0].gold).toBe(1000);
+    // Check Player properties
+    expect(loadedState.players![0].name).toBe('Player 1');
+    expect(loadedState.players![0].gold).toBe(1000);
 
-    // Check Unit instance and Map (cargo)
-    const loadedUnit = loadedState.players[0].units[0];
-    expect(loadedUnit).toBeInstanceOf(Unit);
+    // Check Unit and Map (cargo)
+    const loadedUnit = loadedState.players![0].units[0];
     expect(loadedUnit.cargo).toBeInstanceOf(Map);
     expect(loadedUnit.cargo.get(GoodType.FOOD)).toBe(50);
 
-    // Check Settlement instance and its properties
-    const loadedSettlement = loadedState.players[0].settlements[0];
-    expect(loadedSettlement).toBeInstanceOf(Settlement);
+    // Check Settlement and its properties
+    const loadedSettlement = loadedState.players![0].settlements[0];
     expect(loadedSettlement.inventory.get(GoodType.LUMBER)).toBe(100);
     expect(loadedSettlement.workforce.get('u1')).toBe(JobType.FARMER);
 
-    // Check Tile instance
-    expect(loadedState.map[0][0]).toBeInstanceOf(Tile);
-    expect(loadedState.map[0][0].terrainType).toBe(TerrainType.PLAINS);
+    // Check Tile properties
+    expect(loadedState.map![0][0].terrainType).toBe(TerrainType.PLAINS);
 
-    // Check NPC Settlement instance and Map
-    expect(loadedState.npcSettlements[0]).toBeInstanceOf(Settlement);
-    expect(loadedState.npcSettlements[0].goods.get(GoodType.TRADE_GOODS)).toBe(20);
+    // Check NPC Settlement and Map
+    expect(loadedState.npcSettlements![0].goods.get(GoodType.TRADE_GOODS)).toBe(20);
   });
 
   it('should manage manifest correctly', () => {

@@ -1,9 +1,8 @@
 import React from 'react';
-import { useGameStore } from '../../game/state/gameStore';
+import { useUIStore } from '../../game/state/uiStore';
 
 export const HowToPlayModal: React.FC = () => {
-  const isHowToPlayModalOpen = useGameStore((state) => state.isHowToPlayModalOpen);
-  const setHowToPlayModalOpen = useGameStore((state) => state.setHowToPlayModalOpen);
+  const { isHowToPlayModalOpen, setHowToPlayModalOpen } = useUIStore();
 
   if (!isHowToPlayModalOpen) return null;
 

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import Phaser from 'phaser';
 import { useGameStore } from './game/state/gameStore';
+import { useUIStore } from './game/state/uiStore';
 import { WorldScene } from './scenes/WorldScene';
 import { MainMenuScene } from './scenes/MainMenuScene';
 import { HUD } from './ui/HUD';
@@ -24,12 +25,14 @@ function App() {
   const {
     selectUnit,
     selectSettlement,
-    showEndTurnConfirm,
-    setShowEndTurnConfirm,
     endTurn,
     players,
     currentPlayerId
   } = useGameStore();
+  const {
+    showEndTurnConfirm,
+    setShowEndTurnConfirm
+  } = useUIStore();
 
   const currentPlayer = players.find(p => p.id === currentPlayerId);
   const availableUnits = currentPlayer?.units.filter(u => u.movesRemaining > 0 && !u.isSkipping) || [];

@@ -1,18 +1,18 @@
 import { describe, it, expect } from 'vitest';
 import { TurnEngine } from '../TurnEngine';
-import { Player } from '../../entities/Player';
-import { Tile } from '../../entities/Tile';
-import { Settlement } from '../../entities/Settlement';
-import { Unit } from '../../entities/Unit';
+import { createPlayer } from '../../entities/Player';
+import { createTile } from '../../entities/Tile';
+import { createSettlement } from '../../entities/Settlement';
+import { createUnit } from '../../entities/Unit';
 import { TerrainType, GoodType, UnitType, JobType, Nation } from '../../entities/types';
 
 describe('TurnEngine', () => {
-  const createMap = (width: number, height: number): Tile[][] => {
-    const map: Tile[][] = [];
+  const createMap = (width: number, height: number): any[][] => {
+    const map: any[][] = [];
     for (let y = 0; y < height; y++) {
-      const row: Tile[] = [];
+      const row: any[] = [];
       for (let x = 0; x < width; x++) {
-        row.push(new Tile(`${x}-${y}`, x, y, TerrainType.GRASSLAND, 1));
+        row.push(createTile(`${x}-${y}`, x, y, TerrainType.GRASSLAND, 1));
       }
       map.push(row);
     }
@@ -21,9 +21,9 @@ describe('TurnEngine', () => {
 
   describe('runProduction', () => {
     it('should calculate food based on workforce and population consumption', () => {
-      const player = new Player('p1', 'Player 1', true, 0, Nation.FRANCE);
-      const settlement = new Settlement('c1', 'p1', 'Settlement 1', 2, 2, 1, 'EUROPEAN', 'STATE');
-      const unit = new Unit('u1', 'p1', UnitType.COLONIST, 2, 2, 1);
+      const player = createPlayer('p1', 'Player 1', true, 0, Nation.FRANCE);
+      const settlement = createSettlement('c1', 'p1', 'Settlement 1', 2, 2, 1, 'EUROPEAN', 'STATE');
+      const unit = createUnit('u1', 'p1', UnitType.COLONIST, 2, 2, 1);
       settlement.units.push(unit);
       settlement.workforce.set(unit.id, JobType.FARMER);
       player.settlements.push(settlement);
@@ -45,9 +45,9 @@ describe('TurnEngine', () => {
       // Set (5,5) as PLAINS (target)
       map[5][5].terrainType = TerrainType.PLAINS;
 
-      const human = new Player('p1', 'Human', true, 0, Nation.SPAIN);
-      const ai = new Player('p2', 'AI', false, 0, Nation.NORSEMEN);
-      const unit = new Unit('u1', 'p2', UnitType.SOLDIER, 0, 0, 1);
+      const human = createPlayer('p1', 'Human', true, 0, Nation.SPAIN);
+      const ai = createPlayer('p2', 'AI', false, 0, Nation.NORSEMEN);
+      const unit = createUnit('u1', 'p2', UnitType.SOLDIER, 0, 0, 1);
       ai.units.push(unit);
 
       const updatedPlayers = TurnEngine.runAITurn([human, ai], map);
@@ -64,8 +64,8 @@ describe('TurnEngine', () => {
       const map = createMap(10, 10);
       map[2][2].terrainType = TerrainType.PLAINS;
 
-      const ai = new Player('p1', 'AI', false, 0, Nation.PORTUGAL);
-      const unit = new Unit('u1', 'p1', UnitType.COLONIST, 2, 2, 1);
+      const ai = createPlayer('p1', 'AI', false, 0, Nation.PORTUGAL);
+      const unit = createUnit('u1', 'p1', UnitType.COLONIST, 2, 2, 1);
       ai.units.push(unit);
 
       const updatedPlayers = TurnEngine.runAITurn([ai], map);
@@ -81,10 +81,10 @@ describe('TurnEngine', () => {
         const map = createMap(10, 10);
         map[2][2].terrainType = TerrainType.PLAINS;
 
-        const ai = new Player('p1', 'AI', false, 0, Nation.NETHERLANDS);
-        const settlement = new Settlement('c1', 'p1', 'Col1', 3, 3, 1, 'EUROPEAN', 'STATE');
+        const ai = createPlayer('p1', 'AI', false, 0, Nation.NETHERLANDS);
+        const settlement = createSettlement('c1', 'p1', 'Col1', 3, 3, 1, 'EUROPEAN', 'STATE');
         ai.settlements.push(settlement);
-        const unit = new Unit('u1', 'p1', UnitType.COLONIST, 2, 2, 1);
+        const unit = createUnit('u1', 'p1', UnitType.COLONIST, 2, 2, 1);
         ai.units.push(unit);
 
         const updatedPlayers = TurnEngine.runAITurn([ai], map);

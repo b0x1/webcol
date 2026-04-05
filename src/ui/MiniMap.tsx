@@ -1,9 +1,18 @@
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { useGameStore } from '../game/state/gameStore';
+import { useUIStore } from '../game/state/uiStore';
 import { TerrainType } from '../game/entities/types';
 import { eventBus } from '../game/state/EventBus';
 
 export const MiniMap: React.FC = () => {
+  const {
+    map,
+    players,
+    currentPlayerId,
+    selectNextUnit,
+    endTurn,
+  } = useGameStore();
+
   const {
     isMainMenuOpen,
     isSettlementScreenOpen,
@@ -13,14 +22,9 @@ export const MiniMap: React.FC = () => {
     isNativeTradeModalOpen,
     isHowToPlayModalOpen,
     isGameSetupModalOpen,
-    map,
-    players,
-    currentPlayerId,
-    selectNextUnit,
-    endTurn,
     showEndTurnConfirm,
     setShowEndTurnConfirm
-  } = useGameStore();
+  } = useUIStore();
 
   const isAnyModalOpen =
     isSettlementScreenOpen ||

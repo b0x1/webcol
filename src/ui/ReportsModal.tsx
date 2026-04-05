@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../game/state/gameStore';
+import { useUIStore } from '../game/state/uiStore';
 import { GoodType } from '../game/entities/types';
 import { Flag } from './Flag';
 import { eventBus } from '../game/state/EventBus';
@@ -8,15 +9,17 @@ type ReportTab = 'units' | 'settlements' | 'resources';
 
 export const ReportsModal: React.FC = () => {
   const {
-    isReportsModalOpen,
-    setReportsModalOpen,
     players,
     currentPlayerId,
-    isDebugMode,
     selectUnit,
     selectSettlement,
-    setSettlementScreenOpen
   } = useGameStore();
+  const {
+    isReportsModalOpen,
+    setReportsModalOpen,
+    isDebugMode,
+    setSettlementScreenOpen
+  } = useUIStore();
   const [activeTab, setActiveTab] = useState<ReportTab>('units');
 
   useEffect(() => {

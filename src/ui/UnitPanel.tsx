@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useGameStore } from '../game/state/gameStore';
+import { useUIStore } from '../game/state/uiStore';
 import { UnitType } from '../game/entities/types';
 
 export const UnitPanel: React.FC = () => {
@@ -7,9 +8,11 @@ export const UnitPanel: React.FC = () => {
     currentPlayerId,
     selectedUnitId,
     players,
-    isMainMenuOpen,
     skipUnit,
     selectUnit,
+  } = useGameStore();
+  const {
+    isMainMenuOpen,
     isSettlementScreenOpen,
     isEuropeScreenOpen,
     isReportsModalOpen,
@@ -17,7 +20,7 @@ export const UnitPanel: React.FC = () => {
     isNativeTradeModalOpen,
     isHowToPlayModalOpen,
     isGameSetupModalOpen,
-  } = useGameStore();
+  } = useUIStore();
   const foundSettlement = useGameStore((state) => state.foundSettlement);
 
   const isAnyModalOpen =

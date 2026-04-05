@@ -1,14 +1,14 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useGameStore } from '../gameStore';
-import { Player } from '../../entities/Player';
-import { Unit } from '../../entities/Unit';
+import { createPlayer } from '../../entities/Player';
+import { createUnit } from '../../entities/Unit';
 import { GoodType, UnitType, Nation } from '../../entities/types';
 
 describe('Europe Trade', () => {
   beforeEach(() => {
     // Reset store state before each test
-    const p1 = new Player('p1', 'Player 1', true, 1000, Nation.ENGLAND);
-    const ship = new Unit('ship1', 'p1', UnitType.SHIP, 0, 0, 1);
+    const p1 = createPlayer('p1', 'Player 1', true, 1000, Nation.ENGLAND);
+    const ship = createUnit('ship1', 'p1', UnitType.SHIP, 0, 0, 1);
     ship.cargo.set(GoodType.LUMBER, 50);
     p1.units.push(ship);
 
@@ -16,7 +16,6 @@ describe('Europe Trade', () => {
       players: [p1],
       currentPlayerId: 'p1',
       selectedUnitId: 'ship1',
-      isEuropeScreenOpen: false,
       europePrices: {
         [GoodType.FOOD]: 1,
         [GoodType.LUMBER]: 2,
@@ -76,9 +75,7 @@ describe('Europe Trade', () => {
 
     // Give ship 50 muskets
     useGameStore.setState((state) => {
-        const p1 = state.players[0];
-        p1.units[0].cargo.set(GoodType.MUSKETS, 50);
-        return { players: [p1] };
+        state.players[0].units[0].cargo.set(GoodType.MUSKETS, 50);
     });
 
     recruitUnit(UnitType.SOLDIER);

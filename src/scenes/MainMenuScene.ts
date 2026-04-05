@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { TerrainGenerator } from '../game/map/TerrainGenerator';
 import { TerrainRenderer } from '../game/map/TerrainRenderer';
 import { TerrainType } from '../game/entities/types';
-import { Tile } from '../game/entities/Tile';
+import type { Tile } from '../game/entities/Tile';
 import { MAP_CONSTANTS } from '../game/constants';
 import { SpriteLoader } from '../game/utils/SpriteLoader';
 import { eventBus } from '../game/state/EventBus';
@@ -40,7 +40,14 @@ export class MainMenuScene extends Phaser.Scene {
         if (type === TerrainType.FOREST || type === TerrainType.HILLS) {
           cost = 2;
         }
-        return new Tile(`${x}-${y}`, x, y, type, cost);
+        return {
+          id: `${x}-${y}`,
+          x,
+          y,
+          terrainType: type,
+          movementCost: cost,
+          hasResource: null,
+        };
       })
     );
 

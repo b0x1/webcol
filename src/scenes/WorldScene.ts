@@ -1,43 +1,33 @@
 import Phaser from 'phaser';
-import { TerrainGenerator } from '../game/map/TerrainGenerator';
 import { TileMap } from '../game/map/TileMap';
-import { TerrainType, ResourceType } from '../game/entities/types';
 import { TerrainRenderer } from '../game/map/TerrainRenderer';
-import { Tile } from '../game/entities/Tile';
 import { SpriteLoader } from '../game/utils/SpriteLoader';
 import { useGameStore } from '../game/state/gameStore';
-import { Unit } from '../game/entities/Unit';
-import { Player } from '../game/entities/Player';
-import { UnitType, Attitude } from '../game/entities/types';
+import type { Unit } from '../game/entities/Unit';
 import { MovementSystem } from '../game/systems/MovementSystem';
 import { eventBus } from '../game/state/EventBus';
 import { MAP_CONSTANTS, UNIT_CONSTANTS } from '../game/constants';
+import { UnitRenderer } from '../game/map/UnitRenderer';
+import { CameraManager } from '../game/map/CameraManager';
+import { InputHandler } from '../game/map/InputHandler';
 
 export class WorldScene extends Phaser.Scene {
   public tileMap!: TileMap;
   private terrainRenderer!: TerrainRenderer;
-  private unitSprites!: Phaser.GameObjects.Group;
-  private selectionRings!: Phaser.GameObjects.Group;
-  private unitBadges!: Phaser.GameObjects.Group;
+  private unitRenderer!: UnitRenderer;
+  private cameraManager!: CameraManager;
+  private inputHandler!: InputHandler;
   private storeUnsubscribe: (() => void) | null = null;
-  private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
-  private zoomKeys!: {
-    plus: Phaser.Input.Keyboard.Key;
-    minus: Phaser.Input.Keyboard.Key;
-  };
   private gameLoadedUnsubscribe: (() => void) | null = null;
   private cameraJumpUnsubscribe: (() => void) | null = null;
 
   private readonly TILE_SIZE = MAP_CONSTANTS.TILE_SIZE;
-  private readonly MAP_WIDTH = MAP_CONSTANTS.WIDTH;
-  private readonly MAP_HEIGHT = MAP_CONSTANTS.HEIGHT;
 
   constructor() {
     super('WorldScene');
   }
 
   preload() {
-    // Load AVIF spritesheets via SpriteLoader
     SpriteLoader.preload(this, 'terrain', 'terrain.avif', 'terrain.json');
     SpriteLoader.preload(this, 'units', 'units.avif', 'units.json');
     SpriteLoader.preload(this, 'resources', 'resources.avif', 'resources.json');
@@ -47,134 +37,35 @@ export class WorldScene extends Phaser.Scene {
   private reachableTiles: { x: number; y: number; cost: number }[] = [];
 
   create() {
-    // Register frames from manifests via SpriteLoader
     ['terrain', 'units', 'resources', 'other'].forEach((key) => {
       SpriteLoader.register(this, key);
     });
 
     this.terrainRenderer = new TerrainRenderer(this as any, this.TILE_SIZE);
-
-    this.unitSprites = this.add.group();
-    this.selectionRings = this.add.group();
-    this.unitBadges = this.add.group();
+    this.unitRenderer = new UnitRenderer(this, this.terrainRenderer, this.TILE_SIZE);
+    this.cameraManager = new CameraManager(this, this.terrainRenderer, this.TILE_SIZE);
+    this.inputHandler = new InputHandler(this, this.terrainRenderer);
 
     const state = useGameStore.getState();
     const tiles = state.map;
     const mapWidth = tiles[0].length;
     const mapHeight = tiles.length;
-    const npcSettlements = state.npcSettlements;
-    const playerSettlements = state.players.flatMap(p => p.settlements);
+
     this.tileMap = new TileMap(mapWidth, mapHeight, tiles.map(row => row.map(t => t.terrainType)));
+    this.terrainRenderer.renderTileMap(tiles, state.npcSettlements, state.players.flatMap(p => p.settlements));
+    this.cameraManager.setup(mapWidth, mapHeight);
 
-    this.terrainRenderer.renderTileMap(tiles, npcSettlements, playerSettlements);
+    this.inputHandler.setup(
+      mapWidth,
+      mapHeight,
+      () => this.reachableTiles,
+      (id, x, y) => this.handleMove(id, x, y)
+    );
 
-    // Disable context menu for right-click handling
-    this.input.mouse?.disableContextMenu();
-
-    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-      const worldPoint = pointer.positionToCamera(this.cameras.main) as Phaser.Math.Vector2;
-      const { x, y } = this.terrainRenderer.worldToTile(worldPoint.x, worldPoint.y);
-
-      if (x < 0 || x >= mapWidth || y < 0 || y >= mapHeight) {
-        return;
-      }
-
-      const state = useGameStore.getState();
-
-      if (pointer.leftButtonDown()) {
-        // Selection logic
-        const unitAtTile = state.players
-          .flatMap((p) => p.units)
-          .find((u) => u.x === x && u.y === y);
-
-        const settlementAtTile = state.players
-          .flatMap((p) => p.settlements)
-          .find((c) => c.x === x && c.y === y);
-
-        const npcSettlementAtTile = state.npcSettlements.find((s) => s.x === x && s.y === y);
-
-        if (unitAtTile) {
-          console.log(`Selecting unit ${unitAtTile.id} at ${x}, ${y}`);
-          useGameStore.getState().selectUnit(unitAtTile.id);
-          this.events.emit('unitSelected', unitAtTile.id);
-        } else if (settlementAtTile) {
-          console.log(`Selecting settlement ${settlementAtTile.id} at ${x}, ${y}`);
-          useGameStore.getState().selectSettlement(settlementAtTile.id);
-          this.events.emit('settlementSelected', settlementAtTile.id);
-        } else if (npcSettlementAtTile) {
-          const selectedUnitId = useGameStore.getState().selectedUnitId;
-          if (selectedUnitId) {
-            const selectedUnit = state.players
-              .flatMap((p) => p.units)
-              .find((u) => u.id === selectedUnitId);
-
-            if (selectedUnit) {
-              if (
-                selectedUnit.type === UnitType.SOLDIER &&
-                npcSettlementAtTile.attitude === Attitude.HOSTILE
-              ) {
-                useGameStore.getState().attackSettlement(npcSettlementAtTile.id, selectedUnitId);
-              } else if (
-                selectedUnit.type === UnitType.COLONIST &&
-                npcSettlementAtTile.attitude !== Attitude.HOSTILE
-              ) {
-                useGameStore.getState().setNativeTradeModalOpen(true, npcSettlementAtTile.id);
-              }
-            }
-          }
-        } else {
-          useGameStore.getState().selectUnit(null);
-          useGameStore.getState().selectSettlement(null);
-          this.events.emit('unitSelected', null as any);
-          this.events.emit('settlementSelected', null as any);
-        }
-        this.terrainRenderer.updateSelectionHighlight(x, y);
-      } else if (pointer.rightButtonDown()) {
-        // Movement or Combat logic
-        if (state.selectedUnitId) {
-          const selectedUnit = state.players
-            .flatMap((p) => p.units)
-            .find((u) => u.id === state.selectedUnitId);
-
-          if (selectedUnit) {
-            // Check for combat targets
-            const enemyUnitAtTile = state.players
-              .filter((p) => p.id !== state.currentPlayerId)
-              .flatMap((p) => p.units)
-              .find((u) => u.x === x && u.y === y);
-
-            const enemySettlementAtTile = state.players
-              .filter((p) => p.id !== state.currentPlayerId)
-              .flatMap((p) => p.settlements)
-              .find((c) => c.x === x && c.y === y);
-
-            const npcSettlementAtTile = state.npcSettlements.find((s) => s.x === x && s.y === y);
-
-            if (selectedUnit.type === UnitType.SOLDIER && (enemyUnitAtTile || enemySettlementAtTile || (npcSettlementAtTile && npcSettlementAtTile.attitude === Attitude.HOSTILE))) {
-              useGameStore.getState().resolveCombat(selectedUnit.id, x, y);
-            } else if (state.selectedUnitId) {
-              // Movement logic
-              const isReachable = this.reachableTiles.some((t) => t.x === x && t.y === y);
-              if (isReachable) {
-                this.handleMove(state.selectedUnitId, x, y);
-              } else {
-                // Deselect on unreachable right-click
-                useGameStore.getState().selectUnit(null);
-                this.events.emit('unitSelected', null as any);
-                this.terrainRenderer.updateSelectionHighlight(null, null);
-              }
-            }
-          }
-        }
-      }
-    });
-
-    // Subscribe to store changes
     this.storeUnsubscribe = useGameStore.subscribe((state, prevState) => {
       if (!this.scene?.scene) return;
       if (!this.scene.isActive('WorldScene')) return;
 
-      // Only re-render the map if it, npc settlements, or player settlements have changed
       const playerSettlements = state.players.flatMap(p => p.settlements);
       const prevPlayerSettlements = prevState.players.flatMap(p => p.settlements);
       if (
@@ -186,12 +77,9 @@ export class WorldScene extends Phaser.Scene {
         this.terrainRenderer.renderTileMap(state.map, state.npcSettlements, playerSettlements);
       }
 
-      this.renderUnits();
+      this.unitRenderer.render(state.players, state.selectedUnitId);
 
-      const selectedUnit = state.players
-        .flatMap((p) => p.units)
-        .find((u) => u.id === state.selectedUnitId);
-
+      const selectedUnit = state.players.flatMap((p) => p.units).find((u) => u.id === state.selectedUnitId);
       if (selectedUnit) {
         this.reachableTiles = MovementSystem.getReachableTiles(selectedUnit, state.map);
         this.terrainRenderer.updateReachableHighlights(this.reachableTiles);
@@ -201,72 +89,23 @@ export class WorldScene extends Phaser.Scene {
       }
     });
 
-    // Escape key for deselection
-    this.input.keyboard?.on('keydown-ESC', () => {
-      useGameStore.getState().selectUnit(null);
-      this.events.emit('unitSelected', null as any);
-      this.terrainRenderer.updateSelectionHighlight(null, null);
-    });
-
-    this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
-      const worldPoint = pointer.positionToCamera(this.cameras.main) as Phaser.Math.Vector2;
-      const { x, y } = this.terrainRenderer.worldToTile(worldPoint.x, worldPoint.y);
-
-      if (x >= 0 && x < mapWidth && y >= 0 && y < mapHeight) {
-        const settlement = useGameStore.getState().npcSettlements.find((s) => s.x === x && s.y === y);
-        this.terrainRenderer.showTooltip(x, y, worldPoint.x, worldPoint.y, settlement?.name);
-      } else {
-        this.terrainRenderer.hideTooltip();
-      }
-    });
-
-    this.input.on('pointerout', () => {
-      this.terrainRenderer.hideTooltip();
-    });
-
-    this.cameras.main.setBounds(
-      0,
-      0,
-      mapWidth * this.TILE_SIZE,
-      mapHeight * this.TILE_SIZE,
-    );
-
-    if (this.input.keyboard) {
-      this.cursors = this.input.keyboard.createCursorKeys();
-      this.zoomKeys = {
-        plus: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS),
-        minus: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS),
-      };
-    }
-
     this.gameLoadedUnsubscribe = eventBus.on('gameLoaded', () => {
       this.scene.restart();
     });
 
     this.cameraJumpUnsubscribe = eventBus.on('cameraJump', ({ x, y }) => {
-      const { x: wx, y: wy } = this.terrainRenderer.tileToWorld(x, y);
-      this.cameras.main.centerOn(wx, wy);
+      this.cameraManager.centerOn(x, y);
     });
 
     this.scale.on('resize', (gameSize: Phaser.Structs.Size) => {
       if (this.cameras && this.cameras.main) {
         this.cameras.main.setViewport(0, 0, gameSize.width, gameSize.height);
-        this.emitViewportUpdate();
+        this.cameraManager.emitViewportUpdate();
       }
     });
 
-    this.renderUnits();
-    this.emitViewportUpdate();
-  }
-
-  private emitViewportUpdate() {
-    const cam = this.cameras.main;
-    eventBus.emit('viewportUpdated', {
-      x: cam.scrollX / this.TILE_SIZE,
-      y: cam.scrollY / this.TILE_SIZE,
-      width: cam.width / (this.TILE_SIZE * cam.zoom),
-      height: cam.height / (this.TILE_SIZE * cam.zoom),
-    });
+    this.unitRenderer.render(state.players, state.selectedUnitId);
+    this.cameraManager.emitViewportUpdate();
   }
 
   private isAnimating = false;
@@ -283,12 +122,9 @@ export class WorldScene extends Phaser.Scene {
 
     this.isAnimating = true;
 
-    // Animate movement first
     this.animateUnitMove(unit, fromX, fromY, toX, toY, () => {
-      // Use gameStore.moveUnit() after animation completes
       useGameStore.getState().moveUnit(unitId, toX, toY);
       this.isAnimating = false;
-      // Emit unitMoved event
       eventBus.emit('unitMoved', { id: unitId, fromX, fromY, toX, toY });
     });
   }
@@ -297,13 +133,11 @@ export class WorldScene extends Phaser.Scene {
     const { x: startX, y: startY } = this.terrainRenderer.tileToWorld(fromX, fromY);
     const { x: endX, y: endY } = this.terrainRenderer.tileToWorld(toX, toY);
 
-    // Hide original unit sprite before animation starts
-    // We can find it by its starting position in the current sprites group.
-    this.unitSprites.getChildren().forEach((child: any) => {
+    this.unitRenderer.unitSprites.getChildren().forEach((child: any) => {
       if (
         child instanceof Phaser.GameObjects.Image &&
-          child.texture.key === 'units' &&
-          child.frame.name === unit.type &&
+        child.texture.key === 'units' &&
+        child.frame.name === unit.type &&
         child.x === startX + this.TILE_SIZE / 2 &&
         child.y === startY + this.TILE_SIZE / 2
       ) {
@@ -331,110 +165,15 @@ export class WorldScene extends Phaser.Scene {
     });
   }
 
-  private renderUnits() {
-    if (!this.unitSprites || !this.selectionRings || !this.unitBadges) return;
-
-    this.unitSprites.clear(true, true);
-    this.selectionRings.clear(true, true);
-    this.unitBadges.clear(true, true);
-
-    const state = useGameStore.getState();
-    const unitsByTile: Record<string, Unit[]> = {};
-
-    state.players.forEach((player) => {
-      player.units.forEach((unit) => {
-        const key = `${unit.x}-${unit.y}`;
-        if (!unitsByTile[key]) unitsByTile[key] = [];
-        unitsByTile[key].push(unit);
-      });
-    });
-
-    Object.entries(unitsByTile).forEach(([key, units]) => {
-      const [tx, ty] = key.split('-').map(Number);
-      const { x: worldX, y: worldY } = this.terrainRenderer.tileToWorld(tx, ty);
-
-      units.forEach((unit, index) => {
-        const offset = index * 4;
-        const ux = worldX + this.TILE_SIZE / 2 - offset;
-        const uy = worldY + this.TILE_SIZE / 2 - offset;
-
-        const sprite = this.add.image(ux, uy, 'units', unit.type);
-        sprite.setDepth(150 + index);
-        this.unitSprites?.add(sprite);
-
-        if (state.selectedUnitId === unit.id) {
-          const ring = this.add.graphics();
-          ring.lineStyle(2, 0xffff00, 1);
-          ring.strokeCircle(ux, uy, (this.TILE_SIZE * 0.7) / 2 + 2);
-          ring.setDepth(149);
-          this.selectionRings?.add(ring);
-        }
-
-        // Add count badge only for the top unit if there are multiple
-        if (index === units.length - 1 && units.length > 1) {
-          const badgeX = ux + 8;
-          const badgeY = uy - 8;
-          const badgeBg = this.add.graphics();
-          badgeBg.fillStyle(0x000000, 0.8);
-          badgeBg.fillCircle(badgeX, badgeY, 8);
-          badgeBg.setDepth(200);
-          this.unitBadges.add(badgeBg);
-
-          const badgeText = this.add.text(badgeX, badgeY, units.length.toString(), {
-            fontSize: '10px',
-            color: '#ffffff',
-          }).setOrigin(0.5);
-          badgeText.setDepth(201);
-          this.unitBadges.add(badgeText);
-        }
-      });
-    });
-  }
-
   destroy() {
-    if (this.storeUnsubscribe) {
-      this.storeUnsubscribe();
-    }
-    if (this.gameLoadedUnsubscribe) {
-      this.gameLoadedUnsubscribe();
-    }
-    if (this.cameraJumpUnsubscribe) {
-      this.cameraJumpUnsubscribe();
-    }
+    if (this.storeUnsubscribe) this.storeUnsubscribe();
+    if (this.gameLoadedUnsubscribe) this.gameLoadedUnsubscribe();
+    if (this.cameraJumpUnsubscribe) this.cameraJumpUnsubscribe();
     this.terrainRenderer.destroy();
-    this.unitSprites.destroy(true);
-    this.selectionRings.destroy(true);
-    this.unitBadges.destroy(true);
+    this.unitRenderer.destroy();
   }
 
   update() {
-    const cam = this.cameras.main;
-    const speed = 30;
-
-    if (this.cursors?.left?.isDown) {
-      cam.scrollX -= speed;
-    } else if (this.cursors?.right?.isDown) {
-      cam.scrollX += speed;
-    }
-
-    if (this.cursors?.up?.isDown) {
-      cam.scrollY -= speed;
-    } else if (this.cursors?.down?.isDown) {
-      cam.scrollY += speed;
-    }
-
-    const zoomSpeed = 0.02;
-    if (this.zoomKeys?.plus?.isDown) {
-      cam.zoom += zoomSpeed;
-    }
-    if (this.zoomKeys?.minus?.isDown) {
-      cam.zoom -= zoomSpeed;
-    }
-
-    cam.zoom = Phaser.Math.Clamp(cam.zoom, 0.5, 2.0);
-
-    if (cam.dirty) {
-        this.emitViewportUpdate();
-    }
+    this.cameraManager.update();
   }
 }

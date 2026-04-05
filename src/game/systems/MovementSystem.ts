@@ -1,5 +1,5 @@
-import { Unit } from '../entities/Unit';
-import { Tile } from '../entities/Tile';
+import type { Unit } from '../entities/Unit';
+import type { Tile } from '../entities/Tile';
 import { TerrainType, UnitType } from '../entities/types';
 
 export class MovementSystem {

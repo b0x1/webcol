@@ -1,8 +1,4 @@
 import type { GameState } from '../state/gameStore';
-import { Player } from '../entities/Player';
-import { Unit } from '../entities/Unit';
-import { Settlement } from '../entities/Settlement';
-import { Tile } from '../entities/Tile';
 
 export interface SaveMeta {
   slotName: string;
@@ -42,13 +38,13 @@ export class SaveSystem {
     this.updateManifest(slotName, state);
   }
 
-  static load(slotName: string): GameState | null {
+  static load(slotName: string): Partial<GameState> | null {
     const serialized = localStorage.getItem(`${this.SAVE_PREFIX}${slotName}`);
     if (!serialized) return null;
 
     try {
       const data = JSON.parse(serialized, this.reviver) as SaveData;
-      return this.hydrateState(data);
+      return data;
     } catch (e) {
       console.error('Failed to load save:', e);
       return null;
@@ -105,95 +101,5 @@ export class SaveSystem {
       }
     }
     return value;
-  }
-
-  private static hydrateState(data: SaveData): any {
-    const players = data.players.map((pData) => {
-      const player = new Player(pData.id, pData.name, pData.isHuman, pData.gold, pData.nation);
-      player.units = pData.units.map((uData: any) => {
-        const unit = new Unit(
-          uData.id,
-          uData.ownerId,
-          uData.type,
-          uData.x,
-          uData.y,
-          uData.movesRemaining
-        );
-        unit.cargo = uData.cargo;
-        unit.maxMoves = uData.maxMoves;
-        return unit;
-      });
-      player.settlements = pData.settlements.map((cData: any) => {
-        const settlement = new Settlement(
-          cData.id,
-          cData.ownerId,
-          cData.name,
-          cData.x,
-          cData.y,
-          cData.population,
-          cData.culture || 'EUROPEAN',
-          cData.organization || 'STATE'
-        );
-        settlement.buildings = cData.buildings;
-        settlement.inventory = cData.inventory;
-        settlement.productionQueue = cData.productionQueue;
-        settlement.workforce = cData.workforce;
-        settlement.units = cData.units.map((uData: any) => {
-          const unit = new Unit(
-            uData.id,
-            uData.ownerId,
-            uData.type,
-            uData.x,
-            uData.y,
-            uData.movesRemaining
-          );
-          unit.cargo = uData.cargo;
-          unit.maxMoves = uData.maxMoves;
-          return unit;
-        });
-        return settlement;
-      });
-      return player;
-    });
-
-    const map = data.map.map((row) =>
-      row.map((tData) => {
-        const tile = new Tile(
-          tData.id,
-          tData.x,
-          tData.y,
-          tData.terrainType,
-          tData.movementCost,
-          tData.hasResource
-        );
-        return tile;
-      })
-    );
-
-    const npcSettlements = data.npcSettlements.map((sData) => {
-      const settlement = new Settlement(
-        sData.id,
-        sData.ownerId,
-        sData.name,
-        sData.x,
-        sData.y,
-        sData.population,
-        sData.culture || 'NATIVE',
-        sData.organization || 'TRIBE'
-      );
-      settlement.attitude = sData.attitude;
-      settlement.goods = sData.goods;
-      return settlement;
-    });
-
-    return {
-      players,
-      currentPlayerId: data.currentPlayerId,
-      turn: data.turn,
-      phase: data.phase,
-      europePrices: data.europePrices,
-      map,
-      npcSettlements,
-    };
   }
 }

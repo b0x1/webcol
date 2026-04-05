@@ -1,8 +1,10 @@
 import React from 'react';
 import { useGameStore } from '../game/state/gameStore';
+import { useUIStore } from '../game/state/uiStore';
 
 export const SettlementPanel: React.FC = () => {
-  const { selectedSettlementId, players, selectSettlement, setSettlementScreenOpen, isMainMenuOpen } = useGameStore();
+  const { selectedSettlementId, players, selectSettlement } = useGameStore();
+  const { setSettlementScreenOpen, isMainMenuOpen } = useUIStore();
 
   if (isMainMenuOpen) return null;
 

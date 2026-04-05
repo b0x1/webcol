@@ -1,19 +1,34 @@
 import type { GoodType, UnitType } from './types';
 
-export class Unit {
-  public cargo: Map<GoodType, number> = new Map();
-  public maxMoves: number;
+export interface Unit {
+  id: string;
+  ownerId: string;
+  type: UnitType;
+  x: number;
+  y: number;
+  movesRemaining: number;
+  maxMoves: number;
+  isSkipping: boolean;
+  cargo: Map<GoodType, number>;
+}
 
-  public isSkipping: boolean = false;
-
-  constructor(
-    public readonly id: string,
-    public readonly ownerId: string,
-    public readonly type: UnitType,
-    public x: number,
-    public y: number,
-    public movesRemaining: number,
-  ) {
-    this.maxMoves = movesRemaining;
-  }
+export function createUnit(
+  id: string,
+  ownerId: string,
+  type: UnitType,
+  x: number,
+  y: number,
+  movesRemaining: number,
+): Unit {
+  return {
+    id,
+    ownerId,
+    type,
+    x,
+    y,
+    movesRemaining,
+    maxMoves: movesRemaining,
+    isSkipping: false,
+    cargo: new Map(),
+  };
 }

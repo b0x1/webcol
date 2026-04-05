@@ -1,6 +1,6 @@
 import React from 'react';
 import { JobType } from '../../game/entities/types';
-import { Unit } from '../../game/entities/Unit';
+import type { Unit } from '../../game/entities/Unit';
 import { useGameStore } from '../../game/state/gameStore';
 
 interface Props {

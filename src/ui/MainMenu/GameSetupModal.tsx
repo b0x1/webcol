@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useGameStore } from '../../game/state/gameStore';
+import { useUIStore } from '../../game/state/uiStore';
 import { Nation } from '../../game/entities/types';
 import { NATION_BONUSES } from '../../game/constants';
 import { Flag } from '../Flag';
 
 export const GameSetupModal: React.FC = () => {
-  const isGameSetupModalOpen = useGameStore((state) => state.isGameSetupModalOpen);
-  const setGameSetupModalOpen = useGameStore((state) => state.setGameSetupModalOpen);
+  const { isGameSetupModalOpen, setGameSetupModalOpen } = useUIStore();
   const initGame = useGameStore((state) => state.initGame);
 
   const [playerName, setPlayerName] = useState('Colonist');

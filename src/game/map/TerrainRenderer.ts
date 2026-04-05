@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
-import { Tile } from '../entities/Tile';
-import { Settlement } from '../entities/Settlement';
+import type { Tile } from '../entities/Tile';
+import type { Settlement } from '../entities/Settlement';
 import { TerrainType } from '../entities/types';
 
 export class TerrainRenderer {

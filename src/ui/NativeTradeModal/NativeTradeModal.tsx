@@ -1,19 +1,23 @@
 import React, { useEffect } from 'react';
 import { useGameStore } from '../../game/state/gameStore';
+import { useUIStore } from '../../game/state/uiStore';
 import { GoodType, Attitude, UnitType } from '../../game/entities/types';
 
 export const NativeTradeModal: React.FC = () => {
   const {
-    isNativeTradeModalOpen,
-    activeSettlementId,
     npcSettlements,
     players,
     currentPlayerId,
     selectedUnitId,
-    setNativeTradeModalOpen,
     tradeWithSettlement,
     learnFromSettlement,
   } = useGameStore();
+
+  const {
+    isNativeTradeModalOpen,
+    activeSettlementId,
+    setNativeTradeModalOpen,
+  } = useUIStore();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

@@ -1,27 +1,36 @@
 import { describe, it, expect } from 'vitest';
 import { NativeInteractionSystem } from '../NativeInteractionSystem';
-import { Settlement } from '../../entities/Settlement';
-import { Unit } from '../../entities/Unit';
-import { Nation, Attitude, GoodType, UnitType } from '../../entities/types';
+import { createSettlement } from '../../entities/Settlement';
+import { createUnit } from '../../entities/Unit';
+import { Attitude, GoodType, UnitType } from '../../entities/types';
 
 describe('NativeInteractionSystem', () => {
-  const mockSettlement = new Settlement(
-    's1',
-    'npc-AZTEC',
-    'Aztec Village',
-    10,
-    10,
-    5,
-    'NATIVE',
-    'STATE'
-  );
-  mockSettlement.attitude = Attitude.FRIENDLY;
-  mockSettlement.goods = new Map([[GoodType.FOOD, 100], [GoodType.FURS, 50]]);
+  const getMockSettlement = () => {
+    const s = createSettlement(
+        's1',
+        'npc-AZTEC',
+        'Aztec Village',
+        10,
+        10,
+        5,
+        'NATIVE',
+        'STATE'
+      );
+      s.attitude = Attitude.FRIENDLY;
+      s.goods = new Map([[GoodType.FOOD, 100], [GoodType.FURS, 50]]);
+      return s;
+  };
 
-  const mockUnit = new Unit('u1', 'player-1', UnitType.COLONIST, 10, 10, 3);
-  mockUnit.cargo.set(GoodType.TRADE_GOODS, 50);
+  const getMockUnit = () => {
+    const u = createUnit('u1', 'player-1', UnitType.COLONIST, 10, 10, 3);
+    u.cargo.set(GoodType.TRADE_GOODS, 50);
+    return u;
+  };
 
   it('should process trade correctly and shift attitude', () => {
+    const mockSettlement = getMockSettlement();
+    const mockUnit = getMockUnit();
+
     const { updatedSettlement, updatedUnit, goodReceived } = NativeInteractionSystem.trade(
       mockSettlement,
       mockUnit,
@@ -35,6 +44,9 @@ describe('NativeInteractionSystem', () => {
   });
 
   it('should convert colonist to pioneer during learning', () => {
+    const mockSettlement = getMockSettlement();
+    const mockUnit = getMockUnit();
+
     const { updatedSettlement, updatedUnit } = NativeInteractionSystem.learn(
       mockSettlement,
       mockUnit
@@ -45,12 +57,14 @@ describe('NativeInteractionSystem', () => {
   });
 
   it('should throw error when non-colonist tries to learn', () => {
-    const soldier = new Unit('u2', 'player-1', UnitType.SOLDIER, 10, 10, 3);
+    const mockSettlement = getMockSettlement();
+    const soldier = createUnit('u2', 'player-1', UnitType.SOLDIER, 10, 10, 3);
     expect(() => NativeInteractionSystem.learn(mockSettlement, soldier)).toThrow();
   });
 
   it('should throw error when learning from non-friendly settlement', () => {
-    const neutralSettlement = new Settlement(
+    const mockUnit = getMockUnit();
+    const neutralSettlement = createSettlement(
       's2',
       'npc-IROQUOIS',
       'Sioux Village',

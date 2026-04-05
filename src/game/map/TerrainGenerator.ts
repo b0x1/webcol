@@ -1,6 +1,6 @@
 import { createNoise2D } from 'simplex-noise';
-import { TerrainType, Attitude, GoodType, Nation, Culture, Organization } from '../entities/types';
-import { Settlement } from '../entities/Settlement';
+import { TerrainType, Attitude, GoodType, Nation } from '../entities/types';
+import type { Settlement } from '../entities/Settlement';
 import { MAP_CONSTANTS, NATION_BONUSES } from '../constants';
 
 export class TerrainGenerator {
@@ -103,20 +103,26 @@ export class TerrainGenerator {
       const id = `native-${settlements.length}-${Date.now()}`;
       const name = `${nationData.name} Settlement`;
 
-      const s = new Settlement(
+      const s: Settlement = {
         id,
-        `npc-${nationKey}`,
+        ownerId: `npc-${nationKey}`,
         name,
         x,
         y,
-        3 + Math.floor(Math.random() * 5),
-        'NATIVE',
-        nationData.organization
-      );
-
-      s.goods.set(GoodType.FOOD, 50 + Math.floor(Math.random() * 50));
-      s.goods.set(GoodType.FURS, 20 + Math.floor(Math.random() * 30));
-      s.attitude = Attitude.FRIENDLY;
+        population: 3 + Math.floor(Math.random() * 5),
+        culture: 'NATIVE',
+        organization: nationData.organization,
+        buildings: [],
+        inventory: new Map(),
+        productionQueue: [],
+        workforce: new Map(),
+        units: [],
+        goods: new Map([
+          [GoodType.FOOD, 50 + Math.floor(Math.random() * 50)],
+          [GoodType.FURS, 20 + Math.floor(Math.random() * 30)],
+        ]),
+        attitude: Attitude.FRIENDLY,
+      };
 
       settlements.push(s);
     }

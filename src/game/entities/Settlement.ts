@@ -1,25 +1,49 @@
 import type { BuildingType, GoodType, UnitType, JobType, Culture, Organization, Attitude } from './types';
 import type { Unit } from './Unit';
 
-export class Settlement {
-  public buildings: BuildingType[] = [];
-  public inventory: Map<GoodType, number> = new Map();
-  public productionQueue: (UnitType | BuildingType)[] = [];
-  public workforce: Map<string, JobType> = new Map();
-  public units: Unit[] = [];
+export interface Settlement {
+  id: string;
+  ownerId: string;
+  name: string;
+  x: number;
+  y: number;
+  population: number;
+  culture: Culture;
+  organization: Organization;
+  buildings: BuildingType[];
+  inventory: Map<GoodType, number>;
+  productionQueue: (UnitType | BuildingType)[];
+  workforce: Map<string, JobType>;
+  units: Unit[];
+  attitude: Attitude;
+  goods: Map<GoodType, number>;
+}
 
-  // For non-player settlements (initially)
-  public attitude: Attitude = 'NEUTRAL';
-  public goods: Map<GoodType, number> = new Map();
-
-  constructor(
-    public readonly id: string,
-    public readonly ownerId: string,
-    public name: string,
-    public readonly x: number,
-    public readonly y: number,
-    public population: number,
-    public readonly culture: Culture,
-    public readonly organization: Organization,
-  ) {}
+export function createSettlement(
+  id: string,
+  ownerId: string,
+  name: string,
+  x: number,
+  y: number,
+  population: number,
+  culture: Culture,
+  organization: Organization,
+): Settlement {
+  return {
+    id,
+    ownerId,
+    name,
+    x,
+    y,
+    population,
+    culture,
+    organization,
+    buildings: [],
+    inventory: new Map(),
+    productionQueue: [],
+    workforce: new Map(),
+    units: [],
+    attitude: 'NEUTRAL',
+    goods: new Map(),
+  };
 }
