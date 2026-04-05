@@ -41,11 +41,23 @@ export const SettlementScreen: React.FC = () => {
           <div className="flex items-center gap-4">
             <Flag nation={settlementOwner.nation} size={48} />
             <div>
-              <h1 className="text-4xl font-black m-0 uppercase tracking-tight text-blue-400">{settlement.name}</h1>
-              <div className="text-slate-400 font-bold flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full animate-pulse ${isReadOnly ? 'bg-red-500' : 'bg-green-500'}`}></span>
-                Population: {settlement.population}
-                {isReadOnly && <span className="ml-2 text-red-500 text-xs font-black uppercase tracking-widest">[READ ONLY - {settlementOwner.name}]</span>}
+              <h1 className="text-2xl font-black m-0 uppercase tracking-tight text-blue-400">{settlement.name}</h1>
+              <div className="text-slate-400 font-bold flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
+                <div className="flex items-center gap-1.5 text-sm">
+                  <span className={`w-2 h-2 rounded-full animate-pulse ${isReadOnly ? 'bg-red-500' : 'bg-green-500'}`}></span>
+                  Pop: {settlement.population}
+                </div>
+                <div className="flex items-center gap-1.5 text-blue-300 text-sm">
+                  <span className="text-[9px] font-black uppercase tracking-widest bg-blue-900/50 px-1.5 py-0.5 rounded border border-blue-700/50">Hammers</span>
+                  {settlement.hammers}
+                </div>
+                {settlement.productionQueue.length > 0 && (
+                  <div className="flex items-center gap-1.5 text-orange-300 text-sm">
+                    <span className="text-[9px] font-black uppercase tracking-widest bg-orange-900/50 px-1.5 py-0.5 rounded border border-orange-700/50">Building</span>
+                    <span className="truncate max-w-[120px]">{settlement.productionQueue[0].replace('_', ' ')}</span>
+                  </div>
+                )}
+                {isReadOnly && <span className="text-red-500 text-[10px] font-black uppercase tracking-widest bg-red-950/30 px-2 py-0.5 rounded border border-red-900/30">[READ ONLY - {settlementOwner.name}]</span>}
               </div>
             </div>
           </div>

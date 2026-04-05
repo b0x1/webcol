@@ -5,6 +5,12 @@ export const GoodType = {
   TOBACCO: 'TOBACCO',
   COTTON: 'COTTON',
   FURS: 'FURS',
+  SUGAR: 'SUGAR',
+  RUM: 'RUM',
+  CLOTH: 'CLOTH',
+  COATS: 'COATS',
+  CIGARS: 'CIGARS',
+  TOOLS: 'TOOLS',
   TRADE_GOODS: 'TRADE_GOODS',
   MUSKETS: 'MUSKETS',
 } as const;
@@ -56,6 +62,11 @@ export const BuildingType = {
   SCHOOLHOUSE: 'SCHOOLHOUSE',
   STOCKADE: 'STOCKADE',
   PRINTING_PRESS: 'PRINTING_PRESS',
+  DISTILLERY: 'DISTILLERY',
+  WEAVERS_SHOP: 'WEAVERS_SHOP',
+  TOBACCONISTS_SHOP: 'TOBACCONISTS_SHOP',
+  TAILORS_SHOP: 'TAILORS_SHOP',
+  ARMORY: 'ARMORY',
 } as const;
 export type BuildingType = (typeof BuildingType)[keyof typeof BuildingType];
 
@@ -65,6 +76,11 @@ export const JobType = {
   MINER: 'MINER',
   TOBACCONIST: 'TOBACCONIST',
   WEAVER: 'WEAVER',
+  CARPENTER: 'CARPENTER',
+  BLACKSMITH: 'BLACKSMITH',
+  DISTILLER: 'DISTILLER',
+  TAILOR: 'TAILOR',
+  ARMORER: 'ARMORER',
 } as const;
 export type JobType = (typeof JobType)[keyof typeof JobType];
 

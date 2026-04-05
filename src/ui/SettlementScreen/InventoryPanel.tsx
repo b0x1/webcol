@@ -17,13 +17,42 @@ export const InventoryPanel: React.FC<Props> = ({ inventory, workforce, building
     let prod = 0;
 
     // Base production from workforce
-    workforce.forEach((assignment) => {
+    workforce.forEach((assignment, unitId) => {
+      const unit = (useGameStore.getState().players.flatMap(p => p.settlements).flatMap(s => s.units).find(u => u.id === unitId));
+      let amount = 3;
+      if (unit?.specialty === assignment) {
+        amount *= 2;
+      }
+
       if (Object.values(JobType).includes(assignment as JobType)) {
-        if (assignment === JobType.FARMER && good === GoodType.FOOD) prod += 3;
-        if (assignment === JobType.LUMBERJACK && good === GoodType.LUMBER) prod += 3;
-        if (assignment === JobType.MINER && good === GoodType.ORE) prod += 3;
-        if (assignment === JobType.TOBACCONIST && good === GoodType.TOBACCO) prod += 3;
-        if (assignment === JobType.WEAVER && good === GoodType.TRADE_GOODS) prod += 3;
+        if (assignment === JobType.FARMER && good === GoodType.FOOD) prod += amount;
+        if (assignment === JobType.LUMBERJACK && good === GoodType.LUMBER) prod += amount;
+        if (assignment === JobType.MINER && good === GoodType.ORE) prod += amount;
+
+        if (assignment === JobType.TOBACCONIST && buildings.includes(BuildingType.TOBACCONISTS_SHOP)) {
+          if (good === GoodType.TOBACCO) prod -= amount;
+          if (good === GoodType.CIGARS) prod += amount;
+        }
+        if (assignment === JobType.DISTILLER && buildings.includes(BuildingType.DISTILLERY)) {
+          if (good === GoodType.SUGAR) prod -= amount;
+          if (good === GoodType.RUM) prod += amount;
+        }
+        if (assignment === JobType.TAILOR && buildings.includes(BuildingType.TAILORS_SHOP)) {
+          if (good === GoodType.FURS) prod -= amount;
+          if (good === GoodType.COATS) prod += amount;
+        }
+        if (assignment === JobType.BLACKSMITH && (buildings.includes(BuildingType.BLACKSMITHS_HOUSE) || buildings.includes(BuildingType.BLACKSMITHS_SHOP) || buildings.includes(BuildingType.IRON_WORKS))) {
+          if (good === GoodType.ORE) prod -= amount;
+          if (good === GoodType.TOOLS) prod += amount;
+        }
+        if (assignment === JobType.ARMORER && buildings.includes(BuildingType.ARMORY)) {
+          if (good === GoodType.TOOLS) prod -= amount;
+          if (good === GoodType.MUSKETS) prod += amount;
+        }
+        if (assignment === JobType.WEAVER && buildings.includes(BuildingType.WEAVERS_SHOP)) {
+           if (good === GoodType.COTTON) prod -= amount;
+           if (good === GoodType.CLOTH) prod += amount;
+        }
       } else {
         const parts = (assignment as string).split('-');
         if (parts.length === 2) {
@@ -34,8 +63,10 @@ export const InventoryPanel: React.FC<Props> = ({ inventory, workforce, building
             let tileGood: GoodType | null = null;
             switch (tile.terrainType) {
               case TerrainType.GRASSLAND:
-              case TerrainType.PLAINS:
               case TerrainType.PRAIRIE:
+                tileGood = GoodType.FOOD;
+                break;
+              case TerrainType.PLAINS:
                 tileGood = GoodType.FOOD;
                 break;
               case TerrainType.FOREST:
@@ -46,12 +77,17 @@ export const InventoryPanel: React.FC<Props> = ({ inventory, workforce, building
                 tileGood = GoodType.ORE;
                 break;
               case TerrainType.SWAMP:
+                tileGood = GoodType.SUGAR;
+                break;
               case TerrainType.MARSH:
                 tileGood = GoodType.TOBACCO;
                 break;
+              case TerrainType.TUNDRA:
+                tileGood = GoodType.FURS;
+                break;
             }
             if (tileGood === good) {
-              prod += 3;
+              prod += amount;
             }
           }
         }

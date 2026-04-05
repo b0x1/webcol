@@ -21,15 +21,33 @@ export const COLONY_CONSTANTS = {
   WAREHOUSE_CAPACITY: 400,
   DEFAULT_CAPACITY: 200,
   PRODUCTION_PER_WORKER: 3,
+  FOOD_GROWTH_THRESHOLD: 200,
+  EXPERT_PROMOTION_TURNS: 20,
 } as const;
 
-export const BUILDING_COSTS = {
-  LUMBER_MILL: 100,
-  IRON_WORKS: 150,
-  SCHOOLHOUSE: 120,
-  WAREHOUSE: 80,
-  STOCKADE: 200,
-  PRINTING_PRESS: 180,
+export interface ResourceCost {
+  hammers: number;
+  tools: number;
+}
+
+export const BUILDING_COSTS: Record<string, ResourceCost> = {
+  LUMBER_MILL: { hammers: 52, tools: 20 },
+  IRON_WORKS: { hammers: 80, tools: 40 },
+  SCHOOLHOUSE: { hammers: 60, tools: 0 },
+  WAREHOUSE: { hammers: 40, tools: 0 },
+  STOCKADE: { hammers: 64, tools: 0 },
+  PRINTING_PRESS: { hammers: 52, tools: 20 },
+  DISTILLERY: { hammers: 64, tools: 20 },
+  WEAVERS_SHOP: { hammers: 64, tools: 20 },
+  TOBACCONISTS_SHOP: { hammers: 64, tools: 20 },
+  TAILORS_SHOP: { hammers: 64, tools: 20 },
+  ARMORY: { hammers: 52, tools: 40 },
+} as const;
+
+export const UNIT_BUILD_COSTS: Record<string, ResourceCost & { muskets: number }> = {
+  COLONIST: { hammers: 40, tools: 0, muskets: 0 },
+  PIONEER: { hammers: 40, tools: 20, muskets: 0 },
+  SOLDIER: { hammers: 40, tools: 0, muskets: 50 },
 } as const;
 
 export const RECRUITMENT_COSTS = {

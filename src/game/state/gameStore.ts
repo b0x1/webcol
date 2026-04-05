@@ -261,13 +261,14 @@ export const useGameStore = create<GameState>()(
           population: 1,
           culture: nationData.culture,
           organization: nationData.organization,
-          buildings: [],
+          buildings: [BuildingType.TOWN_HALL, BuildingType.CARPENTERS_SHOP, BuildingType.BLACKSMITHS_HOUSE],
           inventory: new Map(),
           productionQueue: [],
           workforce: new Map([[unit.id, JobType.FARMER]]),
           units: [unit],
           attitude: 'NEUTRAL',
           goods: new Map(),
+          hammers: 0,
         };
 
         player.units.splice(unitIndex, 1);
@@ -280,23 +281,15 @@ export const useGameStore = create<GameState>()(
 
     buyBuilding: (settlementId, building) =>
       set((state) => {
-        const buildingCosts: Record<string, number> = {
-          ...BUILDING_COSTS,
-          [BuildingType.TOWN_HALL]: 0,
-          [BuildingType.CARPENTERS_SHOP]: 0,
-          [BuildingType.BLACKSMITHS_HOUSE]: 0,
-          [BuildingType.BLACKSMITHS_SHOP]: 0,
-          [BuildingType.STABLES]: 0,
-        };
-
-        const cost = buildingCosts[building] || 0;
         const player = state.players.find((p) => p.id === state.currentPlayerId);
-        if (!player || player.gold < cost) return;
+        if (!player) return;
 
         const settlement = player.settlements.find((s) => s.id === settlementId);
         if (settlement) {
-          settlement.buildings.push(building);
-          player.gold -= cost;
+          // Instead of instant buy, add to productionQueue if not already there or built
+          if (!settlement.buildings.includes(building) && !settlement.productionQueue.includes(building)) {
+             settlement.productionQueue.push(building);
+          }
         }
       }),
 

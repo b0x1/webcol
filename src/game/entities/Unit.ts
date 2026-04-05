@@ -1,4 +1,4 @@
-import type { GoodType, UnitType } from './types';
+import type { GoodType, UnitType, JobType } from './types';
 
 export interface Unit {
   id: string;
@@ -10,6 +10,8 @@ export interface Unit {
   maxMoves: number;
   isSkipping: boolean;
   cargo: Map<GoodType, number>;
+  specialty?: JobType;
+  turnsInJob: number;
 }
 
 export function createUnit(
@@ -30,5 +32,6 @@ export function createUnit(
     maxMoves: movesRemaining,
     isSkipping: false,
     cargo: new Map(),
+    turnsInJob: 0,
   };
 }

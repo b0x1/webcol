@@ -17,6 +17,7 @@ export interface Settlement {
   units: Unit[];
   attitude: Attitude;
   goods: Map<GoodType, number>;
+  hammers: number;
 }
 
 export function createSettlement(
@@ -45,5 +46,6 @@ export function createSettlement(
     units: [],
     attitude: 'NEUTRAL',
     goods: new Map(),
+    hammers: 0,
   };
 }

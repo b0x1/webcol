@@ -41,7 +41,9 @@ export const WorkforcePanel: React.FC<Props> = ({ settlementId, units, workforce
               className="p-3 bg-slate-800 rounded border border-slate-700 flex justify-between items-center group hover:border-slate-500 transition-colors shadow-sm"
             >
               <div>
-                <div className="text-xs font-black uppercase tracking-widest text-blue-400">{unit.type}</div>
+                <div className="text-xs font-black uppercase tracking-widest text-blue-400">
+                  {unit.type} {unit.specialty && <span className="text-yellow-400 ml-1 text-[8px] tracking-tight font-bold bg-yellow-900/40 px-1 py-0.5 rounded border border-yellow-800/30">EXPERT {unit.specialty}</span>}
+                </div>
                 <div className="text-[10px] text-slate-500 font-mono mt-0.5">
                   {isJob ? 'Assigned to Building' : `Assigned to Tile ${assignment}`}
                 </div>

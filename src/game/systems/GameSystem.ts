@@ -188,6 +188,7 @@ export class GameSystem {
       maxMoves: moves,
       isSkipping: false,
       cargo: new Map(),
+      turnsInJob: 0,
     };
   }
 }

@@ -41,8 +41,9 @@ export const AvailableUnits: React.FC<Props> = ({ settlementId, units }) => {
               <div className="w-12 h-12 bg-slate-900 rounded-full flex items-center justify-center border border-white/10 group-hover:border-blue-500/50">
                 <span className="text-lg font-black text-slate-500">{unit.type[0]}</span>
               </div>
-              <div className="text-center">
+              <div className="text-center w-full">
                 <div className="text-[10px] font-black uppercase tracking-widest text-blue-400 truncate w-full">{unit.type}</div>
+                {unit.specialty && <div className="text-[8px] text-yellow-500 font-black uppercase tracking-tighter truncate w-full">Expert {unit.specialty}</div>}
                 <div className="text-[8px] text-slate-500 font-mono mt-0.5">ID: {unit.id.slice(0, 4)}</div>
               </div>
             </div>
