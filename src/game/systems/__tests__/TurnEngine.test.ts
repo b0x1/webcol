@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { TurnEngine } from '../TurnEngine';
+import { AISystem } from '../AISystem';
 import { createPlayer } from '../../entities/Player';
 import { createTile } from '../../entities/Tile';
 import { createSettlement } from '../../entities/Settlement';
@@ -50,7 +51,7 @@ describe('TurnEngine', () => {
       const unit = createUnit('u1', 'p2', UnitType.SOLDIER, 0, 0, 1);
       ai.units.push(unit);
 
-      const updatedPlayers = TurnEngine.runAITurn([human, ai], map);
+      const updatedPlayers = AISystem.runAITurn([human, ai], map);
       const updatedUnit = updatedPlayers[1].units[0];
 
       // Unit should move from (0,0) towards (5,5)
@@ -68,7 +69,7 @@ describe('TurnEngine', () => {
       const unit = createUnit('u1', 'p1', UnitType.COLONIST, 2, 2, 1);
       ai.units.push(unit);
 
-      const updatedPlayers = TurnEngine.runAITurn([ai], map);
+      const updatedPlayers = AISystem.runAITurn([ai], map);
       const updatedAI = updatedPlayers[0];
 
       expect(updatedAI.settlements.length).toBe(1);
@@ -87,7 +88,7 @@ describe('TurnEngine', () => {
         const unit = createUnit('u1', 'p1', UnitType.COLONIST, 2, 2, 1);
         ai.units.push(unit);
 
-        const updatedPlayers = TurnEngine.runAITurn([ai], map);
+        const updatedPlayers = AISystem.runAITurn([ai], map);
         const updatedAI = updatedPlayers[0];
 
         expect(updatedAI.settlements.length).toBe(1); // Only the existing one

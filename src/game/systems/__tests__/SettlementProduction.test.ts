@@ -41,18 +41,18 @@ describe('Settlement Production and Building Logic', () => {
   it('respects inventory caps and warehouse bonus', () => {
     const player = createPlayer('p1', 'Player 1', true, 1000, Nation.NORSEMEN);
     const settlement = createSettlement('c1', 'p1', 'Settlement 1', 0, 0, 1, 'EUROPEAN', 'STATE');
-    settlement.inventory.set(GoodType.FOOD, 250);
+    settlement.inventory.set(GoodType.LUMBER, 250);
     player.settlements.push(settlement);
 
     // No warehouse, cap is 200
     let updatedPlayers = TurnEngine.runProduction([player], []);
-    expect(updatedPlayers[0].settlements[0].inventory.get(GoodType.FOOD)).toBe(200);
+    expect(updatedPlayers[0].settlements[0].inventory.get(GoodType.LUMBER)).toBe(200);
 
     // With warehouse, cap is 400
     settlement.buildings.push(BuildingType.WAREHOUSE);
-    settlement.inventory.set(GoodType.FOOD, 350);
+    settlement.inventory.set(GoodType.LUMBER, 350);
     updatedPlayers = TurnEngine.runProduction([player], []);
-    expect(updatedPlayers[0].settlements[0].inventory.get(GoodType.FOOD)).toBe(350 - 2); // 350 - (1 pop * 2 food) = 348
+    expect(updatedPlayers[0].settlements[0].inventory.get(GoodType.LUMBER)).toBe(350);
   });
 
   it('processes printing press population growth', () => {

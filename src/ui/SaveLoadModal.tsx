@@ -4,6 +4,8 @@ import { useUIStore } from '../game/state/uiStore';
 import { SaveSystem } from '../game/systems/SaveSystem';
 import type { SaveMeta } from '../game/systems/SaveSystem';
 import { eventBus } from '../game/state/EventBus';
+import { AutosaveSection } from './SaveLoadModal/components/AutosaveSection';
+import { ManualSavesSection } from './SaveLoadModal/components/ManualSavesSection';
 
 export const SaveLoadModal: React.FC = () => {
   const { isSaveModalOpen, isMainMenuOpen, setSaveModalOpen } = useUIStore();
@@ -77,100 +79,22 @@ export const SaveLoadModal: React.FC = () => {
           </div>
         </div>
 
-        <div className="mb-8">
-          <h3 className="text-lg font-bold mb-3 text-blue-400 border-b border-slate-700 pb-1">Autosave</h3>
-          {autoSave ? (
-            <div className="flex justify-between items-center p-4 bg-slate-900/50 rounded-lg border border-slate-700 hover:border-slate-500 transition-colors">
-              <div>
-                <div className="font-bold">Turn {autoSave.turn} - {autoSave.playerName}</div>
-                <div className="text-xs text-slate-400 mt-1">
-                  {new Date(autoSave.timestamp).toLocaleString()}
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleDownload('autosave')}
-                  className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded transition-colors cursor-pointer text-xs"
-                >
-                  Download
-                </button>
-                <button
-                  onClick={() => handleLoad('autosave')}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded transition-colors cursor-pointer text-sm"
-                >
-                  Load
-                </button>
-                <button
-                  onClick={() => handleDelete('autosave')}
-                  className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded transition-colors cursor-pointer text-xs"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="p-4 text-slate-500 italic bg-slate-900/30 rounded-lg border border-slate-800">No autosave found</div>
-          )}
-        </div>
+        <AutosaveSection
+          save={autoSave}
+          onLoad={handleLoad}
+          onDownload={handleDownload}
+          onDelete={handleDelete}
+        />
 
-        <h3 className="text-lg font-bold mb-3 text-blue-400 border-b border-slate-700 pb-1">Manual Saves</h3>
-        <div className="space-y-3">
-          {slots.map((slot) => {
-            const save = saves.find((s) => s.slotName === slot);
-            return (
-              <div
-                key={slot}
-                className="flex justify-between items-center p-4 bg-slate-900/50 rounded-lg border border-slate-700 hover:border-slate-500 transition-colors"
-              >
-                <div className="flex-1">
-                  <div className="font-black text-slate-300">Slot {slot}</div>
-                  {save ? (
-                    <>
-                      <div className="font-bold">Turn {save.turn} - {save.playerName}</div>
-                      <div className="text-xs text-slate-400 mt-1">
-                        {new Date(save.timestamp).toLocaleString()}
-                      </div>
-                    </>
-                  ) : (
-                    <div className="text-sm text-slate-500 italic mt-1">Empty</div>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  {!isMainMenuOpen && (
-                    <button
-                      onClick={() => handleSave(slot)}
-                      className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded transition-colors cursor-pointer text-xs"
-                    >
-                      {save ? 'Overwrite' : 'Save'}
-                    </button>
-                  )}
-                  {save && (
-                    <>
-                      <button
-                        onClick={() => handleDownload(slot)}
-                        className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded transition-colors cursor-pointer text-xs"
-                      >
-                        Download
-                      </button>
-                      <button
-                        onClick={() => handleLoad(slot)}
-                        className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded transition-colors cursor-pointer text-xs"
-                      >
-                        Load
-                      </button>
-                      <button
-                        onClick={() => handleDelete(slot)}
-                        className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded transition-colors cursor-pointer text-xs"
-                      >
-                        Delete
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <ManualSavesSection
+          slots={slots}
+          saves={saves}
+          isMainMenuOpen={isMainMenuOpen}
+          onSave={handleSave}
+          onLoad={handleLoad}
+          onDownload={handleDownload}
+          onDelete={handleDelete}
+        />
       </div>
     </div>
   );

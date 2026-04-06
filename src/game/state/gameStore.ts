@@ -7,12 +7,16 @@ import type { Unit } from '../entities/Unit';
 import type { Settlement } from '../entities/Settlement';
 import { BuildingType, GoodType, JobType, Nation, TurnPhase, UnitType, Attitude } from '../entities/types';
 import { TurnEngine } from '../systems/TurnEngine';
-import { BUILDING_COSTS, RECRUITMENT_COSTS, NATION_BONUSES } from '../constants';
+import { AISystem } from '../systems/AISystem';
+import { BUILDING_COSTS, RECRUITMENT_COSTS } from '../constants';
 import { NativeInteractionSystem } from '../systems/NativeInteractionSystem';
 import { eventBus } from './EventBus';
 import { CombatSystem } from '../systems/CombatSystem';
 import type { CombatResult } from '../systems/CombatSystem';
 import { GameSystem } from '../systems/GameSystem';
+import { SettlementSystem } from '../systems/SettlementSystem';
+import { UnitSystem } from '../systems/UnitSystem';
+import { EconomySystem } from '../systems/EconomySystem';
 
 enableMapSet();
 
@@ -97,33 +101,8 @@ export const useGameStore = create<GameState>()(
       const player = state.players.find((p) => p.id === state.currentPlayerId);
       if (!player) return;
 
-      const currentUnit = player.units.find((u) => u.id === state.selectedUnitId);
-      const availableUnits = player.units.filter((u) => u.movesRemaining > 0 && !u.isSkipping);
-
-      if (availableUnits.length === 0) return;
-
-      let nextUnit: Unit;
-      if (currentUnit) {
-        nextUnit = availableUnits.reduce((prev, curr) => {
-          if (curr.x === currentUnit.x && curr.y === currentUnit.y) {
-            const currentIdx = player.units.indexOf(currentUnit);
-            const nextSameTile = player.units
-              .slice(currentIdx + 1)
-              .find((u) => u.x === currentUnit.x && u.y === currentUnit.y && u.movesRemaining > 0 && !u.isSkipping);
-            if (nextSameTile) return nextSameTile;
-          }
-
-          const distPrev = Math.abs(prev.x - currentUnit.x) + Math.abs(prev.y - currentUnit.y);
-          const distCurr = Math.abs(curr.x - currentUnit.x) + Math.abs(curr.y - currentUnit.y);
-
-          if (curr.x === currentUnit.x && curr.y === currentUnit.y) return curr;
-          if (prev.x === currentUnit.x && prev.y === currentUnit.y) return prev;
-
-          return distCurr < distPrev ? curr : prev;
-        }, availableUnits[0]);
-      } else {
-        nextUnit = availableUnits[0];
-      }
+      const nextUnit = UnitSystem.findNextAvailableUnit(player, state.selectedUnitId);
+      if (!nextUnit) return;
 
       set((state) => {
         state.selectedUnitId = nextUnit.id;
@@ -159,12 +138,8 @@ export const useGameStore = create<GameState>()(
         const unit = player.units.find((u) => u.id === unitId);
         if (!unit) return;
 
-        if (toY < 0 || toY >= state.map.length || !state.map[toY] || toX < 0 || toX >= state.map[toY].length) {
-          return;
-        }
-        const targetTile = state.map[toY][toX];
-
-        if (unit.movesRemaining >= targetTile.movementCost) {
+        if (UnitSystem.canMoveTo(unit, toX, toY, state.map)) {
+          const targetTile = state.map[toY][toX];
           unit.x = toX;
           unit.y = toY;
           unit.movesRemaining -= targetTile.movementCost;
@@ -230,7 +205,7 @@ export const useGameStore = create<GameState>()(
       } else if (state.phase === TurnPhase.TRADE) {
         get().endTurn();
       } else if (state.phase === TurnPhase.AI) {
-        const updatedPlayers = TurnEngine.runAITurn(state.players, state.map);
+        const updatedPlayers = AISystem.runAITurn(state.players, state.map);
         set((s) => {
           s.players = updatedPlayers;
         });
@@ -254,28 +229,14 @@ export const useGameStore = create<GameState>()(
         if (unitIndex === -1) return;
         const unit = player.units[unitIndex];
 
-        const nationData = NATION_BONUSES[player.nation];
-        if (nationData.culture === 'EUROPEAN' && unit.type !== UnitType.COLONIST) return;
-        if (nationData.culture === 'NATIVE' && unit.type !== UnitType.VILLAGER) return;
+        if (!SettlementSystem.canFoundSettlement(player, unit)) return;
 
-        const newSettlement: Settlement = {
-          id: `settlement-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-          ownerId: player.id,
-          name: `${player.name}'s Settlement`,
-          x: unit.x,
-          y: unit.y,
-          population: 1,
-          culture: nationData.culture,
-          organization: nationData.organization,
-          buildings: [BuildingType.TOWN_HALL, BuildingType.CARPENTERS_SHOP, BuildingType.BLACKSMITHS_HOUSE],
-          inventory: new Map(),
-          productionQueue: [],
-          workforce: new Map([[unit.id, JobType.FARMER]]),
-          units: [unit],
-          attitude: 'NEUTRAL',
-          goods: new Map(),
-          hammers: 0,
-        };
+        const newSettlement = SettlementSystem.createSettlement(
+          player,
+          unit,
+          `${player.name}'s Settlement`,
+          [BuildingType.TOWN_HALL, BuildingType.CARPENTERS_SHOP, BuildingType.BLACKSMITHS_HOUSE]
+        );
 
         player.units.splice(unitIndex, 1);
         player.settlements.push(newSettlement);
@@ -317,37 +278,38 @@ export const useGameStore = create<GameState>()(
     sellGood: (unitId, good, amount) =>
       set((state) => {
         const player = state.players.find((p) => p.id === state.currentPlayerId);
-        if (!player) return;
+        const unit = player?.units.find((u) => u.id === unitId);
+        if (!player || !unit) return;
 
-        const unit = player.units.find((u) => u.id === unitId);
-        if (!unit) return;
+        const { goldGained, newPrice, actualSellAmount } = EconomySystem.sellGood(
+          player,
+          unit,
+          good,
+          amount,
+          state.europePrices[good]
+        );
 
-        const cargoAmount = unit.cargo.get(good) || 0;
-        const actualSellAmount = Math.min(amount, cargoAmount);
         if (actualSellAmount <= 0) return;
 
-        const price = state.europePrices[good];
-        const goldGained = actualSellAmount * price;
-
-        unit.cargo.set(good, cargoAmount - actualSellAmount);
+        unit.cargo.set(good, (unit.cargo.get(good) || 0) - actualSellAmount);
         player.gold += goldGained;
-
-        if (actualSellAmount > 20) {
-          state.europePrices[good] = Math.max(1, price - 1);
-        }
+        state.europePrices[good] = newPrice;
       }),
 
     buyGood: (unitId, good, amount) =>
       set((state) => {
         const player = state.players.find((p) => p.id === state.currentPlayerId);
-        if (!player) return;
+        const unit = player?.units.find((u) => u.id === unitId);
+        if (!player || !unit) return;
 
-        const unit = player.units.find((u) => u.id === unitId);
-        if (!unit) return;
+        const { cost, canAfford } = EconomySystem.buyGood(
+          player.gold,
+          good,
+          amount,
+          state.europePrices[good]
+        );
 
-        const price = state.europePrices[good];
-        const cost = amount * price;
-        if (player.gold < cost) return;
+        if (!canAfford) return;
 
         unit.cargo.set(good, (unit.cargo.get(good) || 0) + amount);
         player.gold -= cost;

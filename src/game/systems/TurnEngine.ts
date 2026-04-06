@@ -1,13 +1,13 @@
 import type { Player } from '../entities/Player';
 import type { Tile } from '../entities/Tile';
 import type { Settlement } from '../entities/Settlement';
-import type { Unit } from '../entities/Unit';
-import { TerrainType, GoodType, ResourceType, UnitType, JobType, BuildingType } from '../entities/types';
+import { GoodType, UnitType, JobType, BuildingType } from '../entities/types';
 import { eventBus } from '../state/EventBus';
 import { SaveSystem } from './SaveSystem';
 import type { GameState } from '../state/gameStore';
 import { BUILDING_COSTS, COLONY_CONSTANTS, UNIT_BUILD_COSTS } from '../constants';
 import { createUnit } from '../entities/Unit';
+import { JOB_PRODUCTION_RULES, TERRAIN_PRODUCTION_RULES } from '../rules/ProductionRules';
 
 export class TurnEngine {
   static autoSave(state: GameState): void {
@@ -53,83 +53,26 @@ export class TurnEngine {
             }
 
             if (Object.values(JobType).includes(assignment as JobType)) {
-              // Building-based production & Refinement
-              switch (assignment) {
-                case JobType.CARPENTER: {
-                  if (newSettlement.buildings.includes(BuildingType.CARPENTERS_SHOP) ||
-                      newSettlement.buildings.includes(BuildingType.LUMBER_MILL)) {
-                    const lumber = newSettlement.inventory.get(GoodType.LUMBER) || 0;
-                    const possible = Math.min(amount, lumber);
-                    newSettlement.inventory.set(GoodType.LUMBER, lumber - possible);
-                    newSettlement.hammers += possible;
+              const rule = JOB_PRODUCTION_RULES[assignment as JobType];
+              if (rule) {
+                const hasBuilding = rule.requiredBuildings.length === 0 ||
+                  rule.requiredBuildings.some(b => newSettlement.buildings.includes(b));
+
+                if (hasBuilding) {
+                  if (rule.inputGood) {
+                    const inputAmount = newSettlement.inventory.get(rule.inputGood) || 0;
+                    const possible = Math.min(amount, inputAmount);
+                    newSettlement.inventory.set(rule.inputGood, inputAmount - possible);
+
+                    if (rule.producesHammers) {
+                      newSettlement.hammers += possible;
+                    } else if (rule.outputGood) {
+                      newSettlement.inventory.set(rule.outputGood, (newSettlement.inventory.get(rule.outputGood) || 0) + possible);
+                    }
+                  } else if (rule.outputGood) {
+                    good = rule.outputGood;
                   }
-                  break;
                 }
-                case JobType.BLACKSMITH: {
-                  if (newSettlement.buildings.includes(BuildingType.BLACKSMITHS_HOUSE) ||
-                      newSettlement.buildings.includes(BuildingType.BLACKSMITHS_SHOP) ||
-                      newSettlement.buildings.includes(BuildingType.IRON_WORKS)) {
-                    const ore = newSettlement.inventory.get(GoodType.ORE) || 0;
-                    const possible = Math.min(amount, ore);
-                    newSettlement.inventory.set(GoodType.ORE, ore - possible);
-                    newSettlement.inventory.set(GoodType.TOOLS, (newSettlement.inventory.get(GoodType.TOOLS) || 0) + possible);
-                  }
-                  break;
-                }
-                case JobType.DISTILLER: {
-                  if (newSettlement.buildings.includes(BuildingType.DISTILLERY)) {
-                    const sugar = newSettlement.inventory.get(GoodType.SUGAR) || 0;
-                    const possible = Math.min(amount, sugar);
-                    newSettlement.inventory.set(GoodType.SUGAR, sugar - possible);
-                    newSettlement.inventory.set(GoodType.RUM, (newSettlement.inventory.get(GoodType.RUM) || 0) + possible);
-                  }
-                  break;
-                }
-                case JobType.TAILOR: {
-                  if (newSettlement.buildings.includes(BuildingType.TAILORS_SHOP)) {
-                    const furs = newSettlement.inventory.get(GoodType.FURS) || 0;
-                    const possible = Math.min(amount, furs);
-                    newSettlement.inventory.set(GoodType.FURS, furs - possible);
-                    newSettlement.inventory.set(GoodType.COATS, (newSettlement.inventory.get(GoodType.COATS) || 0) + possible);
-                  }
-                  break;
-                }
-                case JobType.TOBACCONIST: {
-                  if (newSettlement.buildings.includes(BuildingType.TOBACCONISTS_SHOP)) {
-                    const tobacco = newSettlement.inventory.get(GoodType.TOBACCO) || 0;
-                    const possible = Math.min(amount, tobacco);
-                    newSettlement.inventory.set(GoodType.TOBACCO, tobacco - possible);
-                    newSettlement.inventory.set(GoodType.CIGARS, (newSettlement.inventory.get(GoodType.CIGARS) || 0) + possible);
-                  }
-                  break;
-                }
-                case JobType.ARMORER: {
-                  if (newSettlement.buildings.includes(BuildingType.ARMORY)) {
-                    const tools = newSettlement.inventory.get(GoodType.TOOLS) || 0;
-                    const possible = Math.min(amount, tools);
-                    newSettlement.inventory.set(GoodType.TOOLS, tools - possible);
-                    newSettlement.inventory.set(GoodType.MUSKETS, (newSettlement.inventory.get(GoodType.MUSKETS) || 0) + possible);
-                  }
-                  break;
-                }
-                case JobType.WEAVER: {
-                  if (newSettlement.buildings.includes(BuildingType.WEAVERS_SHOP)) {
-                    const cotton = newSettlement.inventory.get(GoodType.COTTON) || 0;
-                    const possible = Math.min(amount, cotton);
-                    newSettlement.inventory.set(GoodType.COTTON, cotton - possible);
-                    newSettlement.inventory.set(GoodType.CLOTH, (newSettlement.inventory.get(GoodType.CLOTH) || 0) + possible);
-                  }
-                  break;
-                }
-                case JobType.FARMER:
-                  good = GoodType.FOOD;
-                  break;
-                case JobType.LUMBERJACK:
-                  good = GoodType.LUMBER;
-                  break;
-                case JobType.MINER:
-                  good = GoodType.ORE;
-                  break;
               }
             } else {
               // Tile-based production
@@ -139,31 +82,7 @@ export class TurnEngine {
                 const ty = parseInt(parts[1]);
                 const tile = map[ty]?.[tx];
                 if (tile) {
-                  switch (tile.terrainType) {
-                    case TerrainType.GRASSLAND:
-                    case TerrainType.PRAIRIE:
-                      good = GoodType.FOOD;
-                      break;
-                    case TerrainType.PLAINS:
-                      good = GoodType.COTTON;
-                      break;
-                    case TerrainType.FOREST:
-                      good = GoodType.LUMBER;
-                      break;
-                    case TerrainType.HILLS:
-                    case TerrainType.MOUNTAINS:
-                      good = GoodType.ORE;
-                      break;
-                    case TerrainType.SWAMP:
-                      good = GoodType.SUGAR;
-                      break;
-                    case TerrainType.MARSH:
-                      good = GoodType.TOBACCO;
-                      break;
-                    case TerrainType.TUNDRA:
-                      good = GoodType.FURS;
-                      break;
-                  }
+                  good = TERRAIN_PRODUCTION_RULES[tile.terrainType] || null;
                   if (tile.hasResource) {
                      // specific resource bonus could be added here
                   }
@@ -176,7 +95,18 @@ export class TurnEngine {
             }
           });
 
-          // 2. Construction
+          // 2. Building bonuses (Restored)
+          if (newSettlement.buildings.includes(BuildingType.LUMBER_MILL)) {
+            newSettlement.inventory.set(GoodType.LUMBER, (newSettlement.inventory.get(GoodType.LUMBER) || 0) + 2);
+          }
+          if (newSettlement.buildings.includes(BuildingType.IRON_WORKS)) {
+            newSettlement.inventory.set(GoodType.ORE, (newSettlement.inventory.get(GoodType.ORE) || 0) + 2);
+          }
+          if (newSettlement.buildings.includes(BuildingType.PRINTING_PRESS)) {
+            newSettlement.population += 1;
+          }
+
+          // 3. Construction
           if (newSettlement.productionQueue.length > 0) {
             const currentItem = newSettlement.productionQueue[0];
             const isBuilding = Object.values(BuildingType).includes(currentItem as BuildingType);
@@ -219,7 +149,7 @@ export class TurnEngine {
             }
           }
 
-          // 3. Population Growth & Food Consumption
+          // 4. Population Growth & Food Consumption
           const foodNeeded = newSettlement.population * 2;
           const currentFood = newSettlement.inventory.get(GoodType.FOOD) || 0;
           const netFood = currentFood - foodNeeded;
@@ -242,7 +172,7 @@ export class TurnEngine {
               newSettlement.inventory.set(GoodType.FOOD, Math.max(0, netFood));
           }
 
-          // 4. Inventory Cap
+          // 5. Inventory Cap
           const cap = newSettlement.buildings.includes(BuildingType.WAREHOUSE) ?
             COLONY_CONSTANTS.WAREHOUSE_CAPACITY : COLONY_CONSTANTS.DEFAULT_CAPACITY;
           newSettlement.inventory.forEach((amount, good) => {
@@ -263,126 +193,5 @@ export class TurnEngine {
 
     eventBus.emit('productionCompleted', updatedPlayers);
     return updatedPlayers;
-  }
-
-  static runAITurn(players: Player[], map: Tile[][]): Player[] {
-    eventBus.emit('aiTurnStarted');
-
-    const updatedPlayers = players.map((p) => ({
-      ...p,
-      units: p.units.map(u => ({ ...u, cargo: new Map(u.cargo) })),
-      settlements: p.settlements.map(c => ({
-        ...c,
-        buildings: [...c.buildings],
-        productionQueue: [...c.productionQueue],
-        inventory: new Map(c.inventory),
-        workforce: new Map(c.workforce),
-        units: c.units.map(u => ({ ...u, cargo: new Map(u.cargo) })),
-        goods: new Map(c.goods),
-      }))
-    }));
-
-    for (let i = 0; i < updatedPlayers.length; i++) {
-      const player = updatedPlayers[i];
-      if (player.isHuman) continue;
-
-      let unitIndex = 0;
-      while (unitIndex < player.units.length) {
-        const unit = player.units[unitIndex];
-        if (unit.movesRemaining <= 0) {
-          unitIndex++;
-          continue;
-        }
-
-        let unitRemoved = false;
-
-        if (unit.type === UnitType.COLONIST) {
-          const currentTile = map[unit.y][unit.x];
-          if (currentTile.terrainType === TerrainType.PLAINS) {
-            const hasAdjacentFriendlySettlement = player.settlements.some(
-              (c) => Math.abs(c.x - unit.x) <= 1 && Math.abs(c.y - unit.y) <= 1,
-            );
-            if (!hasAdjacentFriendlySettlement) {
-              const newSettlement: Settlement = {
-                id: `settlement-ai-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-                ownerId: player.id,
-                name: `${player.name}'s Settlement`,
-                x: unit.x,
-                y: unit.y,
-                population: 1,
-                culture: 'EUROPEAN',
-                organization: 'STATE',
-                buildings: [],
-                inventory: new Map(),
-                productionQueue: [],
-                workforce: new Map(),
-                units: [],
-                attitude: 'NEUTRAL',
-                goods: new Map(),
-                hammers: 0,
-              };
-              player.settlements.push(newSettlement);
-              player.units.splice(unitIndex, 1);
-              eventBus.emit('settlementFounded', newSettlement);
-              unitRemoved = true;
-            }
-          }
-        }
-
-        if (!unitRemoved) {
-          const allSettlements = updatedPlayers.flatMap((p) => p.settlements);
-          const target = this.findNearestTarget(unit, map, allSettlements);
-          if (target) {
-            const dx = Math.sign(target.x - unit.x);
-            const dy = Math.sign(target.y - unit.y);
-
-            const nx = unit.x + dx;
-            const ny = unit.y + dy;
-
-            if (ny >= 0 && ny < map.length && nx >= 0 && nx < map[ny].length) {
-              const targetTile = map[ny][nx];
-              if (unit.movesRemaining >= targetTile.movementCost) {
-                unit.x = nx;
-                unit.y = ny;
-                unit.movesRemaining -= targetTile.movementCost;
-                eventBus.emit('unitMoved', unit);
-              }
-            }
-          }
-          unitIndex++;
-        }
-      }
-    }
-
-    eventBus.emit('aiTurnCompleted', updatedPlayers);
-    return updatedPlayers;
-  }
-
-  private static findNearestTarget(
-    unit: Unit,
-    map: Tile[][],
-    allSettlements: Settlement[],
-  ): { x: number; y: number } | null {
-    let nearest: { x: number; y: number } | null = null;
-    let minDistance = Infinity;
-
-    for (let y = 0; y < map.length; y++) {
-      for (let x = 0; x < map[y].length; x++) {
-        const tile = map[y][x];
-        const isTargetType =
-          tile.terrainType === TerrainType.PLAINS || tile.hasResource === ResourceType.FOREST;
-        if (!isTargetType) continue;
-
-        const isColonized = allSettlements.some((c) => c.x === x && c.y === y);
-        if (isColonized) continue;
-
-        const dist = Math.max(Math.abs(x - unit.x), Math.abs(y - unit.y));
-        if (dist > 0 && dist < minDistance) {
-          minDistance = dist;
-          nearest = { x, y };
-        }
-      }
-    }
-    return nearest;
   }
 }

@@ -1,4 +1,4 @@
-import { TerrainType } from './TerrainType';
+import { TerrainType } from '../entities/types';
 
 export class TileMap {
   public readonly width: number;
