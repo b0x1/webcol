@@ -4,7 +4,7 @@ import { createPlayer } from '../../entities/Player';
 import { createSettlement } from '../../entities/Settlement';
 import { GoodType, JobType, BuildingType, UnitType, Nation, TerrainType } from '../../entities/types';
 import { createUnit } from '../../entities/Unit';
-import { Tile } from '../../entities/Tile';
+import type { Tile } from '../../entities/Tile';
 
 describe('Settlement Production and Building Logic', () => {
   it('calculates job-based production correctly', () => {
