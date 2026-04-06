@@ -1,6 +1,7 @@
 import type { Player } from '../entities/Player';
 import type { Unit } from '../entities/Unit';
 import type { Tile } from '../entities/Tile';
+import { MovementSystem } from './MovementSystem';
 
 export class UnitSystem {
   static findNextAvailableUnit(
@@ -33,10 +34,11 @@ export class UnitSystem {
   }
 
   static canMoveTo(unit: Unit, toX: number, toY: number, map: Tile[][]): boolean {
-     if (toY < 0 || toY >= map.length || !map[toY] || toX < 0 || toX >= map[toY].length) {
-        return false;
-      }
-      const targetTile = map[toY][toX];
-      return unit.movesRemaining >= targetTile.movementCost;
+    if (toY < 0 || toY >= map.length || !map[toY] || toX < 0 || toX >= map[toY].length) {
+      return false;
+    }
+    const targetTile = map[toY][toX];
+    const cost = MovementSystem.getMovementCost(unit, targetTile);
+    return unit.movesRemaining >= cost;
   }
 }

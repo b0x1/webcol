@@ -17,6 +17,7 @@ import { GameSystem } from '../systems/GameSystem';
 import { SettlementSystem } from '../systems/SettlementSystem';
 import { UnitSystem } from '../systems/UnitSystem';
 import { EconomySystem } from '../systems/EconomySystem';
+import { MovementSystem } from '../systems/MovementSystem';
 
 enableMapSet();
 
@@ -142,7 +143,7 @@ export const useGameStore = create<GameState>()(
           const targetTile = state.map[toY][toX];
           unit.x = toX;
           unit.y = toY;
-          unit.movesRemaining -= targetTile.movementCost;
+          unit.movesRemaining -= MovementSystem.getMovementCost(unit, targetTile);
         }
       }),
 
@@ -229,7 +230,12 @@ export const useGameStore = create<GameState>()(
         if (unitIndex === -1) return;
         const unit = player.units[unitIndex];
 
-        if (!SettlementSystem.canFoundSettlement(player, unit)) return;
+        const allSettlements = [
+          ...state.players.flatMap((p) => p.settlements),
+          ...state.npcSettlements,
+        ];
+
+        if (!SettlementSystem.canFoundSettlement(player, unit, state.map, allSettlements)) return;
 
         const newSettlement = SettlementSystem.createSettlement(
           player,
@@ -268,7 +274,11 @@ export const useGameStore = create<GameState>()(
             if (job === null) {
               settlement.workforce.delete(unitId);
             } else {
-              settlement.workforce.set(unitId, job as JobType);
+              // Sanity check: unit must be at the same coordinates as the settlement
+              const unit = p.units.find((u) => u.id === unitId);
+              if (unit && unit.x === settlement.x && unit.y === settlement.y) {
+                settlement.workforce.set(unitId, job as JobType);
+              }
             }
             return;
           }

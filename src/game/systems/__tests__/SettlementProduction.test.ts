@@ -2,8 +2,9 @@ import { describe, it, expect} from 'vitest';
 import { TurnEngine } from '../TurnEngine';
 import { createPlayer } from '../../entities/Player';
 import { createSettlement } from '../../entities/Settlement';
-import { GoodType, JobType, BuildingType, UnitType, Nation } from '../../entities/types';
+import { GoodType, JobType, BuildingType, UnitType, Nation, TerrainType } from '../../entities/types';
 import { createUnit } from '../../entities/Unit';
+import type { Tile } from '../../entities/Tile';
 
 describe('Settlement Production and Building Logic', () => {
   it('calculates job-based production correctly', () => {
@@ -21,6 +22,33 @@ describe('Settlement Production and Building Logic', () => {
     // Pop 1 consumes 2 FOOD.
     expect(updatedSettlement.inventory.get(GoodType.LUMBER)).toBe(3);
     expect(updatedSettlement.inventory.get(GoodType.FOOD)).toBe(0); // 0 - 2, clamped to 0
+  });
+
+  it('calculates tile-based production correctly', () => {
+    const player = createPlayer('p1', 'Player 1', true, 1000, Nation.SPAIN);
+    const settlement = createSettlement('c1', 'p1', 'Settlement 1', 5, 5, 1, 'EUROPEAN', 'STATE');
+    const unit = createUnit('u1', 'p1', UnitType.COLONIST, 5, 5, 1);
+    settlement.units.push(unit);
+
+    // Assign to tile 6,5 (Grassland -> Food)
+    settlement.workforce.set(unit.id, '6-5');
+    player.settlements.push(settlement);
+
+    const map: Tile[][] = [];
+    for (let y = 0; y < 10; y++) {
+      map[y] = [];
+      for (let x = 0; x < 10; x++) {
+        map[y][x] = { id: `${x}-${y}`, x, y, terrainType: TerrainType.GRASSLAND, movementCost: 1, hasResource: null };
+      }
+    }
+
+    const updatedPlayers = TurnEngine.runProduction([player], map);
+    const updatedSettlement = updatedPlayers[0].settlements[0];
+
+    // 1 worker on Grassland produces 3 FOOD.
+    // Consumption: 1 pop * 2 = 2 FOOD.
+    // Net: 3 - 2 = 1 FOOD.
+    expect(updatedSettlement.inventory.get(GoodType.FOOD)).toBe(1);
   });
 
   it('applies building bonuses correctly', () => {
@@ -63,23 +91,5 @@ describe('Settlement Production and Building Logic', () => {
 
     const updatedPlayers = TurnEngine.runProduction([player], []);
     expect(updatedPlayers[0].settlements[0].population).toBe(2);
-  });
-
-  it('deducts gold correctly when building a building', () => {
-    const buildingCosts: Record<string, number> = {
-      [BuildingType.LUMBER_MILL]: 100,
-      [BuildingType.IRON_WORKS]: 150,
-      [BuildingType.SCHOOLHOUSE]: 120,
-      [BuildingType.WAREHOUSE]: 80,
-      [BuildingType.STOCKADE]: 200,
-      [BuildingType.PRINTING_PRESS]: 180,
-      };
-
-    expect(buildingCosts[BuildingType.LUMBER_MILL]).toBe(100);
-    expect(buildingCosts[BuildingType.IRON_WORKS]).toBe(150);
-    expect(buildingCosts[BuildingType.SCHOOLHOUSE]).toBe(120);
-    expect(buildingCosts[BuildingType.WAREHOUSE]).toBe(80);
-    expect(buildingCosts[BuildingType.STOCKADE]).toBe(200);
-    expect(buildingCosts[BuildingType.PRINTING_PRESS]).toBe(180);
   });
 });

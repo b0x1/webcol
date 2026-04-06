@@ -1,116 +1,24 @@
-import React from 'react';
-import { GoodType, JobType, BuildingType, TerrainType } from '../../game/entities/types';
+import React, { useMemo } from 'react';
+import { GoodType, BuildingType } from '../../game/entities/types';
 import type { Tile } from '../../game/entities/Tile';
-import { useGameStore } from '../../game/state/gameStore';
 import type { Settlement } from '../../game/entities/Settlement';
-import type { Unit } from '../../game/entities/Unit';
-import type { Player } from '../../game/entities/Player';
+import { ProductionSystem } from '../../game/systems/ProductionSystem';
+import { COLONY_CONSTANTS } from '../../game/constants';
 
 interface Props {
-  inventory: Map<GoodType, number>;
-  workforce: Map<string, JobType | string>;
-  buildings: BuildingType[];
-  population: number;
+  settlement: Settlement;
   map: Tile[][];
-  settlementX: number;
-  settlementY: number;
 }
 
-export const InventoryPanel: React.FC<Props> = ({ inventory, workforce, buildings, population, map, settlementX, settlementY }) => {
-  const calculateProduction = (good: GoodType) => {
-    let prod = 0;
+export const InventoryPanel: React.FC<Props> = ({ settlement, map }) => {
+  const { netProduction } = useMemo(
+    () => ProductionSystem.calculateSettlementProduction(settlement, map),
+    [settlement, map]
+  );
 
-    // Base production from workforce
-    workforce.forEach((assignment, unitId) => {
-      const unit = (useGameStore.getState().players.flatMap((p: Player) => p.settlements).flatMap((s: Settlement) => s.units).find((u: Unit) => u.id === unitId));
-      let amount = 3;
-      if (unit?.specialty === assignment) {
-        amount *= 2;
-      }
-
-      if (Object.values(JobType).includes(assignment as JobType)) {
-        if (assignment === JobType.FARMER && good === GoodType.FOOD) prod += amount;
-        if (assignment === JobType.LUMBERJACK && good === GoodType.LUMBER) prod += amount;
-        if (assignment === JobType.MINER && good === GoodType.ORE) prod += amount;
-
-        if (assignment === JobType.TOBACCONIST && buildings.includes(BuildingType.TOBACCONISTS_SHOP)) {
-          if (good === GoodType.TOBACCO) prod -= amount;
-          if (good === GoodType.CIGARS) prod += amount;
-        }
-        if (assignment === JobType.DISTILLER && buildings.includes(BuildingType.DISTILLERY)) {
-          if (good === GoodType.SUGAR) prod -= amount;
-          if (good === GoodType.RUM) prod += amount;
-        }
-        if (assignment === JobType.TAILOR && buildings.includes(BuildingType.TAILORS_SHOP)) {
-          if (good === GoodType.FURS) prod -= amount;
-          if (good === GoodType.COATS) prod += amount;
-        }
-        if (assignment === JobType.BLACKSMITH && (buildings.includes(BuildingType.BLACKSMITHS_HOUSE) || buildings.includes(BuildingType.BLACKSMITHS_SHOP) || buildings.includes(BuildingType.IRON_WORKS))) {
-          if (good === GoodType.ORE) prod -= amount;
-          if (good === GoodType.TOOLS) prod += amount;
-        }
-        if (assignment === JobType.ARMORER && buildings.includes(BuildingType.ARMORY)) {
-          if (good === GoodType.TOOLS) prod -= amount;
-          if (good === GoodType.MUSKETS) prod += amount;
-        }
-        if (assignment === JobType.WEAVER && buildings.includes(BuildingType.WEAVERS_SHOP)) {
-           if (good === GoodType.COTTON) prod -= amount;
-           if (good === GoodType.CLOTH) prod += amount;
-        }
-      } else {
-        const parts = (assignment as string).split('-');
-        if (parts.length === 2) {
-          const tx = parseInt(parts[0]);
-          const ty = parseInt(parts[1]);
-          const tile = map[ty]?.[tx];
-          if (tile) {
-            let tileGood: GoodType | null = null;
-            switch (tile.terrainType) {
-              case TerrainType.GRASSLAND:
-              case TerrainType.PRAIRIE:
-                tileGood = GoodType.FOOD;
-                break;
-              case TerrainType.PLAINS:
-                tileGood = GoodType.FOOD;
-                break;
-              case TerrainType.FOREST:
-                tileGood = GoodType.LUMBER;
-                break;
-              case TerrainType.HILLS:
-              case TerrainType.MOUNTAINS:
-                tileGood = GoodType.ORE;
-                break;
-              case TerrainType.SWAMP:
-                tileGood = GoodType.SUGAR;
-                break;
-              case TerrainType.MARSH:
-                tileGood = GoodType.TOBACCO;
-                break;
-              case TerrainType.TUNDRA:
-                tileGood = GoodType.FURS;
-                break;
-            }
-            if (tileGood === good) {
-              prod += amount;
-            }
-          }
-        }
-      }
-    });
-
-    // Building bonuses
-    if (good === GoodType.LUMBER && buildings.includes(BuildingType.LUMBER_MILL)) prod += 2;
-    if (good === GoodType.ORE && buildings.includes(BuildingType.IRON_WORKS)) prod += 2;
-
-    // Food consumption
-    if (good === GoodType.FOOD) {
-        prod -= population * 2;
-    }
-
-    return prod;
-  };
-
-  const cap = buildings.includes(BuildingType.WAREHOUSE) ? 400 : 200;
+  const cap = settlement.buildings.includes(BuildingType.WAREHOUSE)
+    ? COLONY_CONSTANTS.WAREHOUSE_CAPACITY
+    : COLONY_CONSTANTS.DEFAULT_CAPACITY;
 
   return (
     <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700 shadow-inner">
@@ -128,8 +36,8 @@ export const InventoryPanel: React.FC<Props> = ({ inventory, workforce, building
         </thead>
         <tbody>
           {Object.values(GoodType).map((good) => {
-            const stock = inventory.get(good) || 0;
-            const net = calculateProduction(good);
+            const stock = settlement.inventory.get(good) || 0;
+            const net = netProduction.get(good) || 0;
             return (
               <tr key={good} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors group">
                 <td className="py-2 text-slate-300 font-medium capitalize">{good.toLowerCase().replace('_', ' ')}</td>

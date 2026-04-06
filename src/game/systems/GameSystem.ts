@@ -29,16 +29,12 @@ export class GameSystem {
 
     const map: Tile[][] = terrainData.map((row, y) =>
       row.map((type, x) => {
-        let cost = 1;
-        if (type === TerrainType.FOREST || type === TerrainType.HILLS) {
-          cost = 2;
-        }
         const tile: Tile = {
           id: `${x}-${y}`,
           x,
           y,
           terrainType: type,
-          movementCost: cost,
+          movementCost: 1, // Default, will be overridden by MovementSystem
           hasResource: null,
         };
         if (type === TerrainType.OCEAN && Math.random() < 0.05) {

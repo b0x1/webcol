@@ -7,16 +7,18 @@ import { COLONY_CONSTANTS } from '../constants';
 export class ProductionSystem {
   static calculateSettlementProduction(
     settlement: Settlement,
-    map: Tile[][]
-  ): Map<GoodType, number> {
+    map: Tile[][],
+    isActualProduction: boolean = false
+  ): { netProduction: Map<GoodType, number>; hammersProduced: number } {
     const netProduction = new Map<GoodType, number>();
+    let hammersProduced = 0;
 
     // Initialize with 0
-    Object.values(GoodType).forEach(good => netProduction.set(good, 0));
+    Object.values(GoodType).forEach((good) => netProduction.set(good, 0));
 
     // 1. Workforce production
     settlement.workforce.forEach((assignment, unitId) => {
-      const unit = settlement.units.find(u => u.id === unitId);
+      const unit = settlement.units.find((u) => u.id === unitId);
       let amount = COLONY_CONSTANTS.PRODUCTION_PER_WORKER;
 
       if (unit?.specialty === assignment) {
@@ -26,25 +28,42 @@ export class ProductionSystem {
       if (Object.values(JobType).includes(assignment as JobType)) {
         const rule = JOB_PRODUCTION_RULES[assignment as JobType];
         if (rule) {
-          const hasBuilding = rule.requiredBuildings.length === 0 ||
-            rule.requiredBuildings.some(b => settlement.buildings.includes(b));
+          // Tier system: check if player has the highest possible building from the list
+          // For now, the rule says any listed building is required.
+          // But usually, higher buildings give more production.
+          // Let's refine it: if there are required buildings, the unit can ONLY work if they have AT LEAST one.
+          // AND, if it's a refined good (inputGood exists), they MUST have a building.
+          const needsBuilding = rule.requiredBuildings.length > 0;
+          const hasBuilding =
+            !needsBuilding ||
+            rule.requiredBuildings.some((b) => settlement.buildings.includes(b));
 
           if (hasBuilding) {
             if (rule.inputGood) {
               const inputGood = rule.inputGood;
-              // Note: We don't check current inventory here for "net" calculation,
-              // but for actual production we would.
-              // For the UI, we want to show what COULD be produced if resources are available.
-              netProduction.set(inputGood, (netProduction.get(inputGood) || 0) - amount);
+              let possible = amount;
 
-              if (rule.outputGood) {
-                netProduction.set(rule.outputGood, (netProduction.get(rule.outputGood) || 0) + amount);
+              if (isActualProduction) {
+                const currentInventory = settlement.inventory.get(inputGood) || 0;
+                possible = Math.min(amount, currentInventory);
               }
-              // Hammers are handled separately in Settlement entity, not as a GoodType usually,
-              // but some systems might treat them as such.
+
+              netProduction.set(inputGood, (netProduction.get(inputGood) || 0) - possible);
+
+              if (rule.producesHammers) {
+                hammersProduced += possible;
+              } else if (rule.outputGood) {
+                netProduction.set(
+                  rule.outputGood,
+                  (netProduction.get(rule.outputGood) || 0) + possible
+                );
+              }
             } else if (rule.outputGood) {
               const outputGood = rule.outputGood;
-              netProduction.set(outputGood, (netProduction.get(outputGood) || 0) + amount);
+              netProduction.set(
+                outputGood,
+                (netProduction.get(outputGood) || 0) + amount
+              );
             }
           }
         }
@@ -77,7 +96,7 @@ export class ProductionSystem {
     const foodConsumption = settlement.population * 2;
     netProduction.set(GoodType.FOOD, (netProduction.get(GoodType.FOOD) || 0) - foodConsumption);
 
-    return netProduction;
+    return { netProduction, hammersProduced };
   }
 
   static getInventoryCapacity(settlement: Settlement): number {

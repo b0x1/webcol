@@ -56,8 +56,7 @@ export class MovementSystem {
     if (isShip) {
       if (
         tile.terrainType === TerrainType.OCEAN ||
-        tile.terrainType === TerrainType.COAST ||
-        tile.terrainType === TerrainType.MOUNTAINS
+        tile.terrainType === TerrainType.COAST
       ) {
         return 1;
       }

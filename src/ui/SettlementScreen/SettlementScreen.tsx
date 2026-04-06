@@ -73,13 +73,8 @@ export const SettlementScreen: React.FC = () => {
         <div className={`flex flex-col gap-5 ${isReadOnly ? 'pointer-events-none opacity-80' : ''}`}>
           <BuildingSlots settlementId={settlement.id} ownedBuildings={settlement.buildings} playerGold={player.gold} />
           <InventoryPanel
-            inventory={settlement.inventory}
-            workforce={settlement.workforce}
-            buildings={settlement.buildings}
-            population={settlement.population}
+            settlement={settlement}
             map={useGameStore.getState().map}
-            settlementX={settlement.x}
-            settlementY={settlement.y}
           />
         </div>
 
