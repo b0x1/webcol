@@ -52,7 +52,7 @@ export class TurnEngine {
         );
 
         netProduction.forEach((amount, good) => {
-          newSettlement.inventory.set(good, (newSettlement.inventory.get(good) || 0) + amount);
+          newSettlement.inventory.set(good, Math.max(0, (newSettlement.inventory.get(good) || 0) + amount));
         });
 
         newSettlement.hammers += hammersProduced;
@@ -105,9 +105,8 @@ export class TurnEngine {
           }
 
           // 4. Population Growth & Food Consumption
-          const foodNeeded = newSettlement.population * 2;
           const currentFood = newSettlement.inventory.get(GoodType.FOOD) || 0;
-          const netFood = currentFood - foodNeeded;
+          const netFood = currentFood;
 
           if (netFood >= COLONY_CONSTANTS.FOOD_GROWTH_THRESHOLD) {
               newSettlement.inventory.set(GoodType.FOOD, netFood - COLONY_CONSTANTS.FOOD_GROWTH_THRESHOLD);
