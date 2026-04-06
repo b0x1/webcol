@@ -30,7 +30,7 @@ export class InputHandler {
       const { x, y } = this.terrainRenderer.worldToTile(worldPoint.x, worldPoint.y);
 
       if (x >= 0 && x < mapWidth && y >= 0 && y < mapHeight) {
-        const settlement = useGameStore.getState().npcSettlements.find((s) => s.x === x && s.y === y);
+        const settlement = useGameStore.getState().players.flatMap(p => p.settlements).find((s) => s.x === x && s.y === y);
         this.terrainRenderer.showTooltip(x, y, worldPoint.x, worldPoint.y, settlement?.name);
       } else {
         this.terrainRenderer.hideTooltip();
@@ -62,14 +62,18 @@ export class InputHandler {
        unitsAtTile.push(...availableUnitsInSettlement);
     }
 
-    const npcSettlementAtTile = state.npcSettlements.find((s) => s.x === x && s.y === y);
-
     const tile = state.map[y]?.[x] || { x, y, terrainType: 'UNKNOWN', movementCost: 1, hasResource: null };
     useGameStore.getState().selectTile(tile as any);
 
-    if (settlementAtTile && unitsAtTile.length > 0) {
-       useGameStore.getState().selectUnit(null);
-       this.scene.events.emit('unitSelected', null as any);
+    if (settlementAtTile) {
+      const isOwned = settlementAtTile.ownerId === state.currentPlayerId;
+      if (unitsAtTile.length > 0 && isOwned) {
+         useGameStore.getState().selectUnit(null);
+         this.scene.events.emit('unitSelected', null as any);
+      } else {
+         useGameStore.getState().selectSettlement(settlementAtTile.id);
+         this.scene.events.emit('settlementSelected', settlementAtTile.id);
+      }
     } else if (unitsAtTile.length === 1) {
       const unit = unitsAtTile[0];
       useGameStore.getState().selectUnit(unit.id);
@@ -77,24 +81,6 @@ export class InputHandler {
     } else if (unitsAtTile.length > 1) {
       useGameStore.getState().selectUnit(null);
       this.scene.events.emit('unitSelected', null as any);
-    } else if (settlementAtTile) {
-      useGameStore.getState().selectSettlement(settlementAtTile.id);
-      this.scene.events.emit('settlementSelected', settlementAtTile.id);
-    } else if (npcSettlementAtTile) {
-      useGameStore.getState().selectSettlement(npcSettlementAtTile.id);
-      this.scene.events.emit('settlementSelected', npcSettlementAtTile.id);
-
-      const selectedUnitId = useGameStore.getState().selectedUnitId;
-      if (selectedUnitId) {
-        const selectedUnit = state.players.flatMap((p) => p.units).find((u) => u.id === selectedUnitId);
-        if (selectedUnit) {
-          if (selectedUnit.type === UnitType.SOLDIER && npcSettlementAtTile.attitude === Attitude.HOSTILE) {
-            useGameStore.getState().attackSettlement(npcSettlementAtTile.id, selectedUnitId);
-          } else if (selectedUnit.type === UnitType.COLONIST && npcSettlementAtTile.attitude !== Attitude.HOSTILE) {
-            useUIStore.getState().setNativeTradeModalOpen(true, npcSettlementAtTile.id);
-          }
-        }
-      }
     } else {
       useGameStore.getState().selectUnit(null);
       useGameStore.getState().selectSettlement(null);
@@ -111,20 +97,24 @@ export class InputHandler {
     const selectedUnit = state.players.flatMap((p) => p.units).find((u) => u.id === state.selectedUnitId);
     if (!selectedUnit) return;
 
-    const enemyUnitAtTile = state.players
+    const foreignUnitAtTile = state.players
       .filter((p) => p.id !== state.currentPlayerId)
       .flatMap((p) => p.units)
       .find((u) => u.x === x && u.y === y);
 
-    const enemySettlementAtTile = state.players
+    const foreignSettlementAtTile = state.players
       .filter((p) => p.id !== state.currentPlayerId)
       .flatMap((p) => p.settlements)
       .find((c) => c.x === x && c.y === y);
 
-    const npcSettlementAtTile = state.npcSettlements.find((s) => s.x === x && s.y === y);
-
-    if (selectedUnit.type === UnitType.SOLDIER && (enemyUnitAtTile || enemySettlementAtTile || (npcSettlementAtTile && npcSettlementAtTile.attitude === Attitude.HOSTILE))) {
+    if (selectedUnit.type === UnitType.SOLDIER && foreignUnitAtTile ) {
       useGameStore.getState().resolveCombat(selectedUnit.id, x, y);
+    } else if (selectedUnit.type === UnitType.SOLDIER && foreignSettlementAtTile ) {
+      useGameStore.getState().attackSettlement(foreignSettlementAtTile.id, selectedUnit.id);
+    } else if (selectedUnit.type === UnitType.COLONIST &&
+        foreignSettlementAtTile &&
+        foreignSettlementAtTile.attitude !== Attitude.HOSTILE) {
+      useUIStore.getState().setNativeTradeModalOpen(true, foreignSettlementAtTile.id);
     } else {
       const isReachable = reachableTiles.some((t) => t.x === x && t.y === y);
       if (isReachable) {

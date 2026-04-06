@@ -9,7 +9,7 @@ import { BuildingType, GoodType, JobType, Nation, TurnPhase, UnitType, Attitude 
 import { TurnEngine } from '../systems/TurnEngine';
 import { AISystem } from '../systems/AISystem';
 import { BUILDING_COSTS, RECRUITMENT_COSTS } from '../constants';
-import { NativeInteractionSystem } from '../systems/NativeInteractionSystem';
+import { ForeignInteractionSystem } from '../systems/ForeignInteractionSystem';
 import { eventBus } from './EventBus';
 import { CombatSystem } from '../systems/CombatSystem';
 import type { CombatResult } from '../systems/CombatSystem';
@@ -32,7 +32,6 @@ export interface GameState {
   europePrices: Record<GoodType, number>;
   map: Tile[][];
   selectedTile: Tile | null;
-  npcSettlements: Settlement[];
   combatResult: CombatResult | null;
 
   selectUnit: (unitId: string | null) => void;
@@ -84,7 +83,6 @@ export const useGameStore = create<GameState>()(
     },
     map: [],
     selectedTile: null,
-    npcSettlements: [],
     combatResult: null,
 
     selectUnit: (unitId) =>
@@ -284,10 +282,7 @@ export const useGameStore = create<GameState>()(
         if (unitIndex === -1) return;
         const unit = player.units[unitIndex];
 
-        const allSettlements = [
-          ...state.players.flatMap((p) => p.settlements),
-          ...state.npcSettlements,
-        ];
+        const allSettlements = state.players.flatMap((p) => p.settlements);
 
         if (!SettlementSystem.canFoundSettlement(player, unit, state.map, allSettlements)) return;
 
@@ -400,44 +395,55 @@ export const useGameStore = create<GameState>()(
 
     tradeWithSettlement: (settlementId, unitId, goodOffered) =>
       set((state) => {
-        const npcIndex = state.npcSettlements.findIndex((s) => s.id === settlementId);
         const player = state.players.find((p) => p.id === state.currentPlayerId);
         const unit = player?.units.find((u) => u.id === unitId);
+        if (!unit) return;
 
-        if (npcIndex === -1 || !unit) return;
+        let foreignPlayer = state.players.find(p => p.settlements.some(s => s.id === settlementId));
+        if (!foreignPlayer) return;
 
-        const { updatedSettlement, updatedUnit } = NativeInteractionSystem.trade(
-          state.npcSettlements[npcIndex],
+        const sIdx = foreignPlayer.settlements.findIndex(s => s.id === settlementId);
+
+        const { updatedSettlement, updatedUnit } = ForeignInteractionSystem.trade(
+          foreignPlayer.settlements[sIdx],
           unit,
           goodOffered
         );
 
-        state.npcSettlements[npcIndex] = updatedSettlement;
+        foreignPlayer.settlements[sIdx] = updatedSettlement;
         const uIdx = player!.units.findIndex(u => u.id === unitId);
         player!.units[uIdx] = updatedUnit;
       }),
 
     learnFromSettlement: (settlementId, unitId) =>
       set((state) => {
-        const npcIndex = state.npcSettlements.findIndex((s) => s.id === settlementId);
         const player = state.players.find((p) => p.id === state.currentPlayerId);
         const unit = player?.units.find((u) => u.id === unitId);
+        if (!unit) return;
 
-        if (npcIndex === -1 || !unit) return;
+        let foreignPlayer = state.players.find(p => p.settlements.some(s => s.id === settlementId));
+        if (!foreignPlayer) return;
 
-        const { updatedSettlement, updatedUnit } = NativeInteractionSystem.learn(
-          state.npcSettlements[npcIndex],
+        const sIdx = foreignPlayer.settlements.findIndex(s => s.id === settlementId);
+
+        const { updatedSettlement, updatedUnit } = ForeignInteractionSystem.learn(
+          foreignPlayer.settlements[sIdx],
           unit
         );
 
-        state.npcSettlements[npcIndex] = updatedSettlement;
+        foreignPlayer.settlements[sIdx] = updatedSettlement;
         const uIdx = player!.units.findIndex(u => u.id === unitId);
         player!.units[uIdx] = updatedUnit;
       }),
 
     attackSettlement: (settlementId, unitId) => {
       const state = get();
-      const settlement = state.npcSettlements.find((s) => s.id === settlementId);
+      let settlement: Settlement | undefined;
+      for (const p of state.players) {
+        settlement = p.settlements.find(s => s.id === settlementId);
+        if (settlement) break;
+      }
+
       if (settlement) {
         state.resolveCombat(unitId, settlement.x, settlement.y);
       }
@@ -480,10 +486,6 @@ export const useGameStore = create<GameState>()(
           }
         }
 
-        if (!defender) {
-          defender = state.npcSettlements.find((s) => s.x === targetX && s.y === targetY);
-        }
-
         if (!defender) return;
 
         const defenderTile = state.map[targetY][targetX];
@@ -498,17 +500,17 @@ export const useGameStore = create<GameState>()(
               }
            }
 
-           const npcIdx = state.npcSettlements.findIndex(s => s.id === defender!.id);
-           if (npcIdx !== -1) {
-              const s = state.npcSettlements[npcIdx];
-              if (s.population > 1) {
+           const capturedSettlementPlayer = state.players.find(p => p.settlements.some(s => s.id === defender!.id));
+           if (capturedSettlementPlayer && capturedSettlementPlayer.id !== state.currentPlayerId) {
+             const sIdx = capturedSettlementPlayer.settlements.findIndex(s => s.id === defender!.id);
+             const s = capturedSettlementPlayer.settlements[sIdx];
+             if (s.population > 1) {
                 s.population -= 1;
-              } else {
-                state.npcSettlements.splice(npcIdx, 1);
-              }
+             } else {
+               // capture logic below
+             }
            }
 
-           const capturedSettlementPlayer = state.players.find(p => p.settlements.some(s => s.id === defender!.id));
            if (capturedSettlementPlayer && capturedSettlementPlayer.id !== state.currentPlayerId) {
               const sIdx = capturedSettlementPlayer.settlements.findIndex(s => s.id === defender!.id);
               const s = capturedSettlementPlayer.settlements[sIdx];
@@ -587,16 +589,14 @@ export const useGameStore = create<GameState>()(
         state.selectedUnitId = null;
         state.selectedSettlementId = null;
         state.map = [];
-        state.npcSettlements = [];
       });
       eventBus.emit('returnToMainMenu');
     },
 
     initGame: (params) => {
-      const { map, npcSettlements, players } = GameSystem.initGame(params);
+      const { map, players } = GameSystem.initGame(params);
       set((state) => {
         state.map = map;
-        state.npcSettlements = npcSettlements;
         state.players = players;
         state.currentPlayerId = 'player-1';
         state.turn = 1;

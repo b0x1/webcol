@@ -10,7 +10,6 @@ export const UnitPanel: React.FC = () => {
     selectedUnitId,
     selectedTile,
     players,
-    npcSettlements,
     skipUnit,
     selectUnit,
   } = useGameStore();
@@ -94,10 +93,7 @@ export const UnitPanel: React.FC = () => {
   const isReadOnly = unit.ownerId !== currentPlayerId;
   const unitOwner = players.find(p => p.id === unit.ownerId);
 
-  const allSettlements = [
-    ...players.flatMap(p => p.settlements),
-    ...npcSettlements
-  ];
+  const allSettlements = players.flatMap(p => p.settlements);
 
   const isAdjacentToSettlement = allSettlements.some(s =>
     Math.abs(s.x - unit.x) <= 1 && Math.abs(s.y - unit.y) <= 1

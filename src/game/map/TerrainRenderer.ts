@@ -54,7 +54,7 @@ export class TerrainRenderer {
 
   public renderTileMap(
     tiles: Tile[][],
-    npcSettlements: Settlement[] = [],
+    _npcSettlements: Settlement[] = [], // Deprecated
     playerSettlements: Settlement[] = [],
   ) {
     const height = tiles.length;
@@ -114,24 +114,7 @@ export class TerrainRenderer {
       });
     });
 
-    this.renderNPCSettlements(npcSettlements);
     this.renderPlayerSettlements(playerSettlements);
-  }
-
-  private renderNPCSettlements(npcSettlements: Settlement[]) {
-    if (this.npcSettlementGraphics) {
-      this.npcSettlementGraphics.destroy(true, true);
-    }
-    this.npcSettlementGraphics = this.scene.add.group();
-
-    npcSettlements.forEach((settlement) => {
-      const { x: worldX, y: worldY } = this.tileToWorld(settlement.x, settlement.y);
-      const frame = `settlement_${settlement.organization.toLowerCase()}`;
-      const sprite = this.scene.add.image(worldX, worldY, 'other', frame)
-        .setOrigin(0, 0)
-        .setDepth(3);
-      this.npcSettlementGraphics?.add(sprite);
-    });
   }
 
   private renderPlayerSettlements(playerSettlements: Settlement[]) {

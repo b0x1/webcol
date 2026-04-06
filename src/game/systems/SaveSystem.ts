@@ -14,7 +14,6 @@ export interface SaveData {
   phase: any;
   europePrices: any;
   map: any[][];
-  npcSettlements: any[];
 }
 
 export class SaveSystem {
@@ -29,7 +28,6 @@ export class SaveSystem {
       phase: state.phase,
       europePrices: state.europePrices,
       map: state.map,
-      npcSettlements: state.npcSettlements,
     };
 
     const serialized = JSON.stringify(data, this.replacer);

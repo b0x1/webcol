@@ -4,28 +4,22 @@ import { useUIStore } from '../game/state/uiStore';
 import { Flag } from './Flag';
 
 export const ForeignSettlementModal: React.FC = () => {
-  const { selectedSettlementId, npcSettlements, players } = useGameStore();
+  const { selectedSettlementId, players } = useGameStore();
 
   if (!selectedSettlementId) return null;
 
-  const allSettlements = [
-    ...players.flatMap(p => p.settlements),
-    ...npcSettlements
-  ];
+  const allSettlements = players.flatMap(p => p.settlements);
 
   const settlement = allSettlements.find(s => s.id === selectedSettlementId);
   if (!settlement) return null;
 
+  const settlementOwner = players.find(p => p.settlements.some(s => s.id === settlement.id));
   const currentPlayerId = useGameStore.getState().currentPlayerId;
   const isOwned = settlement.ownerId === currentPlayerId;
   if (isOwned && !useUIStore.getState().isDebugMode) return null;
 
-  // For NPC settlements, the ownerId is formatted as "npc-NATION" in TerrainGenerator.ts
-  const npcIdMatch = settlement.ownerId.match(/^npc-(.*)$/);
-  const npcOriginNation = npcIdMatch ? npcIdMatch[1] : null;
-
-  const nationName =  npcOriginNation || settlement.culture;
-  const nation = npcOriginNation || 'IROQUOIS';
+  const nationName = settlementOwner?.name || settlement.culture;
+  const nation = settlementOwner?.nation || 'IROQUOIS';
 
   return (
     <div className="absolute left-5 bottom-80 w-64 bg-black/90 text-white p-5 rounded-xl pointer-events-auto shadow-2xl border border-blue-500/30 backdrop-blur-md font-sans z-50">

@@ -10,7 +10,7 @@ import { FieldPanel } from './ui/FieldPanel';
 import { MiniMap } from './ui/MiniMap';
 import { SettlementScreen } from './ui/SettlementScreen/SettlementScreen';
 import { EuropeScreen } from './ui/EuropeScreen/EuropeScreen';
-import { NativeTradeModal } from './ui/NativeTradeModal/NativeTradeModal';
+import { ForeignInteractionModal } from './ui/ForeignInteractionModal/ForeignInteractionModal';
 import { ForeignSettlementModal } from './ui/ForeignSettlementModal';
 import { CombatResultToast } from './ui/CombatResultToast';
 import { SaveLoadModal } from './ui/SaveLoadModal';
@@ -87,7 +87,7 @@ function App() {
         <SettlementScreen />
         <ForeignSettlementModal />
         <EuropeScreen />
-        <NativeTradeModal />
+        <ForeignInteractionModal />
         <CombatResultToast />
         <SaveLoadModal />
         <ReportsModal />
