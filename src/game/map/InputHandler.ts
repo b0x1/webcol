@@ -68,10 +68,14 @@ export class InputHandler {
     const tile = state.map[y]?.[x] || { x, y, terrainType: 'UNKNOWN', movementCost: 1, hasResource: null };
     useGameStore.getState().selectTile(tile as any);
 
-    if (settlementAtTile && player && settlementAtTile.ownerId === player.id) {
-      // Always trigger modal when there is a settlement + units or just to select settlement
+    if (settlementAtTile && unitsAtTile.length > 0) {
+      // Always trigger modal when there is a settlement + units (even foreign ones)
       useGameStore.getState().selectUnit(null);
       this.scene.events.emit('unitSelected', null as any);
+    } else if (settlementAtTile && player && settlementAtTile.ownerId === player.id) {
+       // Just the settlement but it's ours, still show selector to select city
+       useGameStore.getState().selectUnit(null);
+       this.scene.events.emit('unitSelected', null as any);
     } else if (unitsAtTile.length === 1) {
       const unit = unitsAtTile[0];
       useGameStore.getState().selectUnit(unit.id);

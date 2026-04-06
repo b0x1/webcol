@@ -77,11 +77,11 @@ export const UnitPanel: React.FC = () => {
      });
   }
 
-  if (!unit && selectedTile && (unitsAtTile.length > 1 || (settlementAtTile && player && settlementAtTile.ownerId === player.id))) {
+  if (!unit && selectedTile && (unitsAtTile.length > 1 || (settlementAtTile && (unitsAtTile.length > 0 || (player && settlementAtTile.ownerId === player.id))))) {
     return (
       <UnitSelector
         unitsAtTile={unitsAtTile}
-        settlementAtTile={settlementAtTile && settlementAtTile.ownerId === player?.id ? settlementAtTile : null}
+        settlementAtTile={settlementAtTile}
         players={players}
         onSelectUnit={selectUnit}
         onSelectSettlement={useGameStore.getState().selectSettlement}
