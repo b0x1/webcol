@@ -64,7 +64,7 @@ export class MovementSystem {
       return Infinity;
     }
 
-    if (tile.terrainType === TerrainType.OCEAN) {
+    if (tile.terrainType === TerrainType.OCEAN || tile.terrainType === TerrainType.COAST) {
       return Infinity;
     }
 

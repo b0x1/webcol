@@ -73,3 +73,7 @@ export const useUIStore = create<UIState>((set) => {
   setShowEndTurnConfirm: (show) => set({ showEndTurnConfirm: show }),
   };
 });
+
+if (typeof window !== 'undefined') {
+  (window as any).useUIStore = useUIStore;
+}

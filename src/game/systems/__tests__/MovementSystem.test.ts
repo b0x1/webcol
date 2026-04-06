@@ -64,4 +64,17 @@ describe('MovementSystem', () => {
     expect(reachable[0].x).toBe(6);
     expect(reachable[0].y).toBe(5);
   });
+
+  it('should restrict land units from COAST', () => {
+    const map = createMap(10, 10, TerrainType.COAST);
+    map[5][6].terrainType = TerrainType.PLAINS;
+
+    const colonist = createUnit('u1', 'p1', UnitType.COLONIST, 5, 5, 1);
+    const reachable = MovementSystem.getReachableTiles(colonist, map);
+
+    // Only (6,5) which is PLAINS should be reachable, COAST is now blocked
+    expect(reachable.length).toBe(1);
+    expect(reachable[0].x).toBe(6);
+    expect(reachable[0].y).toBe(5);
+  });
 });

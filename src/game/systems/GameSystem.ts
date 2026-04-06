@@ -166,10 +166,32 @@ export class GameSystem {
 
       // Basic AI initialization
       const aiNationData = NATION_BONUSES[aiNation];
+
+      // AI starting position search
+      let aiStartX = 1;
+      let aiStartY = 1;
+      let aiFound = false;
+
+      // Search in different quadrants for AI starting positions
+      const quadrantX = i % 2 === 0 ? 5 : dimensions.width - 15;
+      const quadrantY = i < 2 ? 5 : dimensions.height - 15;
+
+      for (let y = quadrantY; y < quadrantY + 10; y++) {
+        for (let x = quadrantX; x < quadrantX + 10; x++) {
+          if (map[y] && map[y][x] && map[y][x].terrainType !== TerrainType.OCEAN && map[y][x].terrainType !== TerrainType.COAST) {
+            aiStartX = x;
+            aiStartY = y;
+            aiFound = true;
+            break;
+          }
+        }
+        if (aiFound) break;
+      }
+
       if (aiNationData.culture === 'NATIVE') {
-         aiPlayer.units = [this.createBaseUnit(`ai-${i}-u1`, aiPlayer.id, UnitType.VILLAGER, 0, 0, 3)];
+         aiPlayer.units = [this.createBaseUnit(`ai-${i}-u1`, aiPlayer.id, UnitType.VILLAGER, aiStartX, aiStartY, 3)];
       } else {
-         aiPlayer.units = [this.createBaseUnit(`ai-${i}-u1`, aiPlayer.id, UnitType.COLONIST, 0, 0, 3)];
+         aiPlayer.units = [this.createBaseUnit(`ai-${i}-u1`, aiPlayer.id, UnitType.COLONIST, aiStartX, aiStartY, 3)];
       }
 
       players.push(aiPlayer);

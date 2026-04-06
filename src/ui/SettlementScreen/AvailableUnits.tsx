@@ -8,7 +8,13 @@ interface Props {
 }
 
 export const AvailableUnits: React.FC<Props> = ({ settlementId, units }) => {
-  const assignJob = useGameStore((state) => state.assignJob);
+  const { assignJob, players } = useGameStore();
+
+  const settlement = players.flatMap(p => p.settlements).find(s => s.id === settlementId);
+  if (!settlement) return null;
+
+  const assignedUnitIds = Array.from(settlement.workforce.keys());
+  const availableUnits = units.filter(u => !assignedUnitIds.includes(u.id));
 
   const handleDragStart = (e: React.DragEvent, unitId: string) => {
     e.dataTransfer.setData('unitId', unitId);
@@ -30,7 +36,7 @@ export const AvailableUnits: React.FC<Props> = ({ settlementId, units }) => {
     >
       <h3 className="text-lg font-black uppercase tracking-tight mb-4 text-slate-300">Available Units</h3>
       <div className="flex gap-4 min-w-max pr-4">
-        {units.map((unit) => {
+        {availableUnits.map((unit) => {
           return (
             <div
               key={unit.id}
@@ -49,7 +55,7 @@ export const AvailableUnits: React.FC<Props> = ({ settlementId, units }) => {
             </div>
           );
         })}
-        {units.length === 0 && (
+        {availableUnits.length === 0 && (
           <div className="text-slate-600 italic text-sm self-center">No units available</div>
         )}
       </div>
