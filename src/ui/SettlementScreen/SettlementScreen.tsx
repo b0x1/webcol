@@ -84,11 +84,11 @@ export const SettlementScreen: React.FC = () => {
         </div>
 
         {/* Right Side: MapGrid (Top) and Available Units (Bottom) */}
-        <div className="flex flex-col gap-4 overflow-hidden">
-          <div className="aspect-square bg-slate-900/30 rounded-xl border border-slate-800 p-4 flex items-center justify-center">
+        <div className="flex flex-col gap-4 overflow-hidden h-full">
+          <div className="flex-[2] bg-slate-900/30 rounded-xl border border-slate-800 p-4 flex items-center justify-center min-h-0">
              <MapGrid settlementId={settlement.id} />
           </div>
-          <div className="flex-1 overflow-y-auto bg-slate-900/30 rounded-xl border border-slate-800 p-4">
+          <div className="flex-[1] overflow-y-auto bg-slate-900/30 rounded-xl border border-slate-800 p-4 min-h-0">
             <AvailableUnits settlementId={settlement.id} units={settlement.units} />
           </div>
         </div>

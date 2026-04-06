@@ -32,7 +32,7 @@ export const AvailableUnits: React.FC<Props> = ({ settlementId, units }) => {
     <div
       onDragOver={(e) => e.preventDefault()}
       onDrop={handleDrop}
-      className="p-4 bg-slate-900/50 rounded-lg border border-slate-700 h-48 overflow-x-auto shadow-inner"
+      className="p-4 bg-slate-900/50 rounded-lg border border-slate-700 h-full overflow-x-auto shadow-inner"
     >
       <h3 className="text-lg font-black uppercase tracking-tight mb-4 text-slate-300">Available Units</h3>
       <div className="flex gap-4 min-w-max pr-4">

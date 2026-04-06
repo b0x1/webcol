@@ -52,14 +52,27 @@ export class InputHandler {
 
   private handleLeftClick(x: number, y: number) {
     const state = useGameStore.getState();
+    const player = state.players.find(p => p.id === state.currentPlayerId);
+
+    // Units on map + available units in own settlement
     const unitsAtTile = state.players.flatMap((p) => p.units).filter((u) => u.x === x && u.y === y);
     const settlementAtTile = state.players.flatMap((p) => p.settlements).find((c) => c.x === x && c.y === y);
+
+    if (settlementAtTile && player && settlementAtTile.ownerId === player.id) {
+       const availableUnitsInSettlement = settlementAtTile.units.filter(u => !settlementAtTile.workforce.has(u.id));
+       unitsAtTile.push(...availableUnitsInSettlement);
+    }
+
     const npcSettlementAtTile = state.npcSettlements.find((s) => s.x === x && s.y === y);
 
     const tile = state.map[y]?.[x] || { x, y, terrainType: 'UNKNOWN', movementCost: 1, hasResource: null };
     useGameStore.getState().selectTile(tile as any);
 
-    if (unitsAtTile.length === 1) {
+    if (settlementAtTile && player && settlementAtTile.ownerId === player.id) {
+      // Always trigger modal when there is a settlement + units or just to select settlement
+      useGameStore.getState().selectUnit(null);
+      this.scene.events.emit('unitSelected', null as any);
+    } else if (unitsAtTile.length === 1) {
       const unit = unitsAtTile[0];
       useGameStore.getState().selectUnit(unit.id);
       this.scene.events.emit('unitSelected', unit.id);
@@ -70,6 +83,9 @@ export class InputHandler {
       useGameStore.getState().selectSettlement(settlementAtTile.id);
       this.scene.events.emit('settlementSelected', settlementAtTile.id);
     } else if (npcSettlementAtTile) {
+      useGameStore.getState().selectSettlement(npcSettlementAtTile.id);
+      this.scene.events.emit('settlementSelected', npcSettlementAtTile.id);
+
       const selectedUnitId = useGameStore.getState().selectedUnitId;
       if (selectedUnitId) {
         const selectedUnit = state.players.flatMap((p) => p.units).find((u) => u.id === selectedUnitId);

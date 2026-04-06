@@ -28,7 +28,12 @@ export const Sprite: React.FC<SpriteProps> = ({ type, category, size = 64, class
 
   const coords = manifest?.[type];
 
-  if (!coords) return null;
+  if (!coords) {
+    if (manifest) {
+       console.warn(`Sprite type "${type}" not found in category "${category}"`);
+    }
+    return null;
+  }
 
   // Dynamically calculate total sheet size if not already in cache
   const calculateSheetSize = (m: any) => {

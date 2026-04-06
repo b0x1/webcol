@@ -59,16 +59,32 @@ export const UnitPanel: React.FC = () => {
   const allUnits = players.flatMap((p) => p.units);
   const unit = allUnits.find((u) => u.id === selectedUnitId);
 
+  const player = players.find(p => p.id === currentPlayerId);
+  const settlementAtTile = selectedTile
+    ? players.flatMap(p => p.settlements).find(s => s.x === selectedTile.x && s.y === selectedTile.y)
+    : null;
+
   const unitsAtTile = selectedTile
     ? allUnits.filter(u => u.x === selectedTile.x && u.y === selectedTile.y)
     : [];
 
-  if (!unit && unitsAtTile.length > 1) {
+  if (selectedTile && settlementAtTile && player && settlementAtTile.ownerId === player.id) {
+     const availableUnitsInSettlement = settlementAtTile.units.filter(u => !settlementAtTile.workforce.has(u.id));
+     availableUnitsInSettlement.forEach(au => {
+        if (!unitsAtTile.some(u => u.id === au.id)) {
+           unitsAtTile.push(au);
+        }
+     });
+  }
+
+  if (!unit && selectedTile && (unitsAtTile.length > 1 || (settlementAtTile && player && settlementAtTile.ownerId === player.id))) {
     return (
       <UnitSelector
         unitsAtTile={unitsAtTile}
+        settlementAtTile={settlementAtTile && settlementAtTile.ownerId === player?.id ? settlementAtTile : null}
         players={players}
         onSelectUnit={selectUnit}
+        onSelectSettlement={useGameStore.getState().selectSettlement}
       />
     );
   }

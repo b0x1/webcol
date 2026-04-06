@@ -11,6 +11,7 @@ import { MiniMap } from './ui/MiniMap';
 import { SettlementScreen } from './ui/SettlementScreen/SettlementScreen';
 import { EuropeScreen } from './ui/EuropeScreen/EuropeScreen';
 import { NativeTradeModal } from './ui/NativeTradeModal/NativeTradeModal';
+import { ForeignSettlementModal } from './ui/ForeignSettlementModal';
 import { CombatResultToast } from './ui/CombatResultToast';
 import { SaveLoadModal } from './ui/SaveLoadModal';
 import { ReportsModal } from './ui/ReportsModal';
@@ -84,6 +85,7 @@ function App() {
         <UnitPanel />
         <MiniMap />
         <SettlementScreen />
+        <ForeignSettlementModal />
         <EuropeScreen />
         <NativeTradeModal />
         <CombatResultToast />

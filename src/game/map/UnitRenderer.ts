@@ -24,6 +24,10 @@ export class UnitRenderer {
 
     players.forEach((player) => {
       player.units.forEach((unit) => {
+        // Skip rendering units that are in a settlement (except if currently selected, though gameStore logic handles that too)
+        const inSettlement = player.settlements.some(s => s.x === unit.x && s.y === unit.y);
+        if (inSettlement && selectedUnitId !== unit.id) return;
+
         const key = `${unit.x}-${unit.y}`;
         if (!unitsByTile[key]) unitsByTile[key] = [];
         unitsByTile[key].push(unit);
