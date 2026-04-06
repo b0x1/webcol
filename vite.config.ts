@@ -21,6 +21,8 @@ export default defineConfig({
     globals: true,
   },
   base: "/webcol/",  // GitHub repo name as base URL.
+  preview: { port: 4173 },
+  server: { port: 4173 },
   build: {
     outDir: "dist",
     assetsDir: "assets",
