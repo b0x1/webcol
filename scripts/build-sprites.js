@@ -5,7 +5,7 @@ import sharp from 'sharp';
 
 const TILE_SIZE = 64;
 const SPRITE_CACHE_FILE = '.sprite-cache';
-const INPUT_ROOT_DIR = path.join('src', 'assets', 'sprites');
+const INPUT_ROOT_DIR = path.join('data', 'sprites');
 const OUTPUT_DIR = 'public';
 const CATEGORIES = ['resources', 'terrain', 'units', 'other', 'flags']
 
