@@ -1,0 +1,9 @@
+<svg viewBox="0 0 64 64" width="64" height="64" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" image-rendering="pixelated">
+  <!-- Wigwams/Tepis -->
+  <path d="M10 54 L20 20 L30 54 Z" fill="#F5DEB3" stroke="black" stroke-width="2" />
+  <path d="M34 54 L44 20 L54 54 Z" fill="#F5DEB3" stroke="black" stroke-width="2" />
+  <path d="M22 58 L32 24 L42 58 Z" fill="#DEB887" stroke="black" stroke-width="2" />
+  <!-- Smoke representation -->
+  <circle cx="32" cy="15" r="3" fill="#888888" opacity="0.6" />
+  <circle cx="35" cy="8" r="2" fill="#888888" opacity="0.4" />
+</svg>

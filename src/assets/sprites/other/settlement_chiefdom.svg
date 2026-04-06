@@ -1,0 +1,9 @@
+<svg viewBox="0 0 64 64" width="64" height="64" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" image-rendering="pixelated">
+  <!-- Central Longhouse -->
+  <rect x="20" y="25" width="24" height="30" rx="10" ry="10" fill="#CD853F" stroke="black" stroke-width="2" />
+  <!-- Side Huts -->
+  <circle cx="15" cy="45" r="8" fill="#D2B48C" stroke="black" stroke-width="2" />
+  <circle cx="49" cy="45" r="8" fill="#D2B48C" stroke="black" stroke-width="2" />
+  <!-- Fence/Mound representation -->
+  <path d="M5 55 Q32 35 59 55" fill="none" stroke="#654321" stroke-width="3" />
+</svg>

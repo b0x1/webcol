@@ -1,0 +1,18 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" image-rendering="pixelated">
+  <!-- Skin -->
+  <rect x="28" y="8" width="8" height="8" fill="#f5d0b9"/>
+  <!-- Brown Vest -->
+  <rect x="24" y="16" width="16" height="24" fill="#6b4423"/>
+  <!-- White Shirt Sleeves -->
+  <rect x="20" y="16" width="4" height="20" fill="#ffffff"/>
+  <rect x="40" y="16" width="4" height="20" fill="#ffffff"/>
+  <!-- Gray Trousers -->
+  <rect x="24" y="40" width="8" height="16" fill="#707070"/>
+  <rect x="32" y="40" width="8" height="16" fill="#707070"/>
+  <!-- Black Shoes -->
+  <rect x="24" y="56" width="8" height="4" fill="#000000"/>
+  <rect x="32" y="56" width="8" height="4" fill="#000000"/>
+  <!-- Hat (Black wide-brimmed) -->
+  <rect x="20" y="8" width="24" height="4" fill="#000000"/>
+  <rect x="26" y="4" width="12" height="4" fill="#000000"/>
+</svg>

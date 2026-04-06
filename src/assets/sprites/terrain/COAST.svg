@@ -1,0 +1,9 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" image-rendering="pixelated">
+  <!-- Coastal light blue/cyan -->
+  <rect width="64" height="64" fill="#5fbcd3"/>
+  <!-- Waves -->
+  <rect x="0" y="8" width="16" height="4" fill="#88e0ef"/>
+  <rect x="24" y="24" width="24" height="4" fill="#88e0ef"/>
+  <rect x="40" y="48" width="16" height="4" fill="#88e0ef"/>
+  <rect x="8" y="56" width="12" height="4" fill="#88e0ef"/>
+</svg>

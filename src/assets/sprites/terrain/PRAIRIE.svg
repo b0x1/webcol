@@ -1,0 +1,8 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" image-rendering="pixelated">
+  <!-- Tall yellow-green Prairie grass -->
+  <rect width="64" height="64" fill="#a4b43d"/>
+  <!-- Tall grass patterns -->
+  <rect x="8" y="8" width="4" height="12" fill="#8b9a2b"/>
+  <rect x="32" y="24" width="4" height="16" fill="#8b9a2b"/>
+  <rect x="16" y="44" width="4" height="12" fill="#8b9a2b"/>
+</svg>

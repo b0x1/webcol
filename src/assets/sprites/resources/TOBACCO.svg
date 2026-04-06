@@ -1,0 +1,6 @@
+<svg viewBox="0 0 64 64" width="64" height="64" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" image-rendering="pixelated">
+  <!-- Tobacco leaves representation -->
+  <path d="M32 60 L32 20 M32 40 L15 25 M32 40 L49 25 M32 30 L20 10 M32 30 L44 10" stroke="#2E7D32" stroke-width="4" stroke-linecap="round" fill="none" />
+  <!-- Small brownish blossoms or dried leaves -->
+  <rect x="28" y="15" width="8" height="6" fill="#8D6E63" />
+</svg>

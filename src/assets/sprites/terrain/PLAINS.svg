@@ -1,0 +1,9 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" image-rendering="pixelated">
+  <!-- Soft Green Plains -->
+  <rect width="64" height="64" fill="#6ba33d"/>
+  <!-- Grass tufts -->
+  <rect x="12" y="12" width="4" height="4" fill="#4d782b"/>
+  <rect x="40" y="24" width="4" height="4" fill="#4d782b"/>
+  <rect x="20" y="44" width="4" height="4" fill="#4d782b"/>
+  <rect x="52" y="52" width="4" height="4" fill="#4d782b"/>
+</svg>

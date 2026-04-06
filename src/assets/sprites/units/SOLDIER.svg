@@ -1,0 +1,22 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" image-rendering="pixelated">
+  <!-- Redcoat Uniform -->
+  <!-- Skin -->
+  <rect x="28" y="8" width="8" height="8" fill="#f5d0b9"/>
+  <!-- Red Coat -->
+  <rect x="20" y="16" width="24" height="24" fill="#cc0000"/>
+  <!-- White Straps/Cross-belts -->
+  <rect x="24" y="16" width="4" height="24" fill="#ffffff"/>
+  <rect x="36" y="16" width="4" height="24" fill="#ffffff"/>
+  <!-- White Trousers -->
+  <rect x="24" y="40" width="8" height="16" fill="#ffffff"/>
+  <rect x="32" y="40" width="8" height="16" fill="#ffffff"/>
+  <!-- Black Tall Hat (Shako style) -->
+  <rect x="24" y="4" width="16" height="10" fill="#000000"/>
+  <rect x="28" y="4" width="8" height="2" fill="#ffcc00"/>
+  <!-- Black Boots -->
+  <rect x="24" y="56" width="8" height="4" fill="#000000"/>
+  <rect x="32" y="56" width="8" height="4" fill="#000000"/>
+  <!-- Muskets/Bayonet -->
+  <rect x="44" y="12" width="4" height="32" fill="#503010"/>
+  <rect x="44" y="8" width="2" height="4" fill="#c0c0c0"/>
+</svg>

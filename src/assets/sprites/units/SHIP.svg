@@ -1,0 +1,16 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" image-rendering="pixelated">
+  <!-- Galleon/Ship -->
+  <!-- Hull (Brown wood) -->
+  <rect x="8" y="44" width="48" height="12" fill="#5c4033"/>
+  <rect x="12" y="56" width="40" height="4" fill="#3b2b23"/>
+  <!-- Masts (Taller brown wood) -->
+  <rect x="24" y="16" width="4" height="28" fill="#5c4033"/>
+  <rect x="40" y="12" width="4" height="32" fill="#5c4033"/>
+  <!-- Sails (Off-white/Beige) -->
+  <rect x="16" y="20" width="16" height="20" fill="#f5f5dc"/>
+  <rect x="32" y="16" width="20" height="24" fill="#f5f5dc"/>
+  <!-- Rigging (Dark lines) -->
+  <rect x="20" y="16" width="28" height="2" fill="#2a1a0a"/>
+  <!-- Flags -->
+  <rect x="44" y="8" width="8" height="4" fill="#ff0000"/>
+</svg>

@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges" image-rendering="pixelated" width="64" height="64">
+  <!-- Silver / white field -->
+  <rect x="0" y="0" width="64" height="64" fill="#F0EEE0"/>
+
+  <!-- ─── Red bordure (5 px) ─── -->
+  <rect x="0"  y="0"  width="64" height="5"  fill="#C80000"/>
+  <rect x="0"  y="59" width="64" height="5"  fill="#C80000"/>
+  <rect x="0"  y="0"  width="5"  height="64" fill="#C80000"/>
+  <rect x="59" y="0"  width="5"  height="64" fill="#C80000"/>
+
+  <!-- Gold castles (simplified turrets) in bordure — 8 positions -->
+  <!-- corners -->
+  <rect x="0"  y="0"  width="5" height="5" fill="#E8B800"/>
+  <rect x="59" y="0"  width="5" height="5" fill="#E8B800"/>
+  <rect x="0"  y="59" width="5" height="5" fill="#E8B800"/>
+  <rect x="59" y="59" width="5" height="5" fill="#E8B800"/>
+  <!-- midpoints -->
+  <rect x="30" y="0"  width="4" height="5" fill="#E8B800"/>
+  <rect x="30" y="59" width="4" height="5" fill="#E8B800"/>
+  <rect x="0"  y="30" width="5" height="4" fill="#E8B800"/>
+  <rect x="59" y="30" width="5" height="4" fill="#E8B800"/>
+
+  <!-- ─── Five azure (blue) escutcheons in saltire cross ─── -->
+  <!-- Each escutcheon: 10 × 12 px                           -->
+  <!-- Centre -->
+  <rect x="27" y="26" width="10" height="12" fill="#0033AA"/>
+  <!-- Top -->
+  <rect x="27" y="12" width="10" height="12" fill="#0033AA"/>
+  <!-- Bottom -->
+  <rect x="27" y="40" width="10" height="12" fill="#0033AA"/>
+  <!-- Left -->
+  <rect x="13" y="26" width="10" height="12" fill="#0033AA"/>
+  <!-- Right -->
+  <rect x="41" y="26" width="10" height="12" fill="#0033AA"/>
+
+  <!-- ─── Silver bezants (5 per escutcheon, 4×4, arranged in saltire ×) ─── -->
+  <!-- Centre escutcheon (sx=27, sy=26) -->
+  <rect x="27" y="26" width="4" height="4" fill="#F0EEE0"/>
+  <rect x="33" y="26" width="4" height="4" fill="#F0EEE0"/>
+  <rect x="30" y="30" width="4" height="4" fill="#F0EEE0"/>
+  <rect x="27" y="34" width="4" height="4" fill="#F0EEE0"/>
+  <rect x="33" y="34" width="4" height="4" fill="#F0EEE0"/>
+  <!-- Top escutcheon (sx=27, sy=12) -->
+  <rect x="27" y="12" width="4" height="4" fill="#F0EEE0"/>
+  <rect x="33" y="12" width="4" height="4" fill="#F0EEE0"/>
+  <rect x="30" y="16" width="4" height="4" fill="#F0EEE0"/>
+  <rect x="27" y="20" width="4" height="4" fill="#F0EEE0"/>
+  <rect x="33" y="20" width="4" height="4" fill="#F0EEE0"/>
+  <!-- Bottom escutcheon (sx=27, sy=40) -->
+  <rect x="27" y="40" width="4" height="4" fill="#F0EEE0"/>
+  <rect x="33" y="40" width="4" height="4" fill="#F0EEE0"/>
+  <rect x="30" y="44" width="4" height="4" fill="#F0EEE0"/>
+  <rect x="27" y="48" width="4" height="4" fill="#F0EEE0"/>
+  <rect x="33" y="48" width="4" height="4" fill="#F0EEE0"/>
+  <!-- Left escutcheon (sx=13, sy=26) -->
+  <rect x="13" y="26" width="4" height="4" fill="#F0EEE0"/>
+  <rect x="19" y="26" width="4" height="4" fill="#F0EEE0"/>
+  <rect x="16" y="30" width="4" height="4" fill="#F0EEE0"/>
+  <rect x="13" y="34" width="4" height="4" fill="#F0EEE0"/>
+  <rect x="19" y="34" width="4" height="4" fill="#F0EEE0"/>
+  <!-- Right escutcheon (sx=41, sy=26) -->
+  <rect x="41" y="26" width="4" height="4" fill="#F0EEE0"/>
+  <rect x="47" y="26" width="4" height="4" fill="#F0EEE0"/>
+  <rect x="44" y="30" width="4" height="4" fill="#F0EEE0"/>
+  <rect x="41" y="34" width="4" height="4" fill="#F0EEE0"/>
+  <rect x="47" y="34" width="4" height="4" fill="#F0EEE0"/>
+</svg>

@@ -1,0 +1,7 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" image-rendering="pixelated">
+  <!-- Bright Green Grassland -->
+  <rect width="64" height="64" fill="#88c070"/>
+  <!-- Darker grass tufts -->
+  <rect x="16" y="16" width="4" height="4" fill="#6ba33d"/>
+  <rect x="44" y="36" width="4" height="4" fill="#6ba33d"/>
+</svg>
