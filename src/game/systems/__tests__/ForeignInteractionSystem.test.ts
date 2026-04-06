@@ -1,14 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import { NativeInteractionSystem } from '../NativeInteractionSystem';
+import { ForeignInteractionSystem } from '../ForeignInteractionSystem';
 import { createSettlement } from '../../entities/Settlement';
 import { createUnit } from '../../entities/Unit';
 import { Attitude, GoodType, UnitType } from '../../entities/types';
 
-describe('NativeInteractionSystem', () => {
+describe('ForeignInteractionSystem', () => {
   const getMockSettlement = () => {
     const s = createSettlement(
         's1',
-        'npc-AZTEC',
+        'ai-native-AZTEC',
         'Aztec Village',
         10,
         10,
@@ -31,7 +31,7 @@ describe('NativeInteractionSystem', () => {
     const mockSettlement = getMockSettlement();
     const mockUnit = getMockUnit();
 
-    const { updatedSettlement, updatedUnit, goodReceived } = NativeInteractionSystem.trade(
+    const { updatedSettlement, updatedUnit, goodReceived } = ForeignInteractionSystem.trade(
       mockSettlement,
       mockUnit,
       GoodType.TRADE_GOODS
@@ -47,7 +47,7 @@ describe('NativeInteractionSystem', () => {
     const mockSettlement = getMockSettlement();
     const mockUnit = getMockUnit();
 
-    const { updatedSettlement, updatedUnit } = NativeInteractionSystem.learn(
+    const { updatedSettlement, updatedUnit } = ForeignInteractionSystem.learn(
       mockSettlement,
       mockUnit
     );
@@ -59,14 +59,14 @@ describe('NativeInteractionSystem', () => {
   it('should throw error when non-colonist tries to learn', () => {
     const mockSettlement = getMockSettlement();
     const soldier = createUnit('u2', 'player-1', UnitType.SOLDIER, 10, 10, 3);
-    expect(() => NativeInteractionSystem.learn(mockSettlement, soldier)).toThrow();
+    expect(() => ForeignInteractionSystem.learn(mockSettlement, soldier)).toThrow();
   });
 
   it('should throw error when learning from non-friendly settlement', () => {
     const mockUnit = getMockUnit();
     const neutralSettlement = createSettlement(
       's2',
-      'npc-IROQUOIS',
+      'ai-native-IROQUOIS',
       'Sioux Village',
       20,
       20,
@@ -75,12 +75,12 @@ describe('NativeInteractionSystem', () => {
       'TRIBE'
     );
     neutralSettlement.attitude = Attitude.NEUTRAL;
-    expect(() => NativeInteractionSystem.learn(neutralSettlement, mockUnit)).toThrow();
+    expect(() => ForeignInteractionSystem.learn(neutralSettlement, mockUnit)).toThrow();
   });
 
   it('should shift attitude correctly', () => {
-    expect(NativeInteractionSystem.shiftAttitude(Attitude.FRIENDLY)).toBe(Attitude.NEUTRAL);
-    expect(NativeInteractionSystem.shiftAttitude(Attitude.NEUTRAL)).toBe(Attitude.HOSTILE);
-    expect(NativeInteractionSystem.shiftAttitude(Attitude.HOSTILE)).toBe(Attitude.HOSTILE);
+    expect(ForeignInteractionSystem.shiftAttitude(Attitude.FRIENDLY)).toBe(Attitude.NEUTRAL);
+    expect(ForeignInteractionSystem.shiftAttitude(Attitude.NEUTRAL)).toBe(Attitude.HOSTILE);
+    expect(ForeignInteractionSystem.shiftAttitude(Attitude.HOSTILE)).toBe(Attitude.HOSTILE);
   });
 });

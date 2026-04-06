@@ -100,12 +100,12 @@ export class TerrainGenerator {
 
       const nationKey = nativeNations[Math.floor(Math.random() * nativeNations.length)];
       const nationData = NATION_BONUSES[nationKey];
-      const id = `native-${settlements.length}-${Date.now()}`;
+      const id = `settlement-native-${settlements.length}-${Date.now()}`;
       const name = `${nationData.name} Settlement`;
 
       const s: Settlement = {
         id,
-        ownerId: `npc-${nationKey}`,
+        ownerId: nationKey, // Store nationKey directly as ownerId for now
         name,
         x,
         y,

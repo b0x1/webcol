@@ -2,7 +2,7 @@ import type { Settlement } from '../entities/Settlement';
 import type { Unit } from '../entities/Unit';
 import { GoodType, Attitude, UnitType } from '../entities/types';
 
-export class NativeInteractionSystem {
+export class ForeignInteractionSystem {
   static trade(
     settlement: Settlement,
     unit: Unit,
@@ -28,9 +28,9 @@ export class NativeInteractionSystem {
       (updatedSettlementGoods.get(goodOffered) || 0) + amountOffered
     );
 
-    // Native gives a random good from their inventory
-    const nativeGoods = Array.from(settlement.goods.keys()).filter(g => (settlement.goods.get(g) || 0) > 0);
-    const goodReceived = nativeGoods[Math.floor(Math.random() * nativeGoods.length)] || GoodType.FOOD;
+    // Foreigner gives a random good from their inventory
+    const foreignGoods = Array.from(settlement.goods.keys()).filter(g => (settlement.goods.get(g) || 0) > 0);
+    const goodReceived = foreignGoods[Math.floor(Math.random() * foreignGoods.length)] || GoodType.FOOD;
     const amountReceived = Math.min(20, settlement.goods.get(goodReceived) || 10);
 
     updatedUnitCargo.set(goodReceived, (updatedUnitCargo.get(goodReceived) || 0) + amountReceived);
@@ -65,7 +65,7 @@ export class NativeInteractionSystem {
     }
 
     if (unit.type !== UnitType.COLONIST) {
-      throw new Error('Only colonists can learn from natives');
+      throw new Error('Only colonists can learn from foreigners');
     }
 
     const updatedUnit: Unit = {

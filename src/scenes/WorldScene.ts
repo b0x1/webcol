@@ -52,7 +52,7 @@ export class WorldScene extends Phaser.Scene {
     const mapHeight = tiles.length;
 
     this.tileMap = new TileMap(mapWidth, mapHeight, tiles.map(row => row.map(t => t.terrainType)));
-    this.terrainRenderer.renderTileMap(tiles, state.npcSettlements, state.players.flatMap(p => p.settlements));
+    this.terrainRenderer.renderTileMap(tiles, [], state.players.flatMap(p => p.settlements));
     this.cameraManager.setup(mapWidth, mapHeight);
 
     this.inputHandler.setup(
@@ -70,11 +70,10 @@ export class WorldScene extends Phaser.Scene {
       const prevPlayerSettlements = prevState.players.flatMap(p => p.settlements);
       if (
         state.map !== prevState.map ||
-        state.npcSettlements !== prevState.npcSettlements ||
         playerSettlements.length !== prevPlayerSettlements.length ||
         !playerSettlements.every((c, i) => c === prevPlayerSettlements[i])
       ) {
-        this.terrainRenderer.renderTileMap(state.map, state.npcSettlements, playerSettlements);
+        this.terrainRenderer.renderTileMap(state.map, [], playerSettlements);
       }
 
       this.unitRenderer.render(state.players, state.selectedUnitId);

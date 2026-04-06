@@ -44,7 +44,7 @@ describe('gameStore', () => {
       player.units = [unit];
 
       const map = [
-        [createTile('t00', 0, 0, TerrainType.PLAINS, 1), createTile('t10', 1, 0, TerrainType.PLAINS, 2)],
+        [createTile('t00', 0, 0, TerrainType.PLAINS, 1), createTile('t10', 1, 0, TerrainType.FOREST, 2)],
       ];
 
       useGameStore.setState({ players: [player], currentPlayerId: 'p1', map });

@@ -38,18 +38,19 @@ describe('SaveSystem Serialization Round-trip', () => {
 
     const tile = createTile('10-10', 10, 10, TerrainType.PLAINS, 1);
 
-    const npcSettlement = createSettlement('s1', 'npc-IROQUOIS', 'Settlement 1', 15, 15, 5, 'NATIVE', 'TRIBE');
+    const npcPlayer = createPlayer('ai-native-IROQUOIS', 'Iroquois', false, 0, Nation.IROQUOIS);
+    const npcSettlement = createSettlement('s1', 'ai-native-IROQUOIS', 'Settlement 1', 15, 15, 5, 'NATIVE', 'TRIBE');
     npcSettlement.goods.set(GoodType.TRADE_GOODS, 20);
     npcSettlement.attitude = Attitude.NEUTRAL;
+    npcPlayer.settlements.push(npcSettlement);
 
     const mockState: any = {
-      players: [player1],
+      players: [player1, npcPlayer],
       currentPlayerId: 'p1',
       turn: 5,
       phase: TurnPhase.MOVEMENT,
       europePrices: { [GoodType.FOOD]: 2 },
       map: [[tile]],
-      npcSettlements: [npcSettlement],
     };
 
     // 2. Save
@@ -85,7 +86,7 @@ describe('SaveSystem Serialization Round-trip', () => {
     expect(loadedState.map![0][0].terrainType).toBe(TerrainType.PLAINS);
 
     // Check NPC Settlement and Map
-    expect(loadedState.npcSettlements![0].goods.get(GoodType.TRADE_GOODS)).toBe(20);
+    expect(loadedState.players![1].settlements[0].goods.get(GoodType.TRADE_GOODS)).toBe(20);
   });
 
   it('should manage manifest correctly', () => {

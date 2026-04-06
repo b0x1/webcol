@@ -2,8 +2,9 @@ import type { Player } from '../entities/Player';
 import type { Tile } from '../entities/Tile';
 import type { Settlement } from '../entities/Settlement';
 import type { Unit } from '../entities/Unit';
-import { TerrainType, ResourceType, UnitType } from '../entities/types';
+import { TerrainType, ResourceType, UnitType, Attitude } from '../entities/types';
 import { eventBus } from '../state/EventBus';
+import { NATION_BONUSES } from '../constants';
 
 export class AISystem {
   static runAITurn(players: Player[], map: Tile[][]): Player[] {
@@ -37,13 +38,14 @@ export class AISystem {
 
         let unitRemoved = false;
 
-        if (unit.type === UnitType.COLONIST) {
+        if (unit.type === UnitType.COLONIST || unit.type === UnitType.VILLAGER) {
           const currentTile = map[unit.y][unit.x];
-          if (currentTile.terrainType === TerrainType.PLAINS) {
-            const hasAdjacentFriendlySettlement = player.settlements.some(
+          const nationData = NATION_BONUSES[player.nation];
+          if (currentTile.terrainType === TerrainType.PLAINS || currentTile.terrainType === TerrainType.GRASSLAND || currentTile.terrainType === TerrainType.PRAIRIE) {
+            const hasAdjacentSettlement = updatedPlayers.flatMap(p => p.settlements).some(
               (c) => Math.abs(c.x - unit.x) <= 1 && Math.abs(c.y - unit.y) <= 1,
             );
-            if (!hasAdjacentFriendlySettlement) {
+            if (!hasAdjacentSettlement) {
               const newSettlement: Settlement = {
                 id: `settlement-ai-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
                 ownerId: player.id,
@@ -51,14 +53,14 @@ export class AISystem {
                 x: unit.x,
                 y: unit.y,
                 population: 1,
-                culture: 'EUROPEAN',
-                organization: 'STATE',
+                culture: nationData.culture,
+                organization: nationData.organization,
                 buildings: [],
                 inventory: new Map(),
                 productionQueue: [],
                 workforce: new Map(),
                 units: [],
-                attitude: 'NEUTRAL',
+                attitude: Attitude.NEUTRAL,
                 goods: new Map(),
                 hammers: 0,
               };

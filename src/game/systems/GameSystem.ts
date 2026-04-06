@@ -9,7 +9,6 @@ import type { Unit } from '../entities/Unit';
 export class GameSystem {
   static initGame(params: { playerName: string; nation: Nation; mapSize: 'Small' | 'Medium' | 'Large'; aiCount: number }): {
     map: Tile[][];
-    npcSettlements: Settlement[];
     players: Player[];
   } {
     const { playerName, nation, mapSize, aiCount } = params;
@@ -21,11 +20,7 @@ export class GameSystem {
 
     const generator = new TerrainGenerator(dimensions.width, dimensions.height);
     const terrainData = generator.generate();
-    const npcSettlements = generator.generateSettlements(terrainData);
-
-    if (nation === Nation.FRANCE) {
-      npcSettlements.forEach(s => s.attitude = Attitude.FRIENDLY);
-    }
+    const generatedNativeSettlements = generator.generateSettlements(terrainData);
 
     const map: Tile[][] = terrainData.map((row, y) =>
       row.map((type, x) => {
@@ -146,13 +141,17 @@ export class GameSystem {
     humanPlayer.units = units;
 
     const players = [humanPlayer];
-    const availableNations = (Object.keys(Nation) as Nation[]).filter(n => n !== nation);
+    const allNations = Object.keys(Nation) as Nation[];
+    const europeanNations = allNations.filter(n => NATION_BONUSES[n].culture === 'EUROPEAN');
+    const nativeNations = allNations.filter(n => NATION_BONUSES[n].culture === 'NATIVE');
 
+    // Create European AI Players
+    const availableEuropeanNations = europeanNations.filter(n => n !== nation);
     for (let i = 0; i < aiCount; i++) {
-      const aiNation = availableNations.splice(Math.floor(Math.random() * availableNations.length), 1)[0] || Nation.PORTUGAL;
+      const aiNation = availableEuropeanNations.splice(Math.floor(Math.random() * availableEuropeanNations.length), 1)[0] || Nation.PORTUGAL;
       const aiPlayer: Player = {
-        id: `ai-${i}`,
-        name: `AI Opponent ${i + 1}`,
+        id: `ai-euro-${i}`,
+        name: `${NATION_BONUSES[aiNation].name} AI`,
         isHuman: false,
         gold: 100,
         nation: aiNation,
@@ -160,15 +159,10 @@ export class GameSystem {
         settlements: [],
       };
 
-      // Basic AI initialization
-      const aiNationData = NATION_BONUSES[aiNation];
-
-      // AI starting position search
+      // Search in different quadrants for AI starting positions
       let aiStartX = 1;
       let aiStartY = 1;
       let aiFound = false;
-
-      // Search in different quadrants for AI starting positions
       const quadrantX = i % 2 === 0 ? 5 : dimensions.width - 15;
       const quadrantY = i < 2 ? 5 : dimensions.height - 15;
 
@@ -184,16 +178,40 @@ export class GameSystem {
         if (aiFound) break;
       }
 
-      if (aiNationData.culture === 'NATIVE') {
-         aiPlayer.units = [this.createBaseUnit(`ai-${i}-u1`, aiPlayer.id, UnitType.VILLAGER, aiStartX, aiStartY, 3)];
-      } else {
-         aiPlayer.units = [this.createBaseUnit(`ai-${i}-u1`, aiPlayer.id, UnitType.COLONIST, aiStartX, aiStartY, 3)];
-      }
-
+      aiPlayer.units = [this.createBaseUnit(`ai-euro-${i}-u1`, aiPlayer.id, UnitType.COLONIST, aiStartX, aiStartY, 3)];
       players.push(aiPlayer);
     }
 
-    return { map, npcSettlements, players };
+    // Create Native AI Players based on generated settlements
+    const settlementsByNation = new Map<Nation, Settlement[]>();
+    generatedNativeSettlements.forEach(s => {
+      const n = s.ownerId as Nation;
+      if (!settlementsByNation.has(n)) settlementsByNation.set(n, []);
+      settlementsByNation.get(n)!.push(s);
+    });
+
+    settlementsByNation.forEach((settlements, nativeNation) => {
+      const aiPlayer: Player = {
+        id: `ai-native-${nativeNation}`,
+        name: NATION_BONUSES[nativeNation].name,
+        isHuman: false,
+        gold: 0,
+        nation: nativeNation,
+        units: [],
+        settlements: settlements.map(s => ({
+           ...s,
+           ownerId: `ai-native-${nativeNation}`,
+           attitude: nation === Nation.FRANCE ? Attitude.FRIENDLY : s.attitude
+        })),
+      };
+      // Give each native nation a villager at their first settlement
+      if (settlements.length > 0) {
+        aiPlayer.units.push(this.createBaseUnit(`ai-native-${nativeNation}-u1`, aiPlayer.id, UnitType.VILLAGER, settlements[0].x, settlements[0].y, 3));
+      }
+      players.push(aiPlayer);
+    });
+
+    return { map, players };
   }
 
   private static createBaseUnit(id: string, ownerId: string, type: UnitType, x: number, y: number, moves: number): Unit {
