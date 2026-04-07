@@ -57,17 +57,11 @@ export const SaveLoadModal: React.FC = () => {
     <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-[2000] pointer-events-auto backdrop-blur-sm">
       <div className="bg-slate-800 text-white p-6 rounded-xl w-[500px] max-h-[80vh] overflow-y-auto border border-slate-500 shadow-2xl">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-black uppercase tracking-tight">
-            Save / Load Game
-          </h2>
+          <h2 className="text-2xl font-black uppercase tracking-tight">Save / Load Game</h2>
           <div className="flex gap-2">
             <button
               onClick={() => {
-                if (
-                  confirm(
-                    'Are you sure you want to return to the main menu? Unsaved progress will be lost.',
-                  )
-                ) {
+                if (confirm('Are you sure you want to return to the main menu? Unsaved progress will be lost.')) {
                   resetGame();
                   setSaveModalOpen(false);
                 }

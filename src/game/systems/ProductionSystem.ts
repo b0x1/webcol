@@ -1,17 +1,14 @@
 import type { Settlement } from '../entities/Settlement';
 import type { Tile } from '../entities/Tile';
 import { BuildingType, GoodType, JobType } from '../entities/types';
-import {
-  JOB_PRODUCTION_RULES,
-  TERRAIN_PRODUCTION_RULES,
-} from '../rules/ProductionRules';
+import { JOB_PRODUCTION_RULES, TERRAIN_PRODUCTION_RULES } from '../rules/ProductionRules';
 import { COLONY_CONSTANTS } from '../constants';
 
 export class ProductionSystem {
   static calculateSettlementProduction(
     settlement: Settlement,
     map: Tile[][],
-    isActualProduction = false,
+    isActualProduction: boolean = false
   ): { netProduction: Map<GoodType, number>; hammersProduced: number } {
     const netProduction = new Map<GoodType, number>();
     let hammersProduced = 0;
@@ -39,9 +36,7 @@ export class ProductionSystem {
           const needsBuilding = rule.requiredBuildings.length > 0;
           const hasBuilding =
             !needsBuilding ||
-            rule.requiredBuildings.some((b) =>
-              settlement.buildings.includes(b),
-            );
+            rule.requiredBuildings.some((b) => settlement.buildings.includes(b));
 
           if (hasBuilding) {
             if (rule.inputGood) {
@@ -49,29 +44,25 @@ export class ProductionSystem {
               let possible = amount;
 
               if (isActualProduction) {
-                const currentInventory =
-                  settlement.inventory.get(inputGood) || 0;
+                const currentInventory = settlement.inventory.get(inputGood) || 0;
                 possible = Math.min(amount, currentInventory);
               }
 
-              netProduction.set(
-                inputGood,
-                (netProduction.get(inputGood) || 0) - possible,
-              );
+              netProduction.set(inputGood, (netProduction.get(inputGood) || 0) - possible);
 
               if (rule.producesHammers) {
                 hammersProduced += possible;
               } else if (rule.outputGood) {
                 netProduction.set(
                   rule.outputGood,
-                  (netProduction.get(rule.outputGood) || 0) + possible,
+                  (netProduction.get(rule.outputGood) || 0) + possible
                 );
               }
             } else if (rule.outputGood) {
               const outputGood = rule.outputGood;
               netProduction.set(
                 outputGood,
-                (netProduction.get(outputGood) || 0) + amount,
+                (netProduction.get(outputGood) || 0) + amount
               );
             }
           }
@@ -95,24 +86,15 @@ export class ProductionSystem {
 
     // 2. Building bonuses
     if (settlement.buildings.includes(BuildingType.LUMBER_MILL)) {
-      netProduction.set(
-        GoodType.LUMBER,
-        (netProduction.get(GoodType.LUMBER) || 0) + 2,
-      );
+      netProduction.set(GoodType.LUMBER, (netProduction.get(GoodType.LUMBER) || 0) + 2);
     }
     if (settlement.buildings.includes(BuildingType.IRON_WORKS)) {
-      netProduction.set(
-        GoodType.ORE,
-        (netProduction.get(GoodType.ORE) || 0) + 2,
-      );
+      netProduction.set(GoodType.ORE, (netProduction.get(GoodType.ORE) || 0) + 2);
     }
 
     // 3. Food consumption
     const foodConsumption = settlement.population * 2;
-    netProduction.set(
-      GoodType.FOOD,
-      (netProduction.get(GoodType.FOOD) || 0) - foodConsumption,
-    );
+    netProduction.set(GoodType.FOOD, (netProduction.get(GoodType.FOOD) || 0) - foodConsumption);
 
     return { netProduction, hammersProduced };
   }

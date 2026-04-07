@@ -26,21 +26,12 @@ export class MainMenuScene extends Phaser.Scene {
     ['terrain', 'resources', 'other'].forEach((key) => {
       SpriteLoader.register(this, key);
     });
-    const width =
-      Math.ceil(this.cameras.main.width / MAP_CONSTANTS.TILE_SIZE) + 1;
-    const height =
-      Math.ceil(this.cameras.main.height / MAP_CONSTANTS.TILE_SIZE) + 1;
+    const width = Math.ceil(this.cameras.main.width / MAP_CONSTANTS.TILE_SIZE) + 1;
+    const height = Math.ceil(this.cameras.main.height / MAP_CONSTANTS.TILE_SIZE) + 1;
 
-    this.terrainRenderer = new TerrainRenderer(
-      this as any,
-      MAP_CONSTANTS.TILE_SIZE,
-    );
+    this.terrainRenderer = new TerrainRenderer(this as any, MAP_CONSTANTS.TILE_SIZE);
 
-    const generator = new TerrainGenerator(
-      width,
-      height,
-      `menu-bg-${Date.now()}`,
-    );
+    const generator = new TerrainGenerator(width, height, `menu-bg-${Date.now()}`);
     const terrainData = generator.generate();
 
     const tiles: Tile[][] = terrainData.map((row, y) =>
@@ -57,7 +48,7 @@ export class MainMenuScene extends Phaser.Scene {
           movementCost: cost,
           hasResource: null,
         };
-      }),
+      })
     );
 
     this.terrainRenderer.renderTileMap(tiles, []);

@@ -11,11 +11,7 @@ export class CameraManager {
   private readonly scrollSpeed = 30;
   private readonly zoomSpeed = 0.02;
 
-  constructor(
-    private scene: Phaser.Scene,
-    private terrainRenderer: TerrainRenderer,
-    private tileSize: number,
-  ) {
+  constructor(private scene: Phaser.Scene, private terrainRenderer: TerrainRenderer, private tileSize: number) {
     this.cursors = scene.input.keyboard!.createCursorKeys();
     this.zoomKeys = {
       plus: scene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS),
@@ -28,7 +24,7 @@ export class CameraManager {
       0,
       0,
       mapWidth * this.tileSize,
-      mapHeight * this.tileSize,
+      mapHeight * this.tileSize
     );
   }
 

@@ -1,18 +1,17 @@
-import React, {
-  useRef,
-  useEffect,
-  useState,
-  useCallback,
-  useMemo,
-} from 'react';
+import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { useGameStore } from '../game/state/gameStore';
 import { useUIStore } from '../game/state/uiStore';
 import { eventBus } from '../game/state/EventBus';
 import { MiniMapCanvas } from './MiniMap/components/MiniMapCanvas';
 
 export const MiniMap: React.FC = () => {
-  const { map, players, currentPlayerId, selectNextUnit, endTurn } =
-    useGameStore();
+  const {
+    map,
+    players,
+    currentPlayerId,
+    selectNextUnit,
+    endTurn,
+  } = useGameStore();
 
   const {
     isMainMenuOpen,
@@ -24,7 +23,7 @@ export const MiniMap: React.FC = () => {
     isHowToPlayModalOpen,
     isGameSetupModalOpen,
     showEndTurnConfirm,
-    setShowEndTurnConfirm,
+    setShowEndTurnConfirm
   } = useUIStore();
 
   const isAnyModalOpen =
@@ -38,17 +37,8 @@ export const MiniMap: React.FC = () => {
 
   const [viewport, setViewport] = useState({ x: 0, y: 0, width: 0, height: 0 });
 
-  const currentPlayer = useMemo(
-    () => players.find((p) => p.id === currentPlayerId),
-    [players, currentPlayerId],
-  );
-  const availableUnits = useMemo(
-    () =>
-      currentPlayer?.units.filter(
-        (u) => u.movesRemaining > 0 && !u.isSkipping,
-      ) || [],
-    [currentPlayer],
-  );
+  const currentPlayer = useMemo(() => players.find((p) => p.id === currentPlayerId), [players, currentPlayerId]);
+  const availableUnits = useMemo(() => currentPlayer?.units.filter((u) => u.movesRemaining > 0 && !u.isSkipping) || [], [currentPlayer]);
   const hasAvailableUnits = availableUnits.length > 0;
 
   const handleEndTurn = useCallback(() => {
@@ -108,9 +98,7 @@ export const MiniMap: React.FC = () => {
             : 'bg-red-700 hover:bg-red-600 text-white border-red-500'
         }`}
       >
-        {hasAvailableUnits
-          ? `Next Unit (${availableUnits.length})`
-          : 'End Turn'}
+        {hasAvailableUnits ? `Next Unit (${availableUnits.length})` : 'End Turn'}
       </button>
     </div>
   );

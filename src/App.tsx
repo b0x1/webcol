@@ -23,14 +23,20 @@ import { EndTurnConfirmationModal } from './ui/EndTurnConfirmationModal';
 
 function App() {
   const gameRef = useRef<Phaser.Game | null>(null);
-  const { selectUnit, selectSettlement, endTurn, players, currentPlayerId } =
-    useGameStore();
-  const { showEndTurnConfirm, setShowEndTurnConfirm } = useUIStore();
+  const {
+    selectUnit,
+    selectSettlement,
+    endTurn,
+    players,
+    currentPlayerId
+  } = useGameStore();
+  const {
+    showEndTurnConfirm,
+    setShowEndTurnConfirm
+  } = useUIStore();
 
-  const currentPlayer = players.find((p) => p.id === currentPlayerId);
-  const availableUnits =
-    currentPlayer?.units.filter((u) => u.movesRemaining > 0 && !u.isSkipping) ||
-    [];
+  const currentPlayer = players.find(p => p.id === currentPlayerId);
+  const availableUnits = currentPlayer?.units.filter(u => u.movesRemaining > 0 && !u.isSkipping) || [];
 
   useEffect(() => {
     if (gameRef.current) return;
@@ -56,12 +62,9 @@ function App() {
         worldScene.events.on('unitSelected', (unitId: string | null) => {
           selectUnit(unitId);
         });
-        worldScene.events.on(
-          'settlementSelected',
-          (settlementId: string | null) => {
-            selectSettlement(settlementId);
-          },
-        );
+        worldScene.events.on('settlementSelected', (settlementId: string | null) => {
+          selectSettlement(settlementId);
+        });
       }
     });
 

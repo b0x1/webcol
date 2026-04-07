@@ -44,10 +44,7 @@ export const BUILDING_COSTS: Record<string, ResourceCost> = {
   ARMORY: { hammers: 52, tools: 40 },
 } as const;
 
-export const UNIT_BUILD_COSTS: Record<
-  string,
-  ResourceCost & { muskets: number }
-> = {
+export const UNIT_BUILD_COSTS: Record<string, ResourceCost & { muskets: number }> = {
   COLONIST: { hammers: 40, tools: 0, muskets: 0 },
   PIONEER: { hammers: 40, tools: 20, muskets: 0 },
   SOLDIER: { hammers: 40, tools: 0, muskets: 50 },
@@ -83,56 +80,49 @@ export const NATION_BONUSES: Record<string, NationData> = {
   ENGLAND: {
     name: 'England',
     bonus: '+1 COLONIST at start',
-    description:
-      'The English crown provides an extra colonist to help jumpstart your settlement.',
+    description: 'The English crown provides an extra colonist to help jumpstart your settlement.',
     culture: 'EUROPEAN',
     organization: 'STATE',
   },
   FRANCE: {
     name: 'France',
     bonus: 'Native attitudes start FRIENDLY',
-    description:
-      'French explorers are skilled at diplomacy, ensuring peaceful relations with natives from the start.',
+    description: 'French explorers are skilled at diplomacy, ensuring peaceful relations with natives from the start.',
     culture: 'EUROPEAN',
     organization: 'STATE',
   },
   SPAIN: {
     name: 'Spain',
     bonus: 'SOLDIER units cost 600g instead of 800g',
-    description:
-      'The Spanish Empire maintains a powerful military at a reduced cost.',
+    description: 'The Spanish Empire maintains a powerful military at a reduced cost.',
     culture: 'EUROPEAN',
     organization: 'STATE',
   },
   NETHERLANDS: {
     name: 'Netherlands',
     bonus: 'Starting gold 200 instead of 100',
-    description:
-      'Dutch merchants start with a larger treasury to fund their colonial ventures.',
+    description: 'Dutch merchants start with a larger treasury to fund their colonial ventures.',
     culture: 'EUROPEAN',
     organization: 'STATE',
   },
   NORSEMEN: {
     name: 'Norsemen',
     bonus: 'Seafaring experts',
-    description:
-      'Descendants of Vikings, skilled in seafaring and exploration.',
+    description: 'Descendants of Vikings, skilled in seafaring and exploration.',
     culture: 'EUROPEAN',
     organization: 'STATE',
   },
   PORTUGAL: {
     name: 'Portugal',
     bonus: 'Expert navigators',
-    description:
-      'Renowned for their navigation and early exploration of the new world.',
+    description: 'Renowned for their navigation and early exploration of the new world.',
     culture: 'EUROPEAN',
     organization: 'STATE',
   },
   AZTEC: {
     name: 'Aztec',
     bonus: 'Powerful state organization',
-    description:
-      'A mighty empire with highly organized military and agriculture.',
+    description: 'A mighty empire with highly organized military and agriculture.',
     culture: 'NATIVE',
     organization: 'STATE',
   },

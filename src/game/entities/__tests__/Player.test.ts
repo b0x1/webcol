@@ -6,13 +6,7 @@ import { UnitType, Nation } from '../types';
 
 describe('Player', () => {
   it('should initialize with correct values', () => {
-    const player = createPlayer(
-      'player-1',
-      'Human Player',
-      true,
-      500,
-      Nation.ENGLAND,
-    );
+    const player = createPlayer('player-1', 'Human Player', true, 500, Nation.ENGLAND);
     expect(player.id).toBe('player-1');
     expect(player.name).toBe('Human Player');
     expect(player.isHuman).toBe(true);
@@ -29,16 +23,7 @@ describe('Player', () => {
   it('should be able to hold units and settlements', () => {
     const player = createPlayer('p1', 'Human', true, 100, Nation.FRANCE);
     const unit = createUnit('u1', 'p1', UnitType.PIONEER, 1, 1, 3);
-    const settlement = createSettlement(
-      'c1',
-      'p1',
-      'Port Royal',
-      10,
-      10,
-      1,
-      'EUROPEAN',
-      'STATE',
-    );
+    const settlement = createSettlement('c1', 'p1', 'Port Royal', 10, 10, 1, 'EUROPEAN', 'STATE');
     player.units.push(unit);
     player.settlements.push(settlement);
     expect(player.units[0]).toBe(unit);

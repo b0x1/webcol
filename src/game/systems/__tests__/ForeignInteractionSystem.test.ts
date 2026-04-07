@@ -7,21 +7,18 @@ import { Attitude, GoodType, UnitType } from '../../entities/types';
 describe('ForeignInteractionSystem', () => {
   const getMockSettlement = () => {
     const s = createSettlement(
-      's1',
-      'ai-native-AZTEC',
-      'Aztec Village',
-      10,
-      10,
-      5,
-      'NATIVE',
-      'STATE',
-    );
-    s.attitude = Attitude.FRIENDLY;
-    s.goods = new Map([
-      [GoodType.FOOD, 100],
-      [GoodType.FURS, 50],
-    ]);
-    return s;
+        's1',
+        'ai-native-AZTEC',
+        'Aztec Village',
+        10,
+        10,
+        5,
+        'NATIVE',
+        'STATE'
+      );
+      s.attitude = Attitude.FRIENDLY;
+      s.goods = new Map([[GoodType.FOOD, 100], [GoodType.FURS, 50]]);
+      return s;
   };
 
   const getMockUnit = () => {
@@ -34,12 +31,11 @@ describe('ForeignInteractionSystem', () => {
     const mockSettlement = getMockSettlement();
     const mockUnit = getMockUnit();
 
-    const { updatedSettlement, updatedUnit, goodReceived } =
-      ForeignInteractionSystem.trade(
-        mockSettlement,
-        mockUnit,
-        GoodType.TRADE_GOODS,
-      );
+    const { updatedSettlement, updatedUnit, goodReceived } = ForeignInteractionSystem.trade(
+      mockSettlement,
+      mockUnit,
+      GoodType.TRADE_GOODS
+    );
 
     expect(updatedUnit.cargo.has(GoodType.TRADE_GOODS)).toBe(false);
     expect(updatedUnit.cargo.get(goodReceived)).toBeGreaterThan(0);
@@ -53,7 +49,7 @@ describe('ForeignInteractionSystem', () => {
 
     const { updatedSettlement, updatedUnit } = ForeignInteractionSystem.learn(
       mockSettlement,
-      mockUnit,
+      mockUnit
     );
 
     expect(updatedUnit.type).toBe(UnitType.PIONEER);
@@ -63,9 +59,7 @@ describe('ForeignInteractionSystem', () => {
   it('should throw error when non-colonist tries to learn', () => {
     const mockSettlement = getMockSettlement();
     const soldier = createUnit('u2', 'player-1', UnitType.SOLDIER, 10, 10, 3);
-    expect(() =>
-      ForeignInteractionSystem.learn(mockSettlement, soldier),
-    ).toThrow();
+    expect(() => ForeignInteractionSystem.learn(mockSettlement, soldier)).toThrow();
   });
 
   it('should throw error when learning from non-friendly settlement', () => {
@@ -78,23 +72,15 @@ describe('ForeignInteractionSystem', () => {
       20,
       5,
       'NATIVE',
-      'TRIBE',
+      'TRIBE'
     );
     neutralSettlement.attitude = Attitude.NEUTRAL;
-    expect(() =>
-      ForeignInteractionSystem.learn(neutralSettlement, mockUnit),
-    ).toThrow();
+    expect(() => ForeignInteractionSystem.learn(neutralSettlement, mockUnit)).toThrow();
   });
 
   it('should shift attitude correctly', () => {
-    expect(ForeignInteractionSystem.shiftAttitude(Attitude.FRIENDLY)).toBe(
-      Attitude.NEUTRAL,
-    );
-    expect(ForeignInteractionSystem.shiftAttitude(Attitude.NEUTRAL)).toBe(
-      Attitude.HOSTILE,
-    );
-    expect(ForeignInteractionSystem.shiftAttitude(Attitude.HOSTILE)).toBe(
-      Attitude.HOSTILE,
-    );
+    expect(ForeignInteractionSystem.shiftAttitude(Attitude.FRIENDLY)).toBe(Attitude.NEUTRAL);
+    expect(ForeignInteractionSystem.shiftAttitude(Attitude.NEUTRAL)).toBe(Attitude.HOSTILE);
+    expect(ForeignInteractionSystem.shiftAttitude(Attitude.HOSTILE)).toBe(Attitude.HOSTILE);
   });
 });

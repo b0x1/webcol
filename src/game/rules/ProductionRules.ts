@@ -1,9 +1,4 @@
-import {
-  BuildingType,
-  GoodType,
-  JobType,
-  TerrainType,
-} from '../entities/types';
+import { BuildingType, GoodType, JobType, TerrainType } from '../entities/types';
 
 export interface ProductionRule {
   jobType: JobType;
@@ -24,11 +19,7 @@ export const JOB_PRODUCTION_RULES: Record<JobType, ProductionRule> = {
     jobType: JobType.BLACKSMITH,
     inputGood: GoodType.ORE,
     outputGood: GoodType.TOOLS,
-    requiredBuildings: [
-      BuildingType.BLACKSMITHS_HOUSE,
-      BuildingType.BLACKSMITHS_SHOP,
-      BuildingType.IRON_WORKS,
-    ],
+    requiredBuildings: [BuildingType.BLACKSMITHS_HOUSE, BuildingType.BLACKSMITHS_SHOP, BuildingType.IRON_WORKS],
   },
   [JobType.DISTILLER]: {
     jobType: JobType.DISTILLER,
@@ -77,15 +68,14 @@ export const JOB_PRODUCTION_RULES: Record<JobType, ProductionRule> = {
   },
 };
 
-export const TERRAIN_PRODUCTION_RULES: Partial<Record<TerrainType, GoodType>> =
-  {
-    [TerrainType.GRASSLAND]: GoodType.FOOD,
-    [TerrainType.PRAIRIE]: GoodType.FOOD,
-    [TerrainType.PLAINS]: GoodType.COTTON,
-    [TerrainType.FOREST]: GoodType.LUMBER,
-    [TerrainType.HILLS]: GoodType.ORE,
-    [TerrainType.MOUNTAINS]: GoodType.ORE,
-    [TerrainType.SWAMP]: GoodType.SUGAR,
-    [TerrainType.MARSH]: GoodType.TOBACCO,
-    [TerrainType.TUNDRA]: GoodType.FURS,
-  };
+export const TERRAIN_PRODUCTION_RULES: Partial<Record<TerrainType, GoodType>> = {
+  [TerrainType.GRASSLAND]: GoodType.FOOD,
+  [TerrainType.PRAIRIE]: GoodType.FOOD,
+  [TerrainType.PLAINS]: GoodType.COTTON,
+  [TerrainType.FOREST]: GoodType.LUMBER,
+  [TerrainType.HILLS]: GoodType.ORE,
+  [TerrainType.MOUNTAINS]: GoodType.ORE,
+  [TerrainType.SWAMP]: GoodType.SUGAR,
+  [TerrainType.MARSH]: GoodType.TOBACCO,
+  [TerrainType.TUNDRA]: GoodType.FURS,
+};

@@ -16,8 +16,8 @@ export class TerrainRenderer {
   private npcSettlementGraphics: Phaser.GameObjects.Group | null = null;
   private playerSettlementGraphics: Phaser.GameObjects.Group | null = null;
 
-  private terrainIndexMap = new Map<string, number>();
-  private resourceIndexMap = new Map<string, number>();
+  private terrainIndexMap: Map<string, number> = new Map();
+  private resourceIndexMap: Map<string, number> = new Map();
 
   constructor(scene: Phaser.Scene, tileSize: number) {
     this.scene = scene;
@@ -60,11 +60,7 @@ export class TerrainRenderer {
     const height = tiles.length;
     const width = tiles[0]?.length || 0;
 
-    if (
-      !this.tilemap ||
-      this.tilemap.width !== width ||
-      this.tilemap.height !== height
-    ) {
+    if (!this.tilemap || this.tilemap.width !== width || this.tilemap.height !== height) {
       this.destroyTilemap();
       this.initializeIndexMaps();
 
@@ -75,35 +71,15 @@ export class TerrainRenderer {
         height: height,
       });
 
-      const terrainTileset = this.tilemap.addTilesetImage(
-        'terrain',
-        'terrain',
-        this.tileSize,
-        this.tileSize,
-        0,
-        0,
-      );
-      const resourceTileset = this.tilemap.addTilesetImage(
-        'resources',
-        'resources',
-        this.tileSize,
-        this.tileSize,
-        0,
-        0,
-      );
+      const terrainTileset = this.tilemap.addTilesetImage('terrain', 'terrain', this.tileSize, this.tileSize, 0, 0);
+      const resourceTileset = this.tilemap.addTilesetImage('resources', 'resources', this.tileSize, this.tileSize, 0, 0);
 
       if (terrainTileset) {
-        this.terrainLayer = this.tilemap.createBlankLayer(
-          'terrain',
-          terrainTileset,
-        );
+        this.terrainLayer = this.tilemap.createBlankLayer('terrain', terrainTileset);
         this.terrainLayer?.setDepth(0);
       }
       if (resourceTileset) {
-        this.resourceLayer = this.tilemap.createBlankLayer(
-          'resources',
-          resourceTileset,
-        );
+        this.resourceLayer = this.tilemap.createBlankLayer('resources', resourceTileset);
         this.resourceLayer?.setDepth(2);
       }
     }
@@ -148,26 +124,16 @@ export class TerrainRenderer {
     this.playerSettlementGraphics = this.scene.add.group();
 
     playerSettlements.forEach((settlement) => {
-      const { x: worldX, y: worldY } = this.tileToWorld(
-        settlement.x,
-        settlement.y,
-      );
+      const { x: worldX, y: worldY } = this.tileToWorld(settlement.x, settlement.y);
       const frame = `settlement_${settlement.organization.toLowerCase()}`;
-      const sprite = this.scene.add
-        .image(worldX, worldY, 'other', frame)
+      const sprite = this.scene.add.image(worldX, worldY, 'other', frame)
         .setOrigin(0, 0)
         .setDepth(3);
       this.playerSettlementGraphics?.add(sprite);
     });
   }
 
-  private drawCoastBorders(
-    tiles: Tile[][],
-    x: number,
-    y: number,
-    worldX: number,
-    worldY: number,
-  ) {
+  private drawCoastBorders(tiles: Tile[][], x: number, y: number, worldX: number, worldY: number) {
     if (!this.coastBorders) return;
 
     const checkOcean = (tx: number, ty: number) => {
@@ -179,39 +145,19 @@ export class TerrainRenderer {
 
     // North
     if (checkOcean(x, y - 1)) {
-      this.coastBorders.lineBetween(
-        worldX,
-        worldY,
-        worldX + this.tileSize,
-        worldY,
-      );
+      this.coastBorders.lineBetween(worldX, worldY, worldX + this.tileSize, worldY);
     }
     // South
     if (checkOcean(x, y + 1)) {
-      this.coastBorders.lineBetween(
-        worldX,
-        worldY + this.tileSize,
-        worldX + this.tileSize,
-        worldY + this.tileSize,
-      );
+      this.coastBorders.lineBetween(worldX, worldY + this.tileSize, worldX + this.tileSize, worldY + this.tileSize);
     }
     // West
     if (checkOcean(x - 1, y)) {
-      this.coastBorders.lineBetween(
-        worldX,
-        worldY,
-        worldX,
-        worldY + this.tileSize,
-      );
+      this.coastBorders.lineBetween(worldX, worldY, worldX, worldY + this.tileSize);
     }
     // East
     if (checkOcean(x + 1, y)) {
-      this.coastBorders.lineBetween(
-        worldX + this.tileSize,
-        worldY,
-        worldX + this.tileSize,
-        worldY + this.tileSize,
-      );
+      this.coastBorders.lineBetween(worldX + this.tileSize, worldY, worldX + this.tileSize, worldY + this.tileSize);
     }
   }
 
@@ -226,12 +172,7 @@ export class TerrainRenderer {
 
     reachableTiles.forEach((tile) => {
       const { x: worldX, y: worldY } = this.tileToWorld(tile.x, tile.y);
-      this.reachableHighlights?.fillRect(
-        worldX,
-        worldY,
-        this.tileSize,
-        this.tileSize,
-      );
+      this.reachableHighlights?.fillRect(worldX, worldY, this.tileSize, this.tileSize);
     });
   }
 
@@ -252,12 +193,7 @@ export class TerrainRenderer {
       const { x: worldX, y: worldY } = this.tileToWorld(tileX, tileY);
       this.selectionHighlight = this.scene.add.graphics();
       this.selectionHighlight.lineStyle(2, 0xffffff, 1);
-      this.selectionHighlight.strokeRect(
-        worldX,
-        worldY,
-        this.tileSize,
-        this.tileSize,
-      );
+      this.selectionHighlight.strokeRect(worldX, worldY, this.tileSize, this.tileSize);
       this.selectionHighlight.setDepth(10);
     }
   }
@@ -267,13 +203,11 @@ export class TerrainRenderer {
     tileY: number,
     worldX: number,
     worldY: number,
-    settlementName?: string,
+    settlementName?: string
   ) {
     this.hideTooltip();
 
-    const text = settlementName
-      ? `${settlementName} (${tileX}, ${tileY})`
-      : `(${tileX}, ${tileY})`;
+    const text = settlementName ? `${settlementName} (${tileX}, ${tileY})` : `(${tileX}, ${tileY})`;
 
     this.hoverTooltip = this.scene.add
       .text(worldX + 10, worldY + 10, text, {
@@ -306,9 +240,7 @@ export class TerrainRenderer {
     if (this.reachableHighlights) this.reachableHighlights.destroy();
     if (this.hoverTooltip) this.hoverTooltip.destroy();
     if (this.coastBorders) this.coastBorders.destroy();
-    if (this.npcSettlementGraphics)
-      this.npcSettlementGraphics.destroy(true, true);
-    if (this.playerSettlementGraphics)
-      this.playerSettlementGraphics.destroy(true, true);
+    if (this.npcSettlementGraphics) this.npcSettlementGraphics.destroy(true, true);
+    if (this.playerSettlementGraphics) this.playerSettlementGraphics.destroy(true, true);
   }
 }

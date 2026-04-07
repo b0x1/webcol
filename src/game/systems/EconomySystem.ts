@@ -8,7 +8,7 @@ export class EconomySystem {
     unit: Unit,
     good: GoodType,
     amount: number,
-    currentPrice: number,
+    currentPrice: number
   ): {
     goldGained: number;
     newPrice: number;
@@ -35,7 +35,7 @@ export class EconomySystem {
     playerGold: number,
     good: GoodType,
     amount: number,
-    currentPrice: number,
+    currentPrice: number
   ): {
     cost: number;
     canAfford: boolean;
@@ -43,7 +43,7 @@ export class EconomySystem {
     const cost = amount * currentPrice;
     return {
       cost,
-      canAfford: playerGold >= cost,
+      canAfford: playerGold >= cost
     };
   }
 }

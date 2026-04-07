@@ -5,11 +5,7 @@ import { createTile } from '../../entities/Tile';
 import { TerrainType, UnitType } from '../../entities/types';
 
 describe('MovementSystem', () => {
-  const createMap = (
-    width: number,
-    height: number,
-    terrainType: TerrainType = TerrainType.PLAINS,
-  ) => {
+  const createMap = (width: number, height: number, terrainType: TerrainType = TerrainType.PLAINS) => {
     const map: any[][] = [];
     for (let y = 0; y < height; y++) {
       const row: any[] = [];
@@ -39,7 +35,7 @@ describe('MovementSystem', () => {
     const reachable = MovementSystem.getReachableTiles(unit, map);
 
     // Forest at (6,5) cost 2, so it shouldn't be reachable with 1 move
-    expect(reachable.some((t) => t.x === 6 && t.y === 5)).toBe(false);
+    expect(reachable.some(t => t.x === 6 && t.y === 5)).toBe(false);
     expect(reachable.length).toBe(7);
   });
 

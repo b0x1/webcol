@@ -11,25 +11,19 @@ export const GameSetupModal: React.FC = () => {
 
   const [playerName, setPlayerName] = useState('Colonist');
   const [nation, setNation] = useState<Nation>(Nation.ENGLAND);
-  const [mapSize, setMapSize] = useState<'Small' | 'Medium' | 'Large'>(
-    'Medium',
-  );
+  const [mapSize, setMapSize] = useState<'Small' | 'Medium' | 'Large'>('Medium');
   const [aiCount, setAiCount] = useState(1);
 
   if (!isGameSetupModalOpen) return null;
 
-  const labelClass =
-    'block mb-2 font-black uppercase tracking-widest text-xs text-slate-400';
-  const inputClass =
-    'w-full p-3 mb-6 bg-slate-900 text-white border border-slate-700 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all font-bold';
+  const labelClass = "block mb-2 font-black uppercase tracking-widest text-xs text-slate-400";
+  const inputClass = "w-full p-3 mb-6 bg-slate-900 text-white border border-slate-700 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all font-bold";
 
   return (
     <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-[2000] pointer-events-auto backdrop-blur-sm">
       <div className="bg-slate-800 text-white p-8 rounded-xl w-[500px] max-h-[85vh] overflow-y-auto border border-slate-500 shadow-2xl">
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-black uppercase tracking-tighter italic">
-            Start New Game
-          </h2>
+          <h2 className="text-3xl font-black uppercase tracking-tighter italic">Start New Game</h2>
           <button
             onClick={() => setGameSetupModalOpen(false)}
             className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded transition-colors cursor-pointer text-sm"
@@ -61,12 +55,8 @@ export const GameSetupModal: React.FC = () => {
             >
               <Flag nation={n} size={40} className="shrink-0" />
               <div className="flex flex-col gap-1 overflow-hidden">
-                <div className="font-black uppercase tracking-wider text-sm truncate">
-                  {NATION_BONUSES[n].name}
-                </div>
-                <div
-                  className={`text-[10px] font-bold leading-tight ${nation === n ? 'text-blue-100' : 'text-slate-500'}`}
-                >
+                <div className="font-black uppercase tracking-wider text-sm truncate">{NATION_BONUSES[n].name}</div>
+                <div className={`text-[10px] font-bold leading-tight ${nation === n ? 'text-blue-100' : 'text-slate-500'}`}>
                   {NATION_BONUSES[n].bonus}
                 </div>
               </div>

@@ -8,14 +8,12 @@ export const ForeignSettlementModal: React.FC = () => {
 
   if (!selectedSettlementId) return null;
 
-  const allSettlements = players.flatMap((p) => p.settlements);
+  const allSettlements = players.flatMap(p => p.settlements);
 
-  const settlement = allSettlements.find((s) => s.id === selectedSettlementId);
+  const settlement = allSettlements.find(s => s.id === selectedSettlementId);
   if (!settlement) return null;
 
-  const settlementOwner = players.find((p) =>
-    p.settlements.some((s) => s.id === settlement.id),
-  );
+  const settlementOwner = players.find(p => p.settlements.some(s => s.id === settlement.id));
   const currentPlayerId = useGameStore.getState().currentPlayerId;
   const isOwned = settlement.ownerId === currentPlayerId;
   if (isOwned && !useUIStore.getState().isDebugMode) return null;
@@ -28,38 +26,24 @@ export const ForeignSettlementModal: React.FC = () => {
       <div className="flex items-center gap-3 mb-4">
         <Flag nation={nation as any} size={40} />
         <div>
-          <h3 className="text-xl font-black uppercase tracking-tight text-blue-400 leading-tight">
-            {settlement.name}
-          </h3>
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-            {nationName}
-          </p>
+          <h3 className="text-xl font-black uppercase tracking-tight text-blue-400 leading-tight">{settlement.name}</h3>
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">{nationName}</p>
         </div>
       </div>
 
       <div className="space-y-3">
         <div className="bg-slate-900/50 p-3 rounded-lg border border-white/5">
           <div className="flex justify-between items-center mb-1">
-            <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">
-              Population
-            </span>
-            <span className="text-sm font-bold text-white">
-              {settlement.population}
-            </span>
+            <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Population</span>
+            <span className="text-sm font-bold text-white">{settlement.population}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">
-              Attitude
-            </span>
-            <span
-              className={`text-[10px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded ${
-                settlement.attitude === 'FRIENDLY'
-                  ? 'bg-green-900/40 text-green-400 border border-green-800/30'
-                  : settlement.attitude === 'HOSTILE'
-                    ? 'bg-red-900/40 text-red-400 border border-red-800/30'
-                    : 'bg-slate-800 text-slate-400 border border-slate-700/50'
-              }`}
-            >
+            <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Attitude</span>
+            <span className={`text-[10px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded ${
+              settlement.attitude === 'FRIENDLY' ? 'bg-green-900/40 text-green-400 border border-green-800/30' :
+              settlement.attitude === 'HOSTILE' ? 'bg-red-900/40 text-red-400 border border-red-800/30' :
+              'bg-slate-800 text-slate-400 border border-slate-700/50'
+            }`}>
               {settlement.attitude}
             </span>
           </div>

@@ -2,12 +2,7 @@ import type { Player } from '../entities/Player';
 import type { Tile } from '../entities/Tile';
 import type { Settlement } from '../entities/Settlement';
 import type { Unit } from '../entities/Unit';
-import {
-  TerrainType,
-  ResourceType,
-  UnitType,
-  Attitude,
-} from '../entities/types';
+import { TerrainType, ResourceType, UnitType, Attitude } from '../entities/types';
 import { eventBus } from '../state/EventBus';
 import { NATION_BONUSES } from '../constants';
 
@@ -17,16 +12,16 @@ export class AISystem {
 
     const updatedPlayers = players.map((p) => ({
       ...p,
-      units: p.units.map((u) => ({ ...u, cargo: new Map(u.cargo) })),
-      settlements: p.settlements.map((c) => ({
+      units: p.units.map(u => ({ ...u, cargo: new Map(u.cargo) })),
+      settlements: p.settlements.map(c => ({
         ...c,
         buildings: [...c.buildings],
         productionQueue: [...c.productionQueue],
         inventory: new Map(c.inventory),
         workforce: new Map(c.workforce),
-        units: c.units.map((u) => ({ ...u, cargo: new Map(u.cargo) })),
+        units: c.units.map(u => ({ ...u, cargo: new Map(u.cargo) })),
         goods: new Map(c.goods),
-      })),
+      }))
     }));
 
     for (let i = 0; i < updatedPlayers.length; i++) {
@@ -43,23 +38,13 @@ export class AISystem {
 
         let unitRemoved = false;
 
-        if (
-          unit.type === UnitType.COLONIST ||
-          unit.type === UnitType.VILLAGER
-        ) {
+        if (unit.type === UnitType.COLONIST || unit.type === UnitType.VILLAGER) {
           const currentTile = map[unit.y][unit.x];
           const nationData = NATION_BONUSES[player.nation];
-          if (
-            currentTile.terrainType === TerrainType.PLAINS ||
-            currentTile.terrainType === TerrainType.GRASSLAND ||
-            currentTile.terrainType === TerrainType.PRAIRIE
-          ) {
-            const hasAdjacentSettlement = updatedPlayers
-              .flatMap((p) => p.settlements)
-              .some(
-                (c) =>
-                  Math.abs(c.x - unit.x) <= 1 && Math.abs(c.y - unit.y) <= 1,
-              );
+          if (currentTile.terrainType === TerrainType.PLAINS || currentTile.terrainType === TerrainType.GRASSLAND || currentTile.terrainType === TerrainType.PRAIRIE) {
+            const hasAdjacentSettlement = updatedPlayers.flatMap(p => p.settlements).some(
+              (c) => Math.abs(c.x - unit.x) <= 1 && Math.abs(c.y - unit.y) <= 1,
+            );
             if (!hasAdjacentSettlement) {
               const newSettlement: Settlement = {
                 id: `settlement-ai-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
@@ -128,8 +113,7 @@ export class AISystem {
       for (let x = 0; x < map[y].length; x++) {
         const tile = map[y][x];
         const isTargetType =
-          tile.terrainType === TerrainType.PLAINS ||
-          tile.hasResource === ResourceType.FOREST;
+          tile.terrainType === TerrainType.PLAINS || tile.hasResource === ResourceType.FOREST;
         if (!isTargetType) continue;
 
         const isColonized = allSettlements.some((c) => c.x === x && c.y === y);

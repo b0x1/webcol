@@ -8,16 +8,9 @@ interface ResourceIconProps {
   className?: string;
 }
 
-export const ResourceIcon: React.FC<ResourceIconProps> = ({
-  good,
-  size = 32,
-  className = '',
-}) => {
+export const ResourceIcon: React.FC<ResourceIconProps> = ({ good, size = 32, className = '' }) => {
   return (
-    <div
-      className={`relative ${className}`}
-      style={{ width: `${size}px`, height: `${size}px` }}
-    >
+    <div className={`relative ${className}`} style={{ width: `${size}px`, height: `${size}px` }}>
       <Sprite type={good} category="resources" size={size} />
     </div>
   );

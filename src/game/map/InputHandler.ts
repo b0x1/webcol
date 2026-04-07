@@ -5,27 +5,14 @@ import { useUIStore } from '../state/uiStore';
 import { UnitType, Attitude } from '../entities/types';
 
 export class InputHandler {
-  constructor(
-    private scene: Phaser.Scene,
-    private terrainRenderer: TerrainRenderer,
-  ) {}
+  constructor(private scene: Phaser.Scene, private terrainRenderer: TerrainRenderer) {}
 
-  setup(
-    mapWidth: number,
-    mapHeight: number,
-    getReachableTiles: () => { x: number; y: number }[],
-    handleMove: (id: string, x: number, y: number) => void,
-  ) {
+  setup(mapWidth: number, mapHeight: number, getReachableTiles: () => { x: number; y: number }[], handleMove: (id: string, x: number, y: number) => void) {
     this.scene.input.mouse?.disableContextMenu();
 
     this.scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-      const worldPoint = pointer.positionToCamera(
-        this.scene.cameras.main,
-      ) as Phaser.Math.Vector2;
-      const { x, y } = this.terrainRenderer.worldToTile(
-        worldPoint.x,
-        worldPoint.y,
-      );
+      const worldPoint = pointer.positionToCamera(this.scene.cameras.main) as Phaser.Math.Vector2;
+      const { x, y } = this.terrainRenderer.worldToTile(worldPoint.x, worldPoint.y);
 
       if (x < 0 || x >= mapWidth || y < 0 || y >= mapHeight) return;
 
@@ -39,26 +26,12 @@ export class InputHandler {
     });
 
     this.scene.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
-      const worldPoint = pointer.positionToCamera(
-        this.scene.cameras.main,
-      ) as Phaser.Math.Vector2;
-      const { x, y } = this.terrainRenderer.worldToTile(
-        worldPoint.x,
-        worldPoint.y,
-      );
+      const worldPoint = pointer.positionToCamera(this.scene.cameras.main) as Phaser.Math.Vector2;
+      const { x, y } = this.terrainRenderer.worldToTile(worldPoint.x, worldPoint.y);
 
       if (x >= 0 && x < mapWidth && y >= 0 && y < mapHeight) {
-        const settlement = useGameStore
-          .getState()
-          .players.flatMap((p) => p.settlements)
-          .find((s) => s.x === x && s.y === y);
-        this.terrainRenderer.showTooltip(
-          x,
-          y,
-          worldPoint.x,
-          worldPoint.y,
-          settlement?.name,
-        );
+        const settlement = useGameStore.getState().players.flatMap(p => p.settlements).find((s) => s.x === x && s.y === y);
+        this.terrainRenderer.showTooltip(x, y, worldPoint.x, worldPoint.y, settlement?.name);
       } else {
         this.terrainRenderer.hideTooltip();
       }
@@ -78,40 +51,28 @@ export class InputHandler {
 
   private handleLeftClick(x: number, y: number) {
     const state = useGameStore.getState();
-    const player = state.players.find((p) => p.id === state.currentPlayerId);
+    const player = state.players.find(p => p.id === state.currentPlayerId);
 
     // Units on map + available units in own settlement
-    const unitsAtTile = state.players
-      .flatMap((p) => p.units)
-      .filter((u) => u.x === x && u.y === y);
-    const settlementAtTile = state.players
-      .flatMap((p) => p.settlements)
-      .find((c) => c.x === x && c.y === y);
+    const unitsAtTile = state.players.flatMap((p) => p.units).filter((u) => u.x === x && u.y === y);
+    const settlementAtTile = state.players.flatMap((p) => p.settlements).find((c) => c.x === x && c.y === y);
 
     if (settlementAtTile && player && settlementAtTile.ownerId === player.id) {
-      const availableUnitsInSettlement = settlementAtTile.units.filter(
-        (u) => !settlementAtTile.workforce.has(u.id),
-      );
-      unitsAtTile.push(...availableUnitsInSettlement);
+       const availableUnitsInSettlement = settlementAtTile.units.filter(u => !settlementAtTile.workforce.has(u.id));
+       unitsAtTile.push(...availableUnitsInSettlement);
     }
 
-    const tile = state.map[y]?.[x] || {
-      x,
-      y,
-      terrainType: 'UNKNOWN',
-      movementCost: 1,
-      hasResource: null,
-    };
+    const tile = state.map[y]?.[x] || { x, y, terrainType: 'UNKNOWN', movementCost: 1, hasResource: null };
     useGameStore.getState().selectTile(tile as any);
 
     if (settlementAtTile) {
       const isOwned = settlementAtTile.ownerId === state.currentPlayerId;
       if (unitsAtTile.length > 0 && isOwned) {
-        useGameStore.getState().selectUnit(null);
-        this.scene.events.emit('unitSelected', null as any);
+         useGameStore.getState().selectUnit(null);
+         this.scene.events.emit('unitSelected', null as any);
       } else {
-        useGameStore.getState().selectSettlement(settlementAtTile.id);
-        this.scene.events.emit('settlementSelected', settlementAtTile.id);
+         useGameStore.getState().selectSettlement(settlementAtTile.id);
+         this.scene.events.emit('settlementSelected', settlementAtTile.id);
       }
     } else if (unitsAtTile.length === 1) {
       const unit = unitsAtTile[0];
@@ -129,18 +90,11 @@ export class InputHandler {
     this.terrainRenderer.updateSelectionHighlight(x, y);
   }
 
-  private handleRightClick(
-    x: number,
-    y: number,
-    reachableTiles: { x: number; y: number }[],
-    handleMove: (id: string, x: number, y: number) => void,
-  ) {
+  private handleRightClick(x: number, y: number, reachableTiles: { x: number; y: number }[], handleMove: (id: string, x: number, y: number) => void) {
     const state = useGameStore.getState();
     if (!state.selectedUnitId) return;
 
-    const selectedUnit = state.players
-      .flatMap((p) => p.units)
-      .find((u) => u.id === state.selectedUnitId);
+    const selectedUnit = state.players.flatMap((p) => p.units).find((u) => u.id === state.selectedUnitId);
     if (!selectedUnit) return;
 
     const foreignUnitAtTile = state.players
@@ -153,23 +107,14 @@ export class InputHandler {
       .flatMap((p) => p.settlements)
       .find((c) => c.x === x && c.y === y);
 
-    if (selectedUnit.type === UnitType.SOLDIER && foreignUnitAtTile) {
+    if (selectedUnit.type === UnitType.SOLDIER && foreignUnitAtTile ) {
       useGameStore.getState().resolveCombat(selectedUnit.id, x, y);
-    } else if (
-      selectedUnit.type === UnitType.SOLDIER &&
-      foreignSettlementAtTile
-    ) {
-      useGameStore
-        .getState()
-        .attackSettlement(foreignSettlementAtTile.id, selectedUnit.id);
-    } else if (
-      selectedUnit.type === UnitType.COLONIST &&
-      foreignSettlementAtTile &&
-      foreignSettlementAtTile.attitude !== Attitude.HOSTILE
-    ) {
-      useUIStore
-        .getState()
-        .setNativeTradeModalOpen(true, foreignSettlementAtTile.id);
+    } else if (selectedUnit.type === UnitType.SOLDIER && foreignSettlementAtTile ) {
+      useGameStore.getState().attackSettlement(foreignSettlementAtTile.id, selectedUnit.id);
+    } else if (selectedUnit.type === UnitType.COLONIST &&
+        foreignSettlementAtTile &&
+        foreignSettlementAtTile.attitude !== Attitude.HOSTILE) {
+      useUIStore.getState().setNativeTradeModalOpen(true, foreignSettlementAtTile.id);
     } else {
       const isReachable = reachableTiles.some((t) => t.x === x && t.y === y);
       if (isReachable) {

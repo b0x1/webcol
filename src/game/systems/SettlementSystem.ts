@@ -2,14 +2,7 @@ import type { Player } from '../entities/Player';
 import type { Unit } from '../entities/Unit';
 import type { Settlement } from '../entities/Settlement';
 import type { Tile } from '../entities/Tile';
-import {
-  BuildingType,
-  GoodType,
-  JobType,
-  Nation,
-  UnitType,
-  TerrainType,
-} from '../entities/types';
+import { BuildingType, GoodType, JobType, Nation, UnitType, TerrainType } from '../entities/types';
 import { NATION_BONUSES } from '../constants';
 
 export class SettlementSystem {
@@ -17,7 +10,7 @@ export class SettlementSystem {
     player: Player,
     unit: Unit,
     name: string,
-    buildings: BuildingType[],
+    buildings: BuildingType[]
   ): Settlement {
     const nationData = NATION_BONUSES[player.nation];
 
@@ -45,13 +38,11 @@ export class SettlementSystem {
     player: Player,
     unit: Unit,
     map: Tile[][],
-    allSettlements: Settlement[],
+    allSettlements: Settlement[]
   ): boolean {
     const nationData = NATION_BONUSES[player.nation];
-    if (nationData.culture === 'EUROPEAN' && unit.type !== UnitType.COLONIST)
-      return false;
-    if (nationData.culture === 'NATIVE' && unit.type !== UnitType.VILLAGER)
-      return false;
+    if (nationData.culture === 'EUROPEAN' && unit.type !== UnitType.COLONIST) return false;
+    if (nationData.culture === 'NATIVE' && unit.type !== UnitType.VILLAGER) return false;
 
     // Check terrain
     const tile = map[unit.y]?.[unit.x];

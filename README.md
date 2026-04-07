@@ -16,6 +16,7 @@ guidelines, please refer to [AGENTS.md](./AGENTS.md).
     ```bash
     npm install
     ```
+    Add `--legacy-peer-deps` if not fixed: https://github.com/facebook/react/issues/35758
 
 2.  **Start development server:**
     ```bash

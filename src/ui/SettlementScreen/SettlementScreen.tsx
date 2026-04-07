@@ -25,12 +25,8 @@ export const SettlementScreen: React.FC = () => {
   if (!isSettlementScreenOpen || !selectedSettlementId) return null;
 
   const player = players.find((p) => p.id === currentPlayerId);
-  const settlementOwner = players.find((p) =>
-    p.settlements.some((s) => s.id === selectedSettlementId),
-  );
-  const settlement = settlementOwner?.settlements.find(
-    (c) => c.id === selectedSettlementId,
-  );
+  const settlementOwner = players.find((p) => p.settlements.some((s) => s.id === selectedSettlementId));
+  const settlement = settlementOwner?.settlements.find((c) => c.id === selectedSettlementId);
 
   if (!settlement || !player || !settlementOwner) return null;
 
@@ -48,34 +44,23 @@ export const SettlementScreen: React.FC = () => {
         <div className="flex items-center gap-4">
           <Flag nation={settlementOwner.nation} size={48} />
           <div>
-            <h1 className="text-2xl font-black m-0 uppercase tracking-tight text-blue-400">
-              {settlement.name}
-            </h1>
+            <h1 className="text-2xl font-black m-0 uppercase tracking-tight text-blue-400">{settlement.name}</h1>
             <div className="text-slate-400 font-bold flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
               <div className="flex items-center gap-1.5 text-sm">
-                <span
-                  className={`w-2 h-2 rounded-full animate-pulse ${isReadOnly ? 'bg-red-500' : 'bg-green-500'}`}
-                ></span>
+                <span className={`w-2 h-2 rounded-full animate-pulse ${isReadOnly ? 'bg-red-500' : 'bg-green-500'}`}></span>
                 Pop: {settlement.population}
               </div>
               <div className="flex items-center gap-1.5 text-blue-300 text-sm">
-                <span className="text-[9px] font-black uppercase tracking-widest bg-blue-900/50 px-1.5 py-0.5 rounded border border-blue-700/50">
-                  Hammers
-                </span>
+                <span className="text-[9px] font-black uppercase tracking-widest bg-blue-900/50 px-1.5 py-0.5 rounded border border-blue-700/50">Hammers</span>
                 {settlement.hammers}
               </div>
-              {isReadOnly && (
-                <span className="text-red-500 text-[10px] font-black uppercase tracking-widest bg-red-950/30 px-2 py-0.5 rounded border border-red-900/30">
-                  [READ ONLY - {settlementOwner.name}]
-                </span>
-              )}
+              {isReadOnly && <span className="text-red-500 text-[10px] font-black uppercase tracking-widest bg-red-950/30 px-2 py-0.5 rounded border border-red-900/30">[READ ONLY - {settlementOwner.name}]</span>}
             </div>
           </div>
         </div>
         <div className="flex items-center gap-4">
           <div className="text-right text-slate-400 text-sm font-mono">
-            Available Gold:{' '}
-            <span className="text-yellow-400 font-bold">{player.gold}g</span>
+            Available Gold: <span className="text-yellow-400 font-bold">{player.gold}g</span>
           </div>
           <button
             onClick={handleClose}
@@ -91,29 +76,20 @@ export const SettlementScreen: React.FC = () => {
         {/* Left Side: Buildings (Top) and Inventory (Bottom) */}
         <div className="flex flex-col gap-4 overflow-hidden">
           <div className="flex-1 overflow-y-auto min-h-0 bg-slate-900/30 rounded-xl border border-slate-800 p-4">
-            <BuildingSlots
-              settlementId={settlement.id}
-              ownedBuildings={settlement.buildings}
-            />
+            <BuildingSlots settlementId={settlement.id} ownedBuildings={settlement.buildings} />
           </div>
           <div className="h-48 bg-slate-900/30 rounded-xl border border-slate-800 p-4">
-            <InventoryPanel
-              settlement={settlement}
-              map={useGameStore.getState().map}
-            />
+            <InventoryPanel settlement={settlement} map={useGameStore.getState().map} />
           </div>
         </div>
 
         {/* Right Side: MapGrid (Top) and Available Units (Bottom) */}
         <div className="flex flex-col gap-4 overflow-hidden h-full">
           <div className="flex-[2] bg-slate-900/30 rounded-xl border border-slate-800 p-4 flex items-center justify-center min-h-0">
-            <MapGrid settlementId={settlement.id} />
+             <MapGrid settlementId={settlement.id} />
           </div>
           <div className="flex-[1] overflow-y-auto bg-slate-900/30 rounded-xl border border-slate-800 p-4 min-h-0">
-            <AvailableUnits
-              settlementId={settlement.id}
-              units={settlement.units}
-            />
+            <AvailableUnits settlementId={settlement.id} units={settlement.units} />
           </div>
         </div>
       </div>

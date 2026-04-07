@@ -6,13 +6,12 @@ export const MainMenu: React.FC = () => {
     isMainMenuOpen,
     setGameSetupModalOpen,
     setHowToPlayModalOpen,
-    setSaveModalOpen,
+    setSaveModalOpen
   } = useUIStore();
 
   if (!isMainMenuOpen) return null;
 
-  const buttonClass =
-    'w-64 py-4 px-6 mb-4 bg-slate-800 hover:bg-slate-700 text-white font-black text-xl uppercase tracking-widest border-2 border-slate-100/20 rounded shadow-xl transition-all transform hover:scale-105 active:scale-95 cursor-pointer pointer-events-auto backdrop-blur-sm';
+  const buttonClass = "w-64 py-4 px-6 mb-4 bg-slate-800 hover:bg-slate-700 text-white font-black text-xl uppercase tracking-widest border-2 border-slate-100/20 rounded shadow-xl transition-all transform hover:scale-105 active:scale-95 cursor-pointer pointer-events-auto backdrop-blur-sm";
 
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center z-[1000] bg-black/20">
@@ -20,19 +19,13 @@ export const MainMenu: React.FC = () => {
         <h1 className="text-8xl font-black text-white mb-16 drop-shadow-2xl uppercase tracking-tighter italic">
           WEB<span className="text-blue-500">COL</span>
         </h1>
-        <button
-          className={buttonClass}
-          onClick={() => setGameSetupModalOpen(true)}
-        >
+        <button className={buttonClass} onClick={() => setGameSetupModalOpen(true)}>
           New Game
         </button>
         <button className={buttonClass} onClick={() => setSaveModalOpen(true)}>
           Load Game
         </button>
-        <button
-          className={buttonClass}
-          onClick={() => setHowToPlayModalOpen(true)}
-        >
+        <button className={buttonClass} onClick={() => setHowToPlayModalOpen(true)}>
           How to Play
         </button>
       </div>

@@ -7,7 +7,9 @@ export interface SpriteFrame {
   h: number;
 }
 
-export type SpriteManifest = Record<string, SpriteFrame>;
+export interface SpriteManifest {
+  [key: string]: SpriteFrame;
+}
 
 /**
  * SpriteLoader manages the loading and registration of AVIF spritesheets
@@ -18,12 +20,7 @@ export class SpriteLoader {
    * Preloads a spritesheet and its manifest.
    * To be called inside a Phaser Scene's preload() method.
    */
-  static preload(
-    scene: Phaser.Scene,
-    key: string,
-    avifUrl: string,
-    jsonUrl: string,
-  ) {
+  static preload(scene: Phaser.Scene, key: string, avifUrl: string, jsonUrl: string) {
     scene.load.image(key, avifUrl);
     scene.load.json(`${key}-manifest`, jsonUrl);
   }
@@ -37,9 +34,7 @@ export class SpriteLoader {
     const texture = scene.textures.get(key);
 
     if (!manifest || !texture) {
-      console.error(
-        `Failed to register frames for ${key}: manifest or texture missing.`,
-      );
+      console.error(`Failed to register frames for ${key}: manifest or texture missing.`);
       return;
     }
 
@@ -55,11 +50,7 @@ export class SpriteLoader {
    * Exposes getSprite(name) as requested, which returns the frame data from the manifest.
    * Assumes the manifest is already loaded into the cache.
    */
-  static getSprite(
-    scene: Phaser.Scene,
-    key: string,
-    frameName: string,
-  ): SpriteFrame | null {
+  static getSprite(scene: Phaser.Scene, key: string, frameName: string): SpriteFrame | null {
     const manifest = scene.cache.json.get(`${key}-manifest`) as SpriteManifest;
     if (manifest && manifest[frameName]) {
       return manifest[frameName];

@@ -9,13 +9,17 @@ import { ResourcesTab } from './ReportsModal/components/ResourcesTab';
 type ReportTab = 'units' | 'settlements' | 'resources';
 
 export const ReportsModal: React.FC = () => {
-  const { players, currentPlayerId, selectUnit, selectSettlement } =
-    useGameStore();
+  const {
+    players,
+    currentPlayerId,
+    selectUnit,
+    selectSettlement,
+  } = useGameStore();
   const {
     isReportsModalOpen,
     setReportsModalOpen,
     isDebugMode,
-    setSettlementScreenOpen,
+    setSettlementScreenOpen
   } = useUIStore();
   const [activeTab, setActiveTab] = useState<ReportTab>('units');
 
@@ -43,11 +47,7 @@ export const ReportsModal: React.FC = () => {
     setReportsModalOpen(false);
   };
 
-  const handleSettlementClick = (
-    settlementId: string,
-    x: number,
-    y: number,
-  ) => {
+  const handleSettlementClick = (settlementId: string, x: number, y: number) => {
     eventBus.emit('cameraJump', { x, y });
     selectSettlement(settlementId);
     setSettlementScreenOpen(true);
@@ -58,9 +58,7 @@ export const ReportsModal: React.FC = () => {
     <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-[2500] pointer-events-auto backdrop-blur-sm">
       <div className="bg-slate-800 text-white p-6 rounded-xl w-[90vw] max-w-5xl h-[85vh] flex flex-col border border-slate-500 shadow-2xl">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-3xl font-black uppercase tracking-tight">
-            Reports
-          </h2>
+          <h2 className="text-3xl font-black uppercase tracking-tight">Reports</h2>
           <button
             onClick={() => setReportsModalOpen(false)}
             className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded transition-colors cursor-pointer"

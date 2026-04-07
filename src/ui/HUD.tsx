@@ -4,7 +4,11 @@ import { useUIStore } from '../game/state/uiStore';
 import { UnitType } from '../game/entities/types';
 
 export const HUD: React.FC = () => {
-  const { players, currentPlayerId, turn } = useGameStore();
+  const {
+    players,
+    currentPlayerId,
+    turn,
+  } = useGameStore();
 
   const {
     setEuropeScreenOpen,
@@ -52,14 +56,7 @@ export const HUD: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [
-    isMainMenuOpen,
-    isAnyModalOpen,
-    hasShip,
-    setSaveModalOpen,
-    setEuropeScreenOpen,
-    setReportsModalOpen,
-  ]);
+  }, [isMainMenuOpen, isAnyModalOpen, hasShip, setSaveModalOpen, setEuropeScreenOpen, setReportsModalOpen]);
 
   if (isMainMenuOpen) return null;
 
@@ -74,9 +71,7 @@ export const HUD: React.FC = () => {
         </button>
         <button
           className={`transition-colors cursor-pointer font-bold uppercase tracking-tight px-3 py-1 rounded border ${
-            isDebugMode
-              ? 'bg-red-600 border-red-400 text-white shadow-[0_0_10px_rgba(220,38,38,0.5)]'
-              : 'bg-slate-800/50 border-slate-600 text-slate-400 hover:text-white'
+            isDebugMode ? 'bg-red-600 border-red-400 text-white shadow-[0_0_10px_rgba(220,38,38,0.5)]' : 'bg-slate-800/50 border-slate-600 text-slate-400 hover:text-white'
           }`}
           onClick={() => toggleDebugMode()}
         >
@@ -92,9 +87,7 @@ export const HUD: React.FC = () => {
         >
           SAIL TO <span className="text-yellow-400 font-black">E</span>UROPE
         </button>
-        <div className="text-slate-300">
-          Turn: <span className="text-white">{turn}</span>
-        </div>
+        <div className="text-slate-300">Turn: <span className="text-white">{turn}</span></div>
       </div>
 
       <div className="flex items-center gap-6">
@@ -105,8 +98,7 @@ export const HUD: React.FC = () => {
           <span className="text-yellow-400 font-black">R</span>EPORTS
         </button>
         <div className="min-w-[100px] font-mono font-bold bg-slate-900/50 px-3 py-1 rounded border border-white/10">
-          GOLD:{' '}
-          <span className="text-yellow-400">{currentPlayer?.gold ?? 0}</span>
+          GOLD: <span className="text-yellow-400">{currentPlayer?.gold ?? 0}</span>
         </div>
       </div>
     </div>

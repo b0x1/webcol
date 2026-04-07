@@ -7,10 +7,7 @@ interface Props {
   onUnitClick: (unitId: string, x: number, y: number) => void;
 }
 
-export const UnitsTab: React.FC<Props> = ({
-  displayedPlayers,
-  onUnitClick,
-}) => (
+export const UnitsTab: React.FC<Props> = ({ displayedPlayers, onUnitClick }) => (
   <div className="overflow-x-auto">
     <table className="w-full text-left border-collapse">
       <thead>
@@ -22,7 +19,7 @@ export const UnitsTab: React.FC<Props> = ({
         </tr>
       </thead>
       <tbody>
-        {displayedPlayers.map((player) => (
+        {displayedPlayers.map(player => (
           <React.Fragment key={player.id}>
             {player.units.map((unit) => (
               <tr
@@ -30,36 +27,24 @@ export const UnitsTab: React.FC<Props> = ({
                 className="border-b border-slate-700 hover:bg-slate-700/30 transition-colors cursor-pointer"
                 onClick={() => onUnitClick(unit.id, unit.x, unit.y)}
               >
-                <td className="p-3">
-                  <Flag nation={player.nation} size={24} />
-                </td>
+                <td className="p-3"><Flag nation={player.nation} size={24} /></td>
                 <td className="p-3">{unit.type}</td>
-                <td className="p-3">
-                  {unit.x}, {unit.y}
-                </td>
-                <td className="p-3 font-mono">
-                  {unit.movesRemaining} / {unit.maxMoves}
-                </td>
+                <td className="p-3">{unit.x}, {unit.y}</td>
+                <td className="p-3 font-mono">{unit.movesRemaining} / {unit.maxMoves}</td>
               </tr>
             ))}
-            {player.settlements
-              .flatMap((c) => c.units)
-              .map((unit) => (
-                <tr
-                  key={unit.id}
-                  className="border-b border-slate-700 italic text-slate-400 hover:bg-slate-700/30 transition-colors cursor-pointer"
-                  onClick={() => onUnitClick(unit.id, unit.x, unit.y)}
-                >
-                  <td className="p-3">
-                    <Flag nation={player.nation} size={24} />
-                  </td>
-                  <td className="p-3">{unit.type} (In Settlement)</td>
-                  <td className="p-3">
-                    {unit.x}, {unit.y}
-                  </td>
-                  <td className="p-3 font-mono text-xs opacity-50">N/A</td>
-                </tr>
-              ))}
+            {player.settlements.flatMap(c => c.units).map((unit) => (
+              <tr
+                key={unit.id}
+                className="border-b border-slate-700 italic text-slate-400 hover:bg-slate-700/30 transition-colors cursor-pointer"
+                onClick={() => onUnitClick(unit.id, unit.x, unit.y)}
+              >
+                <td className="p-3"><Flag nation={player.nation} size={24} /></td>
+                <td className="p-3">{unit.type} (In Settlement)</td>
+                <td className="p-3">{unit.x}, {unit.y}</td>
+                <td className="p-3 font-mono text-xs opacity-50">N/A</td>
+              </tr>
+            ))}
           </React.Fragment>
         ))}
       </tbody>

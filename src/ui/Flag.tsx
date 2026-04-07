@@ -8,16 +8,9 @@ interface FlagProps {
   className?: string;
 }
 
-export const Flag: React.FC<FlagProps> = ({
-  nation,
-  size = 32,
-  className = '',
-}) => {
+export const Flag: React.FC<FlagProps> = ({ nation, size = 32, className = '' }) => {
   return (
-    <div
-      className={`inline-block shrink-0 relative ${className}`}
-      style={{ width: `${size}px`, height: `${size}px` }}
-    >
+    <div className={`inline-block shrink-0 relative ${className}`} style={{ width: `${size}px`, height: `${size}px` }}>
       <Sprite type={nation} category="flags" size={size} />
     </div>
   );

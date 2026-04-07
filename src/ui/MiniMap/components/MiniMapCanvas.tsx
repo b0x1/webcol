@@ -8,11 +8,7 @@ interface Props {
   onMapClick: (e: React.PointerEvent<HTMLDivElement>) => void;
 }
 
-export const MiniMapCanvas: React.FC<Props> = ({
-  map,
-  viewport,
-  onMapClick,
-}) => {
+export const MiniMapCanvas: React.FC<Props> = ({ map, viewport, onMapClick }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -36,33 +32,15 @@ export const MiniMapCanvas: React.FC<Props> = ({
           let color = [0, 0, 0];
 
           switch (tile.terrainType) {
-            case TerrainType.OCEAN:
-              color = [30, 144, 255];
-              break;
-            case TerrainType.COAST:
-              color = [135, 206, 250];
-              break;
-            case TerrainType.PLAINS:
-              color = [34, 139, 34];
-              break;
-            case TerrainType.FOREST:
-              color = [0, 100, 0];
-              break;
-            case TerrainType.HILLS:
-              color = [139, 69, 19];
-              break;
-            case TerrainType.MOUNTAINS:
-              color = [105, 105, 105];
-              break;
-            case TerrainType.DESERT:
-              color = [238, 232, 170];
-              break;
-            case TerrainType.TUNDRA:
-              color = [240, 255, 255];
-              break;
-            case TerrainType.ARCTIC:
-              color = [255, 255, 255];
-              break;
+            case TerrainType.OCEAN: color = [30, 144, 255]; break;
+            case TerrainType.COAST: color = [135, 206, 250]; break;
+            case TerrainType.PLAINS: color = [34, 139, 34]; break;
+            case TerrainType.FOREST: color = [0, 100, 0]; break;
+            case TerrainType.HILLS: color = [139, 69, 19]; break;
+            case TerrainType.MOUNTAINS: color = [105, 105, 105]; break;
+            case TerrainType.DESERT: color = [238, 232, 170]; break;
+            case TerrainType.TUNDRA: color = [240, 255, 255]; break;
+            case TerrainType.ARCTIC: color = [255, 255, 255]; break;
           }
 
           const index = (y * width + x) * 4;

@@ -9,11 +9,7 @@ export class UnitRenderer {
   public selectionRings: Phaser.GameObjects.Group;
   public unitBadges: Phaser.GameObjects.Group;
 
-  constructor(
-    private scene: Phaser.Scene,
-    private terrainRenderer: TerrainRenderer,
-    private tileSize: number,
-  ) {
+  constructor(private scene: Phaser.Scene, private terrainRenderer: TerrainRenderer, private tileSize: number) {
     this.unitSprites = scene.add.group();
     this.selectionRings = scene.add.group();
     this.unitBadges = scene.add.group();
@@ -29,9 +25,7 @@ export class UnitRenderer {
     players.forEach((player) => {
       player.units.forEach((unit) => {
         // Skip rendering units that are in a settlement (except if currently selected, though gameStore logic handles that too)
-        const inSettlement = player.settlements.some(
-          (s) => s.x === unit.x && s.y === unit.y,
-        );
+        const inSettlement = player.settlements.some(s => s.x === unit.x && s.y === unit.y);
         if (inSettlement && selectedUnitId !== unit.id) return;
 
         const key = `${unit.x}-${unit.y}`;
@@ -70,12 +64,10 @@ export class UnitRenderer {
           badgeBg.setDepth(200);
           this.unitBadges.add(badgeBg);
 
-          const badgeText = this.scene.add
-            .text(badgeX, badgeY, units.length.toString(), {
-              fontSize: '10px',
-              color: '#ffffff',
-            })
-            .setOrigin(0.5);
+          const badgeText = this.scene.add.text(badgeX, badgeY, units.length.toString(), {
+            fontSize: '10px',
+            color: '#ffffff',
+          }).setOrigin(0.5);
           badgeText.setDepth(201);
           this.unitBadges.add(badgeText);
         }

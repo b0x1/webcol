@@ -24,10 +24,7 @@ describe('gameStore', () => {
       player.units = [unit];
 
       const map = [
-        [
-          createTile('t00', 0, 0, TerrainType.PLAINS, 1),
-          createTile('t10', 1, 0, TerrainType.PLAINS, 1),
-        ],
+        [createTile('t00', 0, 0, TerrainType.PLAINS, 1), createTile('t10', 1, 0, TerrainType.PLAINS, 1)],
       ];
 
       useGameStore.setState({ players: [player], currentPlayerId: 'p1', map });
@@ -47,10 +44,7 @@ describe('gameStore', () => {
       player.units = [unit];
 
       const map = [
-        [
-          createTile('t00', 0, 0, TerrainType.PLAINS, 1),
-          createTile('t10', 1, 0, TerrainType.FOREST, 2),
-        ],
+        [createTile('t00', 0, 0, TerrainType.PLAINS, 1), createTile('t10', 1, 0, TerrainType.FOREST, 2)],
       ];
 
       useGameStore.setState({ players: [player], currentPlayerId: 'p1', map });
@@ -69,12 +63,7 @@ describe('gameStore', () => {
     it('should advance phases correctly', () => {
       const p1 = createPlayer('p1', 'Player 1', true, 100, Nation.ENGLAND);
       const map = [[createTile('t00', 0, 0, TerrainType.PLAINS, 1)]];
-      useGameStore.setState({
-        players: [p1],
-        currentPlayerId: 'p1',
-        phase: TurnPhase.MOVEMENT,
-        map,
-      });
+      useGameStore.setState({ players: [p1], currentPlayerId: 'p1', phase: TurnPhase.MOVEMENT, map });
 
       useGameStore.getState().endTurn();
 
@@ -88,7 +77,7 @@ describe('gameStore', () => {
       useGameStore.setState({
         players: [p1, p2],
         currentPlayerId: 'p1',
-        phase: TurnPhase.END_TURN,
+        phase: TurnPhase.END_TURN
       });
 
       useGameStore.getState().endTurn();
@@ -106,7 +95,7 @@ describe('gameStore', () => {
         players: [p1, p2],
         currentPlayerId: 'p2',
         phase: TurnPhase.END_TURN,
-        turn: 1,
+        turn: 1
       });
 
       useGameStore.getState().endTurn();
@@ -126,25 +115,23 @@ describe('gameStore', () => {
       unit2.maxMoves = 2;
       p2.units = [unit2];
 
-      const map = [[createTile('t00', 0, 0, TerrainType.PLAINS, 1)]];
+      const map = [
+        [createTile('t00', 0, 0, TerrainType.PLAINS, 1)],
+      ];
 
       useGameStore.setState({
         players: [p1, p2],
         currentPlayerId: 'p1',
         phase: TurnPhase.END_TURN,
-        map,
+        map
       });
 
       useGameStore.getState().endTurn();
 
-      const updatedP2 = useGameStore
-        .getState()
-        .players.find((p) => p.id === 'p2')!;
+      const updatedP2 = useGameStore.getState().players.find(p => p.id === 'p2')!;
       expect(updatedP2.units[0].movesRemaining).toBe(2);
 
-      const updatedP1 = useGameStore
-        .getState()
-        .players.find((p) => p.id === 'p1')!;
+      const updatedP1 = useGameStore.getState().players.find(p => p.id === 'p1')!;
       expect(updatedP1.units[0].movesRemaining).toBe(0);
     });
   });

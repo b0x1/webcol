@@ -16,18 +16,12 @@ export class CombatSystem {
     attacker: Unit,
     defender: Unit | Settlement,
     defenderTile: Tile,
-    defenderSettlement?: Settlement,
+    defenderSettlement?: Settlement
   ): CombatResult {
-    const attackerBaseStrength =
-      COMBAT_CONSTANTS.UNIT_STRENGTHS[
-        attacker.type as keyof typeof COMBAT_CONSTANTS.UNIT_STRENGTHS
-      ] || 1;
+    const attackerBaseStrength = COMBAT_CONSTANTS.UNIT_STRENGTHS[attacker.type as keyof typeof COMBAT_CONSTANTS.UNIT_STRENGTHS] || 1;
     let attackerModifier = 1.0;
 
-    if (
-      attacker.type === UnitType.SOLDIER &&
-      (attacker.cargo.get(GoodType.MUSKETS) || 0) >= 10
-    ) {
+    if (attacker.type === UnitType.SOLDIER && (attacker.cargo.get(GoodType.MUSKETS) || 0) >= 10) {
       attackerModifier *= 1.3;
     }
 
@@ -40,10 +34,7 @@ export class CombatSystem {
     const isSettlement = 'buildings' in defender;
 
     if (isUnit) {
-      defenderBaseStrength =
-        COMBAT_CONSTANTS.UNIT_STRENGTHS[
-          defender.type as keyof typeof COMBAT_CONSTANTS.UNIT_STRENGTHS
-        ] || 1;
+      defenderBaseStrength = COMBAT_CONSTANTS.UNIT_STRENGTHS[defender.type as keyof typeof COMBAT_CONSTANTS.UNIT_STRENGTHS] || 1;
     } else if (isSettlement) {
       if (defender.ownerId.startsWith('npc-')) {
         defenderBaseStrength = COMBAT_CONSTANTS.BASE_NATIVE_STRENGTH;
@@ -62,10 +53,7 @@ export class CombatSystem {
       defenderModifier *= 2.0;
     }
 
-    if (
-      defenderSettlement &&
-      defenderSettlement.buildings.includes('STOCKADE')
-    ) {
+    if (defenderSettlement && defenderSettlement.buildings.includes('STOCKADE')) {
       defenderModifier *= 1.5;
     }
 

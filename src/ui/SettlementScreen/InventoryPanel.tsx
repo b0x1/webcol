@@ -33,7 +33,7 @@ const FINISHED_GOODS = [
 export const InventoryPanel: React.FC<Props> = ({ settlement, map }) => {
   const { netProduction } = useMemo(
     () => ProductionSystem.calculateSettlementProduction(settlement, map),
-    [settlement, map],
+    [settlement, map]
   );
 
   const renderGoodBox = (good: GoodType) => {
@@ -41,17 +41,11 @@ export const InventoryPanel: React.FC<Props> = ({ settlement, map }) => {
     const net = netProduction.get(good) || 0;
 
     return (
-      <div
-        key={good}
-        className="flex-1 min-w-[80px] bg-slate-800/50 rounded border border-slate-700/50 p-1.5 flex flex-col items-center justify-between shadow-sm relative group overflow-hidden"
-      >
+      <div key={good} className="flex-1 min-w-[80px] bg-slate-800/50 rounded border border-slate-700/50 p-1.5 flex flex-col items-center justify-between shadow-sm relative group overflow-hidden">
         <div className="absolute top-0 right-0 p-0.5 pointer-events-none opacity-20 group-hover:opacity-40 transition-opacity">
-          <ResourceIcon good={good} size={24} />
+            <ResourceIcon good={good} size={24} />
         </div>
-        <div
-          className="text-[9px] font-black uppercase tracking-tighter text-slate-400 self-start truncate w-full z-10"
-          title={good.replace('_', ' ')}
-        >
+        <div className="text-[9px] font-black uppercase tracking-tighter text-slate-400 self-start truncate w-full z-10" title={good.replace('_', ' ')}>
           {good.replace('_', ' ')}
         </div>
         <div className="flex items-end justify-between w-full mt-1 z-10">
@@ -59,11 +53,8 @@ export const InventoryPanel: React.FC<Props> = ({ settlement, map }) => {
             {stock}
           </div>
           {net !== 0 && (
-            <div
-              className={`text-[10px] font-bold font-mono leading-none px-1 rounded ${net > 0 ? 'text-green-400 bg-green-900/20' : 'text-red-400 bg-red-900/20'}`}
-            >
-              {net > 0 ? '+' : ''}
-              {net}
+            <div className={`text-[10px] font-bold font-mono leading-none px-1 rounded ${net > 0 ? 'text-green-400 bg-green-900/20' : 'text-red-400 bg-red-900/20'}`}>
+              {net > 0 ? '+' : ''}{net}
             </div>
           )}
         </div>

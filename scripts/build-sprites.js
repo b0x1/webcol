@@ -7,7 +7,7 @@ const TILE_SIZE = 64;
 const SPRITE_CACHE_FILE = '.sprite-cache';
 const INPUT_ROOT_DIR = path.join('data', 'sprites');
 const OUTPUT_DIR = 'public';
-const CATEGORIES = ['resources', 'terrain', 'units', 'other', 'flags'];
+const CATEGORIES = ['resources', 'terrain', 'units', 'other', 'flags']
 
 async function get_config(type) {
   return {
@@ -15,18 +15,19 @@ async function get_config(type) {
     hashCacheFile: path.join(INPUT_ROOT_DIR, type, SPRITE_CACHE_FILE),
     outputAvif: path.join(OUTPUT_DIR, `${type}.avif`),
     outputJson: path.join(OUTPUT_DIR, `${type}.json`),
-  };
+  }
 }
 
-const CONFIGS = await Promise.all(CATEGORIES.map((key) => get_config(key)));
+const CONFIGS = await Promise.all(
+  CATEGORIES.map(key => get_config(key))
+);
 
 async function checkCache(inputDir, hashCacheFile) {
   const allFiles = [];
   if (fs.existsSync(inputDir)) {
-    const files = fs
-      .readdirSync(inputDir)
-      .filter((f) => f.endsWith('.svg'))
-      .map((f) => path.join(inputDir, f));
+    const files = fs.readdirSync(inputDir)
+      .filter(f => f.endsWith('.svg'))
+      .map(f => path.join(inputDir, f));
     allFiles.push(...files);
   }
 
@@ -49,7 +50,7 @@ async function checkCache(inputDir, hashCacheFile) {
 
   return {
     cached,
-    currentHash,
+    currentHash
   };
 }
 
@@ -60,9 +61,8 @@ async function buildSpritesheet(config) {
     return;
   }
 
-  const files = fs
-    .readdirSync(inputDir)
-    .filter((f) => f.endsWith('.svg'))
+  const files = fs.readdirSync(inputDir)
+    .filter(f => f.endsWith('.svg'))
     .sort();
 
   if (files.length === 0) {
@@ -70,7 +70,7 @@ async function buildSpritesheet(config) {
     return;
   }
 
-  const { cached, currentHash } = await checkCache(inputDir, hashCacheFile);
+  const {cached, currentHash} = await checkCache(inputDir, hashCacheFile);
   if (cached) {
     console.log(`SVGs in ${inputDir} are cached. Skip creating images.`);
     return;
@@ -141,7 +141,7 @@ async function run() {
   console.log('Sprites built successfully.');
 }
 
-run().catch((err) => {
+run().catch(err => {
   console.error('Error building sprites:', err);
   process.exit(1);
 });

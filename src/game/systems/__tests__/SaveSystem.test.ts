@@ -4,30 +4,16 @@ import { createPlayer } from '../../entities/Player';
 import { createUnit } from '../../entities/Unit';
 import { createSettlement } from '../../entities/Settlement';
 import { createTile } from '../../entities/Tile';
-import {
-  GoodType,
-  UnitType,
-  TerrainType,
-  Nation,
-  Attitude,
-  JobType,
-  TurnPhase,
-} from '../../entities/types';
+import { GoodType, UnitType, TerrainType, Nation, Attitude, JobType, TurnPhase } from '../../entities/types';
 
 // Mock localStorage
 const localStorageMock = (() => {
   let store: Record<string, string> = {};
   return {
     getItem: (key: string) => store[key] || null,
-    setItem: (key: string, value: string) => {
-      store[key] = value;
-    },
-    removeItem: (key: string) => {
-      delete store[key];
-    },
-    clear: () => {
-      store = {};
-    },
+    setItem: (key: string, value: string) => { store[key] = value; },
+    removeItem: (key: string) => { delete store[key]; },
+    clear: () => { store = {}; },
   };
 })();
 Object.defineProperty(window, 'localStorage', { value: localStorageMock });
@@ -44,16 +30,7 @@ describe('SaveSystem Serialization Round-trip', () => {
     unit1.cargo.set(GoodType.FOOD, 50);
     player1.units.push(unit1);
 
-    const settlement1 = createSettlement(
-      'c1',
-      'p1',
-      'Settlement 1',
-      10,
-      10,
-      2,
-      'EUROPEAN',
-      'STATE',
-    );
+    const settlement1 = createSettlement('c1', 'p1', 'Settlement 1', 10, 10, 2, 'EUROPEAN', 'STATE');
     settlement1.buildings.push('WAREHOUSE' as any);
     settlement1.inventory.set(GoodType.LUMBER, 100);
     settlement1.workforce.set('u1', JobType.FARMER);
@@ -61,23 +38,8 @@ describe('SaveSystem Serialization Round-trip', () => {
 
     const tile = createTile('10-10', 10, 10, TerrainType.PLAINS, 1);
 
-    const npcPlayer = createPlayer(
-      'ai-native-IROQUOIS',
-      'Iroquois',
-      false,
-      0,
-      Nation.IROQUOIS,
-    );
-    const npcSettlement = createSettlement(
-      's1',
-      'ai-native-IROQUOIS',
-      'Settlement 1',
-      15,
-      15,
-      5,
-      'NATIVE',
-      'TRIBE',
-    );
+    const npcPlayer = createPlayer('ai-native-IROQUOIS', 'Iroquois', false, 0, Nation.IROQUOIS);
+    const npcSettlement = createSettlement('s1', 'ai-native-IROQUOIS', 'Settlement 1', 15, 15, 5, 'NATIVE', 'TRIBE');
     npcSettlement.goods.set(GoodType.TRADE_GOODS, 20);
     npcSettlement.attitude = Attitude.NEUTRAL;
     npcPlayer.settlements.push(npcSettlement);
@@ -124,9 +86,7 @@ describe('SaveSystem Serialization Round-trip', () => {
     expect(loadedState.map![0][0].terrainType).toBe(TerrainType.PLAINS);
 
     // Check NPC Settlement and Map
-    expect(
-      loadedState.players![1].settlements[0].goods.get(GoodType.TRADE_GOODS),
-    ).toBe(20);
+    expect(loadedState.players![1].settlements[0].goods.get(GoodType.TRADE_GOODS)).toBe(20);
   });
 
   it('should manage manifest correctly', () => {

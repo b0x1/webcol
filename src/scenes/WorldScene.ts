@@ -42,16 +42,8 @@ export class WorldScene extends Phaser.Scene {
     });
 
     this.terrainRenderer = new TerrainRenderer(this as any, this.TILE_SIZE);
-    this.unitRenderer = new UnitRenderer(
-      this,
-      this.terrainRenderer,
-      this.TILE_SIZE,
-    );
-    this.cameraManager = new CameraManager(
-      this,
-      this.terrainRenderer,
-      this.TILE_SIZE,
-    );
+    this.unitRenderer = new UnitRenderer(this, this.terrainRenderer, this.TILE_SIZE);
+    this.cameraManager = new CameraManager(this, this.terrainRenderer, this.TILE_SIZE);
     this.inputHandler = new InputHandler(this, this.terrainRenderer);
 
     const state = useGameStore.getState();
@@ -59,33 +51,23 @@ export class WorldScene extends Phaser.Scene {
     const mapWidth = tiles[0].length;
     const mapHeight = tiles.length;
 
-    this.tileMap = new TileMap(
-      mapWidth,
-      mapHeight,
-      tiles.map((row) => row.map((t) => t.terrainType)),
-    );
-    this.terrainRenderer.renderTileMap(
-      tiles,
-      [],
-      state.players.flatMap((p) => p.settlements),
-    );
+    this.tileMap = new TileMap(mapWidth, mapHeight, tiles.map(row => row.map(t => t.terrainType)));
+    this.terrainRenderer.renderTileMap(tiles, [], state.players.flatMap(p => p.settlements));
     this.cameraManager.setup(mapWidth, mapHeight);
 
     this.inputHandler.setup(
       mapWidth,
       mapHeight,
       () => this.reachableTiles,
-      (id, x, y) => this.handleMove(id, x, y),
+      (id, x, y) => this.handleMove(id, x, y)
     );
 
     this.storeUnsubscribe = useGameStore.subscribe((state, prevState) => {
       if (!this.scene?.scene) return;
       if (!this.scene.isActive('WorldScene')) return;
 
-      const playerSettlements = state.players.flatMap((p) => p.settlements);
-      const prevPlayerSettlements = prevState.players.flatMap(
-        (p) => p.settlements,
-      );
+      const playerSettlements = state.players.flatMap(p => p.settlements);
+      const prevPlayerSettlements = prevState.players.flatMap(p => p.settlements);
       if (
         state.map !== prevState.map ||
         playerSettlements.length !== prevPlayerSettlements.length ||
@@ -96,14 +78,9 @@ export class WorldScene extends Phaser.Scene {
 
       this.unitRenderer.render(state.players, state.selectedUnitId);
 
-      const selectedUnit = state.players
-        .flatMap((p) => p.units)
-        .find((u) => u.id === state.selectedUnitId);
+      const selectedUnit = state.players.flatMap((p) => p.units).find((u) => u.id === state.selectedUnitId);
       if (selectedUnit) {
-        this.reachableTiles = MovementSystem.getReachableTiles(
-          selectedUnit,
-          state.map,
-        );
+        this.reachableTiles = MovementSystem.getReachableTiles(selectedUnit, state.map);
         this.terrainRenderer.updateReachableHighlights(this.reachableTiles);
       } else {
         this.reachableTiles = [];
@@ -136,9 +113,7 @@ export class WorldScene extends Phaser.Scene {
     if (this.isAnimating) return;
 
     const state = useGameStore.getState();
-    const unit = state.players
-      .flatMap((p) => p.units)
-      .find((u) => u.id === unitId);
+    const unit = state.players.flatMap((p) => p.units).find((u) => u.id === unitId);
     if (!unit) return;
 
     const fromX = unit.x;
@@ -153,18 +128,8 @@ export class WorldScene extends Phaser.Scene {
     });
   }
 
-  private animateUnitMove(
-    unit: Unit,
-    fromX: number,
-    fromY: number,
-    toX: number,
-    toY: number,
-    onComplete: () => void,
-  ) {
-    const { x: startX, y: startY } = this.terrainRenderer.tileToWorld(
-      fromX,
-      fromY,
-    );
+  private animateUnitMove(unit: Unit, fromX: number, fromY: number, toX: number, toY: number, onComplete: () => void) {
+    const { x: startX, y: startY } = this.terrainRenderer.tileToWorld(fromX, fromY);
     const { x: endX, y: endY } = this.terrainRenderer.tileToWorld(toX, toY);
 
     this.unitRenderer.unitSprites.getChildren().forEach((child: any) => {
@@ -183,7 +148,7 @@ export class WorldScene extends Phaser.Scene {
       startX + this.TILE_SIZE / 2,
       startY + this.TILE_SIZE / 2,
       'units',
-      unit.type,
+      unit.type
     );
     tempSprite.setDepth(300);
 

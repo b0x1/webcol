@@ -8,9 +8,7 @@ interface Props {
 
 export const MapGrid: React.FC<Props> = ({ settlementId }) => {
   const { map, players, assignJob } = useGameStore();
-  const settlement = players
-    .flatMap((p) => p.settlements)
-    .find((s) => s.id === settlementId);
+  const settlement = players.flatMap(p => p.settlements).find(s => s.id === settlementId);
 
   if (!settlement) return null;
 
@@ -40,8 +38,7 @@ export const MapGrid: React.FC<Props> = ({ settlementId }) => {
           .filter(([_, assignment]) => assignment === `${tile.x}-${tile.y}`)
           .map(([id]) => id);
 
-        const isSettlementTile =
-          tile.x === settlement.x && tile.y === settlement.y;
+        const isSettlementTile = tile.x === settlement.x && tile.y === settlement.y;
 
         return (
           <div
@@ -56,20 +53,16 @@ export const MapGrid: React.FC<Props> = ({ settlementId }) => {
 
             {tile.hasResource && !isSettlementTile && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <Sprite
-                  type={tile.hasResource}
-                  category="resources"
-                  size={100}
-                />
+                <Sprite type={tile.hasResource} category="resources" size={100} />
               </div>
             )}
 
             {isSettlementTile && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <Sprite
-                  type={`settlement_${settlement.organization.toLowerCase()}`}
-                  category="other"
-                  size={100}
+                   type={`settlement_${settlement.organization.toLowerCase()}`}
+                   category="other"
+                   size={100}
                 />
               </div>
             )}
@@ -79,18 +72,12 @@ export const MapGrid: React.FC<Props> = ({ settlementId }) => {
             </div>
             {workers.length > 0 && (
               <div className="flex flex-wrap gap-0.5 justify-center p-1">
-                {workers.map((id) => (
-                  <div
-                    key={id}
-                    className="w-4 h-4 bg-blue-600 rounded-full border border-white/20 shadow-sm"
-                    title={id}
-                  />
+                {workers.map(id => (
+                   <div key={id} className="w-4 h-4 bg-blue-600 rounded-full border border-white/20 shadow-sm" title={id} />
                 ))}
               </div>
             )}
-            {isSettlementTile && (
-              <div className="absolute inset-0 border-2 border-yellow-500/30 pointer-events-none" />
-            )}
+            {isSettlementTile && <div className="absolute inset-0 border-2 border-yellow-500/30 pointer-events-none" />}
           </div>
         );
       })}
