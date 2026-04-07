@@ -20,13 +20,13 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
   },
-  base: '/webcol/', // GitHub repo name as base URL.
+  base: "/webcol/",  // GitHub repo name as base URL.
   preview: { port: 4173 },
   server: { port: 4173 },
   build: {
-    outDir: 'dist',
-    assetsDir: 'assets',
+    outDir: "dist",
+    assetsDir: "assets",
     sourcemap: false,
-    chunkSizeWarningLimit: 2500,
+    chunkSizeWarningLimit: 2500
   },
 });
