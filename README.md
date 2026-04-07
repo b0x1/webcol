@@ -1,4 +1,4 @@
-# Web Colonization
+# WebCol
 
 An open-source turn-based strategy game inspired by the classic
 genre-defining work of art Sid Meier's Colonization,

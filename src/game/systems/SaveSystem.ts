@@ -17,8 +17,8 @@ export interface SaveData {
 }
 
 export class SaveSystem {
-  private static readonly MANIFEST_KEY = 'colonization_saves';
-  private static readonly SAVE_PREFIX = 'colonization_save_';
+  private static readonly MANIFEST_KEY = 'webcol_saves';
+  private static readonly SAVE_PREFIX = 'webcol_save_';
 
   static save(state: GameState, slotName: string): void {
     const data: SaveData = {
