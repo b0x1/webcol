@@ -2,7 +2,7 @@ import type { Player } from '../entities/Player';
 import type { Unit } from '../entities/Unit';
 import type { Settlement } from '../entities/Settlement';
 import type { Tile } from '../entities/Tile';
-import { BuildingType, GoodType, JobType, Nation, UnitType, TerrainType } from '../entities/types';
+import { BuildingType, JobType, UnitType, TerrainType } from '../entities/types';
 import { NATION_BONUSES } from '../constants';
 
 export class SettlementSystem {

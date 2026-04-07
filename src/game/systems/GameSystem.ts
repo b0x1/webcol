@@ -74,7 +74,7 @@ export class GameSystem {
       if (found) break;
     }
 
-    let units: Unit[] = [];
+    let units: Unit[];
     if (nationData.culture === 'EUROPEAN') {
       units = [
         this.createBaseUnit('u1', 'player-1', UnitType.COLONIST, startX, startY, 3),
@@ -143,7 +143,6 @@ export class GameSystem {
     const players = [humanPlayer];
     const allNations = Object.keys(Nation) as Nation[];
     const europeanNations = allNations.filter(n => NATION_BONUSES[n].culture === 'EUROPEAN');
-    const nativeNations = allNations.filter(n => NATION_BONUSES[n].culture === 'NATIVE');
 
     // Create European AI Players
     const availableEuropeanNations = europeanNations.filter(n => n !== nation);

@@ -5,10 +5,10 @@ import type { Player } from '../entities/Player';
 import type { Tile } from '../entities/Tile';
 import type { Unit } from '../entities/Unit';
 import type { Settlement } from '../entities/Settlement';
-import { BuildingType, GoodType, JobType, Nation, TurnPhase, UnitType, Attitude } from '../entities/types';
+import { BuildingType, GoodType, JobType, Nation, TurnPhase, UnitType } from '../entities/types';
 import { TurnEngine } from '../systems/TurnEngine';
 import { AISystem } from '../systems/AISystem';
-import { BUILDING_COSTS, RECRUITMENT_COSTS } from '../constants';
+import { RECRUITMENT_COSTS } from '../constants';
 import { ForeignInteractionSystem } from '../systems/ForeignInteractionSystem';
 import { eventBus } from './EventBus';
 import { CombatSystem } from '../systems/CombatSystem';
@@ -399,7 +399,7 @@ export const useGameStore = create<GameState>()(
         const unit = player?.units.find((u) => u.id === unitId);
         if (!unit) return;
 
-        let foreignPlayer = state.players.find(p => p.settlements.some(s => s.id === settlementId));
+        const foreignPlayer = state.players.find(p => p.settlements.some(s => s.id === settlementId));
         if (!foreignPlayer) return;
 
         const sIdx = foreignPlayer.settlements.findIndex(s => s.id === settlementId);
@@ -421,7 +421,7 @@ export const useGameStore = create<GameState>()(
         const unit = player?.units.find((u) => u.id === unitId);
         if (!unit) return;
 
-        let foreignPlayer = state.players.find(p => p.settlements.some(s => s.id === settlementId));
+        const foreignPlayer = state.players.find(p => p.settlements.some(s => s.id === settlementId));
         if (!foreignPlayer) return;
 
         const sIdx = foreignPlayer.settlements.findIndex(s => s.id === settlementId);

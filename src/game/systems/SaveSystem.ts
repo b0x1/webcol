@@ -97,7 +97,7 @@ export class SaveSystem {
     localStorage.setItem(this.MANIFEST_KEY, JSON.stringify(manifest));
   }
 
-  private static replacer(key: string, value: any): any {
+  private static replacer(_key: string, value: any): any {
     if (value instanceof Map) {
       return {
         dataType: 'Map',
@@ -107,7 +107,7 @@ export class SaveSystem {
     return value;
   }
 
-  private static reviver(key: string, value: any): any {
+  private static reviver(_key: string, value: any): any {
     if (typeof value === 'object' && value !== null) {
       if (value.dataType === 'Map') {
         return new Map(value.value);
