@@ -16,8 +16,6 @@ export class InputHandler {
 
       if (x < 0 || x >= mapWidth || y < 0 || y >= mapHeight) return;
 
-      const state = useGameStore.getState();
-
       if (pointer.leftButtonDown()) {
         this.handleLeftClick(x, y);
       } else if (pointer.rightButtonDown()) {

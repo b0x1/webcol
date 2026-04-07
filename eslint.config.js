@@ -29,12 +29,19 @@ export default tseslint.config(
         'warn',
         { allowConstantExport: true },
       ],
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-extraneous-class': 'off',
-      '@typescript-eslint/no-non-null-assertion': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
-      '@typescript-eslint/prefer-for-of': 'off',
-      '@typescript-eslint/no-dynamic-delete': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-extraneous-class': 'warn',
+      '@typescript-eslint/no-non-null-assertion': 'warn',
+      '@typescript-eslint/no-unused-vars': [
+        'error', {
+          "args": "all",
+          "argsIgnorePattern": "^_" ,
+          "varsIgnorePattern": "^_",
+          "caughtErrorsIgnorePattern": "^_"
+        }
+      ],
+      '@typescript-eslint/prefer-for-of': 'error',
+      '@typescript-eslint/no-dynamic-delete': 'warn',
     },
   },
 );

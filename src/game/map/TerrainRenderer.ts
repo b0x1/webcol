@@ -16,8 +16,8 @@ export class TerrainRenderer {
   private npcSettlementGraphics: Phaser.GameObjects.Group | null = null;
   private playerSettlementGraphics: Phaser.GameObjects.Group | null = null;
 
-  private terrainIndexMap: Map<string, number> = new Map();
-  private resourceIndexMap: Map<string, number> = new Map();
+  private terrainIndexMap = new Map<string, number>();
+  private resourceIndexMap = new Map<string, number>();
 
   constructor(scene: Phaser.Scene, tileSize: number) {
     this.scene = scene;

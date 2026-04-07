@@ -8,7 +8,7 @@ export class ProductionSystem {
   static calculateSettlementProduction(
     settlement: Settlement,
     map: Tile[][],
-    isActualProduction: boolean = false
+    isActualProduction = false
   ): { netProduction: Map<GoodType, number>; hammersProduced: number } {
     const netProduction = new Map<GoodType, number>();
     let hammersProduced = 0;
