@@ -3,7 +3,7 @@ import { TurnEngine } from '../TurnEngine';
 import { createPlayer } from '../../entities/Player';
 import { createSettlement } from '../../entities/Settlement';
 import { createUnit } from '../../entities/Unit';
-import { GoodType, UnitType, JobType, Nation, BuildingType } from '../../entities/types';
+import { TerrainType, GoodType, UnitType, JobType, Nation, BuildingType } from '../../entities/types';
 import { COLONY_CONSTANTS } from '../../constants';
 
 describe('TurnEngine Production', () => {

@@ -143,6 +143,7 @@ export class GameSystem {
     const players = [humanPlayer];
     const allNations = Object.keys(Nation) as Nation[];
     const europeanNations = allNations.filter(n => NATION_BONUSES[n].culture === 'EUROPEAN');
+    const nativeNations = allNations.filter(n => NATION_BONUSES[n].culture === 'NATIVE');
 
     // Create European AI Players
     const availableEuropeanNations = europeanNations.filter(n => n !== nation);

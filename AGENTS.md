@@ -5,13 +5,6 @@ refactoring behaviour for this project. Read it fully before planning any task.
 
 ---
 
-Watch out for updates for eslint-plugin-react-hooks,
-it is currently incompatible with eslint@10.
-Once it is updated and there is no compatibility issues,
-remove `--legacy-peer-deps` from `README.md`, `.github/workflows/deploy.yml`
-and this section from `AGENTS.md`.
-
----
 
 ## Project overview
 

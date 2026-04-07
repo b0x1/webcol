@@ -7,10 +7,12 @@ export class TerrainGenerator {
   private width: number;
   private height: number;
   private noise2D: (x: number, y: number) => number;
+  private seed: string;
 
   constructor(width: number, height: number, seed = 'a-new-world') {
     this.width = width;
     this.height = height;
+    this.seed = seed;
 
     // Simple pseudo-random seed to function with simplex-noise
     const seedFn = this.createRandom(seed);

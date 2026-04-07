@@ -4,7 +4,7 @@ import { GoodType } from '../entities/types';
 
 export class EconomySystem {
   static sellGood(
-    _player: Player,
+    player: Player,
     unit: Unit,
     good: GoodType,
     amount: number,
@@ -33,7 +33,7 @@ export class EconomySystem {
 
   static buyGood(
     playerGold: number,
-    _good: GoodType,
+    good: GoodType,
     amount: number,
     currentPrice: number
   ): {

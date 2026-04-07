@@ -4,9 +4,16 @@ import { TerrainRenderer } from '../TerrainRenderer';
 // Mock Phaser completely for this test file
 vi.mock('phaser', () => ({
   default: {
+    Scene: class {},
     GameObjects: {
+      Graphics: class {},
+      Group: class {},
+      Text: class {},
+      Image: class {},
     },
     Tilemaps: {
+      Tilemap: class {},
+      TilemapLayer: class {},
     },
   },
 }));

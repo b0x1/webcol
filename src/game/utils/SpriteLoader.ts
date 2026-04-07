@@ -7,7 +7,9 @@ export interface SpriteFrame {
   h: number;
 }
 
-export type SpriteManifest = Record<string, SpriteFrame>;
+export interface SpriteManifest {
+  [key: string]: SpriteFrame;
+}
 
 /**
  * SpriteLoader manages the loading and registration of AVIF spritesheets

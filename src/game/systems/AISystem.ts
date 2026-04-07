@@ -24,7 +24,8 @@ export class AISystem {
       }))
     }));
 
-    for (const player of updatedPlayers) {
+    for (let i = 0; i < updatedPlayers.length; i++) {
+      const player = updatedPlayers[i];
       if (player.isHuman) continue;
 
       let unitIndex = 0;
