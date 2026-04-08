@@ -32,6 +32,18 @@ export const SettlementScreen: React.FC = () => {
 
   const isReadOnly = settlement.ownerId !== currentPlayerId;
 
+  // Collect units physically at the settlement
+  const unitsAtSettlement = [
+    ...settlement.units,
+    ...settlementOwner.units.filter(u => u.x === settlement.x && u.y === settlement.y)
+  ].reduce((acc, unit) => {
+    // Avoid duplicates by ID
+    if (!acc.find(u => u.id === unit.id)) {
+      acc.push(unit);
+    }
+    return acc;
+  }, [] as typeof settlement.units);
+
   const handleClose = () => {
     setSettlementScreenOpen(false);
     useGameStore.getState().selectSettlement(null);
@@ -89,7 +101,7 @@ export const SettlementScreen: React.FC = () => {
              <MapGrid settlementId={settlement.id} />
           </div>
           <div className="flex-[1] overflow-y-auto bg-slate-900/30 rounded-xl border border-slate-800 p-4 min-h-0">
-            <AvailableUnits settlementId={settlement.id} units={settlement.units} />
+            <AvailableUnits settlementId={settlement.id} units={unitsAtSettlement} />
           </div>
         </div>
       </div>
