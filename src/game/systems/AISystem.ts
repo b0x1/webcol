@@ -5,7 +5,7 @@ import type { Unit } from '../entities/Unit';
 import { TerrainType, ResourceType, UnitType, Attitude } from '../entities/types';
 import { eventBus } from '../state/EventBus';
 import { NATION_BONUSES } from '../constants';
-import { distance, isSame, isNeighbor } from '../entities/Position';
+import { distance, isSame } from '../entities/Position';
 
 export class AISystem {
   static runAITurn(players: Player[], map: Tile[][]): Player[] {

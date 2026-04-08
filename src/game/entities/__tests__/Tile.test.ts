@@ -6,8 +6,8 @@ describe('Tile', () => {
   it('should initialize with correct values', () => {
     const tile = createTile('tile-1', 10, 20, TerrainType.PLAINS, 1, ResourceType.ORE_DEPOSIT);
     expect(tile.id).toBe('tile-1');
-    expect(tile.x).toBe(10);
-    expect(tile.y).toBe(20);
+    expect(tile.position.x).toBe(10);
+    expect(tile.position.y).toBe(20);
     expect(tile.terrainType).toBe(TerrainType.PLAINS);
     expect(tile.movementCost).toBe(1);
     expect(tile.hasResource).toBe(ResourceType.ORE_DEPOSIT);
