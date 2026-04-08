@@ -1,13 +1,14 @@
 import React from 'react';
 import { useGameStore } from '../game/state/gameStore';
 import { TerrainType } from '../game/entities/types';
+import { isSame } from '../game/entities/Position';
 
 export const FieldPanel: React.FC = () => {
   const { selectedTile, map, selectedUnitId, players } = useGameStore();
 
   if (!selectedTile) return null;
 
-  const tile = map[selectedTile.y]?.[selectedTile.x];
+  const tile = map[selectedTile.position.y]?.[selectedTile.position.x];
   if (!tile) return null;
 
   const getDefenseBonus = (type: TerrainType) => {
@@ -23,7 +24,7 @@ export const FieldPanel: React.FC = () => {
   const defenseBonus = getDefenseBonus(tile.terrainType);
 
   const allUnits = players.flatMap(p => p.units);
-  const unitsAtTile = allUnits.filter(u => u.x === selectedTile.x && u.y === selectedTile.y);
+  const unitsAtTile = allUnits.filter(u => isSame(u.position, selectedTile.position));
   const showAboveUnitPanel = selectedUnitId || unitsAtTile.length > 1;
 
   return (
@@ -33,7 +34,7 @@ export const FieldPanel: React.FC = () => {
           {tile.terrainType.replace('_', ' ')}
         </h3>
         <span className="text-[10px] font-mono text-slate-500">
-          {selectedTile.x}, {selectedTile.y}
+          {selectedTile.position.x}, {selectedTile.position.y}
         </span>
       </div>
 

@@ -19,6 +19,7 @@ import { UnitSystem } from '../systems/UnitSystem';
 import { EconomySystem } from '../systems/EconomySystem';
 import { MovementSystem } from '../systems/MovementSystem';
 import { useUIStore } from './uiStore';
+import { isSame } from '../entities/Position';
 
 enableMapSet();
 
@@ -94,7 +95,7 @@ export const useGameStore = create<GameState>()(
             const prevUnitIdx = player.units.findIndex(u => u.id === state.selectedUnitId);
             if (prevUnitIdx !== -1) {
               const prevUnit = player.units[prevUnitIdx];
-              const settlement = player.settlements.find(s => s.x === prevUnit.x && s.y === prevUnit.y);
+              const settlement = player.settlements.find(s => isSame(s.position, prevUnit.position));
               if (settlement) {
                 if (!settlement.units.some(u => u.id === prevUnit.id)) {
                   settlement.units.push({ ...prevUnit });
@@ -143,7 +144,7 @@ export const useGameStore = create<GameState>()(
         state.selectedUnitId = nextUnit.id;
         state.selectedSettlementId = null;
       });
-      eventBus.emit('cameraJump', { x: nextUnit.x, y: nextUnit.y });
+      eventBus.emit('cameraJump', { x: nextUnit.position.x, y: nextUnit.position.y });
     },
 
     skipUnit: (unitId) =>
@@ -183,12 +184,13 @@ export const useGameStore = create<GameState>()(
 
         if (UnitSystem.canMoveTo(unit, toX, toY, state.map)) {
           const targetTile = state.map[toY][toX];
-          unit.x = toX;
-          unit.y = toY;
+          const toPos = { x: toX, y: toY };
+          unit.position.x = toX;
+          unit.position.y = toY;
           unit.movesRemaining -= MovementSystem.getMovementCost(unit, targetTile);
 
           // Check if entering own settlement
-          const settlement = player.settlements.find(s => s.x === toX && s.y === toY);
+          const settlement = player.settlements.find(s => isSame(s.position, toPos));
           if (settlement) {
             if (!settlement.units.some(u => u.id === unit.id)) {
               settlement.units.push({ ...unit });
@@ -445,7 +447,7 @@ export const useGameStore = create<GameState>()(
       }
 
       if (settlement) {
-        state.resolveCombat(unitId, settlement.x, settlement.y);
+        state.resolveCombat(unitId, settlement.position.x, settlement.position.y);
       }
     },
 
@@ -465,9 +467,11 @@ export const useGameStore = create<GameState>()(
         let defender: Unit | Settlement | undefined;
         let defenderSettlement: Settlement | undefined;
 
+        const targetPos = { x: targetX, y: targetY };
+
         for (const p of state.players) {
           if (p.id !== state.currentPlayerId) {
-            const unit = p.units.find((u) => u.x === targetX && u.y === targetY);
+            const unit = p.units.find((u) => isSame(u.position, targetPos));
             if (unit) {
               defender = unit;
               break;
@@ -476,7 +480,7 @@ export const useGameStore = create<GameState>()(
         }
 
         for (const p of state.players) {
-          const settlement = p.settlements.find((c) => c.x === targetX && c.y === targetY);
+          const settlement = p.settlements.find((c) => isSame(c.position, targetPos));
           if (settlement) {
             defenderSettlement = settlement;
             if (!defender && p.id !== state.currentPlayerId) {
@@ -515,8 +519,8 @@ export const useGameStore = create<GameState>()(
               const sIdx = capturedSettlementPlayer.settlements.findIndex(s => s.id === defender!.id);
               const s = capturedSettlementPlayer.settlements[sIdx];
 
-              attacker.x = targetX;
-              attacker.y = targetY;
+              attacker.position.x = targetX;
+              attacker.position.y = targetY;
               attacker.movesRemaining = 0;
 
               s.ownerId = player.id;
@@ -570,8 +574,7 @@ export const useGameStore = create<GameState>()(
           id: `unit-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
           ownerId: player.id,
           type: unitType,
-          x: selectedUnit.x,
-          y: selectedUnit.y,
+          position: { ...selectedUnit.position },
           movesRemaining: 1,
           maxMoves: 1,
           isSkipping: false,

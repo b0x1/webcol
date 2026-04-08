@@ -56,8 +56,8 @@ describe('TurnEngine', () => {
 
       // Unit should move from (0,0) towards (5,5)
       // One step diagonally towards (5,5) is (1,1)
-      expect(updatedUnit.x).toBe(1);
-      expect(updatedUnit.y).toBe(1);
+      expect(updatedUnit.position.x).toBe(1);
+      expect(updatedUnit.position.y).toBe(1);
       expect(updatedUnit.movesRemaining).toBe(0);
     });
 
@@ -74,8 +74,8 @@ describe('TurnEngine', () => {
 
       expect(updatedAI.settlements.length).toBe(1);
       expect(updatedAI.units.length).toBe(0);
-      expect(updatedAI.settlements[0].x).toBe(2);
-      expect(updatedAI.settlements[0].y).toBe(2);
+      expect(updatedAI.settlements[0].position.x).toBe(2);
+      expect(updatedAI.settlements[0].position.y).toBe(2);
     });
 
     it('should not found a settlement if there is an adjacent friendly settlement', () => {
@@ -93,8 +93,8 @@ describe('TurnEngine', () => {
 
         expect(updatedAI.settlements.length).toBe(1); // Only the existing one
         expect(updatedAI.units.length).toBe(1);
-        expect(updatedAI.units[0].x).toBe(2);
-        expect(updatedAI.units[0].y).toBe(2);
+        expect(updatedAI.units[0].position.x).toBe(2);
+        expect(updatedAI.units[0].position.y).toBe(2);
       });
   });
 });

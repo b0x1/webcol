@@ -28,7 +28,7 @@ export const ResourcesTab: React.FC<Props> = ({ displayedPlayers, onSettlementCl
               <tr
                 key={settlement.id}
                 className="border-b border-slate-700 hover:bg-slate-700/30 transition-colors cursor-pointer"
-                onClick={() => onSettlementClick(settlement.id, settlement.x, settlement.y)}
+                onClick={() => onSettlementClick(settlement.id, settlement.position.x, settlement.position.y)}
               >
                 <td className="p-3 sticky left-0 bg-slate-800"><Flag nation={player.nation} size={24} /></td>
                 <td className="p-3 font-bold sticky left-[64px] bg-slate-800 text-blue-300">{settlement.name}</td>

@@ -1,6 +1,7 @@
 import type { Unit } from '../entities/Unit';
 import type { Tile } from '../entities/Tile';
 import { TerrainType, UnitType } from '../entities/types';
+import { isSame, toKey } from '../entities/Position';
 
 export class MovementSystem {
   static getReachableTiles(unit: Unit, map: Tile[][]): { x: number; y: number; cost: number }[] {
@@ -8,14 +9,15 @@ export class MovementSystem {
     const visited = new Map<string, number>();
     const queue: { x: number; y: number; cost: number }[] = [];
 
-    queue.push({ x: unit.x, y: unit.y, cost: 0 });
-    visited.set(`${unit.x}-${unit.y}`, 0);
+    queue.push({ x: unit.position.x, y: unit.position.y, cost: 0 });
+    visited.set(toKey(unit.position), 0);
 
     while (queue.length > 0) {
       const current = queue.shift()!;
+      const currentPos = { x: current.x, y: current.y };
 
       // Add to reachable if it's not the starting tile
-      if (current.x !== unit.x || current.y !== unit.y) {
+      if (!isSame(currentPos, unit.position)) {
         reachable.push(current);
       }
 
@@ -26,6 +28,7 @@ export class MovementSystem {
 
           const nx = current.x + dx;
           const ny = current.y + dy;
+          const nextPos = { x: nx, y: ny };
 
           if (ny >= 0 && ny < map.length && nx >= 0 && nx < map[ny].length) {
             const targetTile = map[ny][nx];
@@ -35,7 +38,7 @@ export class MovementSystem {
               const totalCost = current.cost + moveCost;
 
               if (totalCost <= unit.movesRemaining) {
-                const key = `${nx}-${ny}`;
+                const key = toKey(nextPos);
                 if (!visited.has(key) || visited.get(key)! > totalCost) {
                   visited.set(key, totalCost);
                   queue.push({ x: nx, y: ny, cost: totalCost });

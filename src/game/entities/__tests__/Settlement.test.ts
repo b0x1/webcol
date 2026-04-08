@@ -8,8 +8,8 @@ describe('Settlement', () => {
     expect(settlement.id).toBe('settlement-1');
     expect(settlement.ownerId).toBe('player-1');
     expect(settlement.name).toBe('Jamestown');
-    expect(settlement.x).toBe(15);
-    expect(settlement.y).toBe(20);
+    expect(settlement.position.x).toBe(15);
+    expect(settlement.position.y).toBe(20);
     expect(settlement.population).toBe(3);
   });
 

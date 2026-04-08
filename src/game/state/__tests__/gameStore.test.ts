@@ -33,8 +33,8 @@ describe('gameStore', () => {
 
       const updatedPlayer = useGameStore.getState().players[0];
       const updatedUnit = updatedPlayer.units[0];
-      expect(updatedUnit.x).toBe(1);
-      expect(updatedUnit.y).toBe(0);
+      expect(updatedUnit.position.x).toBe(1);
+      expect(updatedUnit.position.y).toBe(0);
       expect(updatedUnit.movesRemaining).toBe(2);
     });
 
@@ -53,8 +53,8 @@ describe('gameStore', () => {
 
       const updatedPlayer = useGameStore.getState().players[0];
       const updatedUnit = updatedPlayer.units[0];
-      expect(updatedUnit.x).toBe(0);
-      expect(updatedUnit.y).toBe(0);
+      expect(updatedUnit.position.x).toBe(0);
+      expect(updatedUnit.position.y).toBe(0);
       expect(updatedUnit.movesRemaining).toBe(1);
     });
   });

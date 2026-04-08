@@ -25,11 +25,11 @@ export const UnitsTab: React.FC<Props> = ({ displayedPlayers, onUnitClick }) => 
               <tr
                 key={unit.id}
                 className="border-b border-slate-700 hover:bg-slate-700/30 transition-colors cursor-pointer"
-                onClick={() => onUnitClick(unit.id, unit.x, unit.y)}
+                onClick={() => onUnitClick(unit.id, unit.position.x, unit.position.y)}
               >
                 <td className="p-3"><Flag nation={player.nation} size={24} /></td>
                 <td className="p-3">{unit.type}</td>
-                <td className="p-3">{unit.x}, {unit.y}</td>
+                <td className="p-3">{unit.position.x}, {unit.position.y}</td>
                 <td className="p-3 font-mono">{unit.movesRemaining} / {unit.maxMoves}</td>
               </tr>
             ))}
@@ -37,11 +37,11 @@ export const UnitsTab: React.FC<Props> = ({ displayedPlayers, onUnitClick }) => 
               <tr
                 key={unit.id}
                 className="border-b border-slate-700 italic text-slate-400 hover:bg-slate-700/30 transition-colors cursor-pointer"
-                onClick={() => onUnitClick(unit.id, unit.x, unit.y)}
+                onClick={() => onUnitClick(unit.id, unit.position.x, unit.position.y)}
               >
                 <td className="p-3"><Flag nation={player.nation} size={24} /></td>
                 <td className="p-3">{unit.type} (In Settlement)</td>
-                <td className="p-3">{unit.x}, {unit.y}</td>
+                <td className="p-3">{unit.position.x}, {unit.position.y}</td>
                 <td className="p-3 font-mono text-xs opacity-50">N/A</td>
               </tr>
             ))}

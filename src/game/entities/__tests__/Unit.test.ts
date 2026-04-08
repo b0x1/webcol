@@ -8,8 +8,8 @@ describe('Unit', () => {
     expect(unit.id).toBe('unit-1');
     expect(unit.ownerId).toBe('player-1');
     expect(unit.type).toBe(UnitType.COLONIST);
-    expect(unit.x).toBe(10);
-    expect(unit.y).toBe(10);
+    expect(unit.position.x).toBe(10);
+    expect(unit.position.y).toBe(10);
     expect(unit.movesRemaining).toBe(3);
   });
 

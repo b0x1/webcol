@@ -24,7 +24,7 @@ export const SettlementsTab: React.FC<Props> = ({ displayedPlayers, onSettlement
             <tr
               key={settlement.id}
               className="border-b border-slate-700 hover:bg-slate-700/30 transition-colors cursor-pointer"
-              onClick={() => onSettlementClick(settlement.id, settlement.x, settlement.y)}
+              onClick={() => onSettlementClick(settlement.id, settlement.position.x, settlement.position.y)}
             >
               <td className="p-3"><Flag nation={player.nation} size={24} /></td>
               <td className="p-3 font-semibold text-blue-300">{settlement.name}</td>

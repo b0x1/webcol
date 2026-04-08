@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import type { Unit } from '../entities/Unit';
 import type { Player } from '../entities/Player';
 import type { TerrainRenderer } from './TerrainRenderer';
+import { isSame } from '../entities/Position';
 
 export class UnitRenderer {
   public unitSprites: Phaser.GameObjects.Group;
@@ -24,10 +25,10 @@ export class UnitRenderer {
     players.forEach((player) => {
       player.units.forEach((unit) => {
         // Skip rendering units that are in a settlement (except if currently selected, though gameStore logic handles that too)
-        const inSettlement = player.settlements.some(s => s.x === unit.x && s.y === unit.y);
+        const inSettlement = player.settlements.some(s => isSame(s.position, unit.position));
         if (inSettlement && selectedUnitId !== unit.id) return;
 
-        const key = `${unit.x}-${unit.y}`;
+        const key = `${unit.position.x}-${unit.position.y}`;
         if (!unitsByTile[key]) unitsByTile[key] = [];
         unitsByTile[key].push(unit);
       });

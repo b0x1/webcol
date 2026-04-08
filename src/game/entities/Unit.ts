@@ -1,11 +1,11 @@
 import type { GoodType, UnitType, JobType } from './types';
+import type { Position } from './Position';
 
 export interface Unit {
   id: string;
   ownerId: string;
   type: UnitType;
-  x: number;
-  y: number;
+  position: Position;
   movesRemaining: number;
   maxMoves: number;
   isSkipping: boolean;
@@ -26,8 +26,7 @@ export function createUnit(
     id,
     ownerId,
     type,
-    x,
-    y,
+    position: { x, y },
     movesRemaining,
     maxMoves: movesRemaining,
     isSkipping: false,

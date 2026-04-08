@@ -31,14 +31,14 @@ describe('Settlement Production and Building Logic', () => {
     settlement.units.push(unit);
 
     // Assign to tile 6,5 (Grassland -> Food)
-    settlement.workforce.set(unit.id, '6-5');
+    settlement.workforce.set(unit.id, '6,5');
     player.settlements.push(settlement);
 
     const map: Tile[][] = [];
     for (let y = 0; y < 10; y++) {
       map[y] = [];
       for (let x = 0; x < 10; x++) {
-        map[y][x] = { id: `${x}-${y}`, x, y, terrainType: TerrainType.GRASSLAND, movementCost: 1, hasResource: null };
+        map[y][x] = { id: `${x}-${y}`, position: { x, y }, terrainType: TerrainType.GRASSLAND, movementCost: 1, hasResource: null };
       }
     }
 

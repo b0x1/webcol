@@ -3,6 +3,7 @@ import type { TerrainRenderer } from './TerrainRenderer';
 import { useGameStore } from '../state/gameStore';
 import { useUIStore } from '../state/uiStore';
 import { UnitType, Attitude } from '../entities/types';
+import { isSame } from '../entities/Position';
 
 export class InputHandler {
   constructor(private scene: Phaser.Scene, private terrainRenderer: TerrainRenderer) {}
@@ -28,7 +29,8 @@ export class InputHandler {
       const { x, y } = this.terrainRenderer.worldToTile(worldPoint.x, worldPoint.y);
 
       if (x >= 0 && x < mapWidth && y >= 0 && y < mapHeight) {
-        const settlement = useGameStore.getState().players.flatMap(p => p.settlements).find((s) => s.x === x && s.y === y);
+        const pos = { x, y };
+        const settlement = useGameStore.getState().players.flatMap(p => p.settlements).find((s) => isSame(s.position, pos));
         this.terrainRenderer.showTooltip(x, y, worldPoint.x, worldPoint.y, settlement?.name);
       } else {
         this.terrainRenderer.hideTooltip();
@@ -50,17 +52,18 @@ export class InputHandler {
   private handleLeftClick(x: number, y: number) {
     const state = useGameStore.getState();
     const player = state.players.find(p => p.id === state.currentPlayerId);
+    const pos = { x, y };
 
     // Units on map + available units in own settlement
-    const unitsAtTile = state.players.flatMap((p) => p.units).filter((u) => u.x === x && u.y === y);
-    const settlementAtTile = state.players.flatMap((p) => p.settlements).find((c) => c.x === x && c.y === y);
+    const unitsAtTile = state.players.flatMap((p) => p.units).filter((u) => isSame(u.position, pos));
+    const settlementAtTile = state.players.flatMap((p) => p.settlements).find((c) => isSame(c.position, pos));
 
     if (settlementAtTile && player && settlementAtTile.ownerId === player.id) {
        const availableUnitsInSettlement = settlementAtTile.units.filter(u => !settlementAtTile.workforce.has(u.id));
        unitsAtTile.push(...availableUnitsInSettlement);
     }
 
-    const tile = state.map[y]?.[x] || { x, y, terrainType: 'UNKNOWN', movementCost: 1, hasResource: null };
+    const tile = state.map[y]?.[x] || { position: { x, y }, terrainType: 'UNKNOWN', movementCost: 1, hasResource: null };
     useGameStore.getState().selectTile(tile as any);
 
     if (settlementAtTile) {
@@ -95,15 +98,16 @@ export class InputHandler {
     const selectedUnit = state.players.flatMap((p) => p.units).find((u) => u.id === state.selectedUnitId);
     if (!selectedUnit) return;
 
+    const pos = { x, y };
     const foreignUnitAtTile = state.players
       .filter((p) => p.id !== state.currentPlayerId)
       .flatMap((p) => p.units)
-      .find((u) => u.x === x && u.y === y);
+      .find((u) => isSame(u.position, pos));
 
     const foreignSettlementAtTile = state.players
       .filter((p) => p.id !== state.currentPlayerId)
       .flatMap((p) => p.settlements)
-      .find((c) => c.x === x && c.y === y);
+      .find((c) => isSame(c.position, pos));
 
     if (selectedUnit.type === UnitType.SOLDIER && foreignUnitAtTile ) {
       useGameStore.getState().resolveCombat(selectedUnit.id, x, y);
