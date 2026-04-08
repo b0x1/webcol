@@ -29,6 +29,10 @@ export const MapGrid: React.FC<Props> = ({ settlementId }) => {
     }
   };
 
+  const handleDragStart = (e: React.DragEvent, unitId: string) => {
+    e.dataTransfer.setData('unitId', unitId);
+  };
+
   return (
     <div className="grid grid-cols-3 gap-1 bg-slate-900 p-1 rounded border border-slate-700 w-full aspect-square max-w-[450px]">
       {tiles.map((tile, i) => {
@@ -36,7 +40,8 @@ export const MapGrid: React.FC<Props> = ({ settlementId }) => {
 
         const workers = Array.from(settlement.workforce.entries())
           .filter(([_, assignment]) => assignment === `${tile.x}-${tile.y}`)
-          .map(([id]) => id);
+          .map(([id]) => settlement.units.find(u => u.id === id))
+          .filter(Boolean);
 
         const isSettlementTile = tile.x === settlement.x && tile.y === settlement.y;
 
@@ -71,9 +76,17 @@ export const MapGrid: React.FC<Props> = ({ settlementId }) => {
               {!isSettlementTile ? tile.terrainType.slice(0, 3) : 'CITY'}
             </div>
             {workers.length > 0 && (
-              <div className="flex flex-wrap gap-0.5 justify-center p-1">
-                {workers.map(id => (
-                   <div key={id} className="w-4 h-4 bg-blue-600 rounded-full border border-white/20 shadow-sm" title={id} />
+              <div className="flex flex-wrap gap-0.5 justify-center p-1 z-20">
+                {workers.map(unit => (
+                   <div
+                    key={unit!.id}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, unit!.id)}
+                    className="w-10 h-10 bg-blue-600/40 rounded-full border border-white/20 shadow-sm relative overflow-hidden cursor-grab active:cursor-grabbing"
+                    title={unit!.type}
+                  >
+                     <Sprite type={unit!.type} category="units" size={40} />
+                  </div>
                 ))}
               </div>
             )}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 interface SpriteProps {
   type: string;
-  category: 'terrain' | 'resources' | 'other' | 'flags';
+  category: 'terrain' | 'resources' | 'other' | 'flags' | 'units';
   size?: number;
   className?: string;
 }

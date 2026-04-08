@@ -2,6 +2,7 @@ import React from 'react';
 import { BuildingType, JobType } from '../../game/entities/types';
 import { useGameStore } from '../../game/state/gameStore';
 import { JOB_PRODUCTION_RULES } from '../../game/rules/ProductionRules';
+import { Sprite } from '../Sprite';
 
 const BUILDINGS_LIST = [
   { type: BuildingType.TOWN_HALL, name: 'Town Hall', bonus: 'Governance' },
@@ -39,6 +40,10 @@ export const BuildingSlots: React.FC<Props> = ({ settlementId, ownedBuildings })
     }
   };
 
+  const handleDragStart = (e: React.DragEvent, unitId: string) => {
+    e.dataTransfer.setData('unitId', unitId);
+  };
+
   return (
     <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
       {BUILDINGS_LIST.filter(b => ownedBuildings.includes(b.type)).map((b) => {
@@ -60,19 +65,21 @@ export const BuildingSlots: React.FC<Props> = ({ settlementId, ownedBuildings })
               <div className="text-[10px] text-slate-400 italic mb-2">{b.bonus}</div>
             </div>
 
-            <div className="flex flex-wrap gap-1 mt-auto pt-2 border-t border-slate-700/50">
+            <div className="flex gap-1 mt-auto pt-2 border-t border-slate-700/50 h-12">
               {workers.length > 0 ? (
                 workers.map(unit => (
                   <div
                     key={unit!.id}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, unit!.id)}
                     title={`${unit!.type}${unit!.specialty ? ` (Expert ${unit!.specialty})` : ''}`}
-                    className="w-6 h-6 bg-blue-600 rounded-full border border-blue-400 shadow-sm flex items-center justify-center text-[8px] font-black cursor-help"
+                    className="w-10 h-10 bg-blue-600/40 rounded border border-blue-400/30 shadow-sm flex items-center justify-center relative overflow-hidden cursor-grab active:cursor-grabbing"
                   >
-                    {unit!.type[0]}
+                    <Sprite type={unit!.type} category="units" size={40} />
                   </div>
                 ))
               ) : (
-                <div className="text-[8px] text-slate-600 uppercase font-bold tracking-tighter">Empty</div>
+                <div className="text-[8px] text-slate-600 uppercase font-bold tracking-tighter self-center">Empty</div>
               )}
             </div>
           </div>
