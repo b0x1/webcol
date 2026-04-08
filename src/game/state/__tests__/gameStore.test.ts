@@ -20,7 +20,7 @@ describe('gameStore', () => {
   describe('moveUnit', () => {
     it('should update unit position and movesRemaining when move is valid', () => {
       const player = createPlayer('p1', 'Player 1', true, 100, Nation.ENGLAND);
-      const unit = createUnit('u1', 'p1', UnitType.COLONIST, 0, 0, 3);
+      const unit = createUnit('u1', 'p1', 'Test Unit', UnitType.COLONIST, 0, 0, 3);
       player.units = [unit];
 
       const map = [
@@ -40,7 +40,7 @@ describe('gameStore', () => {
 
     it('should not update unit position when not enough movesRemaining', () => {
       const player = createPlayer('p1', 'Player 1', true, 100, Nation.ENGLAND);
-      const unit = createUnit('u1', 'p1', UnitType.COLONIST, 0, 0, 1);
+      const unit = createUnit('u1', 'p1', 'Test Unit', UnitType.COLONIST, 0, 0, 1);
       player.units = [unit];
 
       const map = [
@@ -106,12 +106,12 @@ describe('gameStore', () => {
 
     it('should reset movesRemaining to maxMoves for the NEW current player', () => {
       const p1 = createPlayer('p1', 'Player 1', true, 100, Nation.ENGLAND);
-      const unit1 = createUnit('u1', 'p1', UnitType.COLONIST, 0, 0, 0);
+      const unit1 = createUnit('u1', 'p1', 'Test Unit', UnitType.COLONIST, 0, 0, 0);
       unit1.maxMoves = 3;
       p1.units = [unit1];
 
       const p2 = createPlayer('p2', 'Player 2', true, 100, Nation.SPAIN);
-      const unit2 = createUnit('u2', 'p2', UnitType.COLONIST, 0, 0, 0);
+      const unit2 = createUnit('u2', 'p2', 'Test Unit', UnitType.COLONIST, 0, 0, 0);
       unit2.maxMoves = 2;
       p2.units = [unit2];
 

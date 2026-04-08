@@ -18,6 +18,7 @@ import { SettlementSystem } from '../systems/SettlementSystem';
 import { UnitSystem } from '../systems/UnitSystem';
 import { EconomySystem } from '../systems/EconomySystem';
 import { MovementSystem } from '../systems/MovementSystem';
+import { NamingSystem, type NamingStats } from '../systems/NamingSystem';
 import { useUIStore } from './uiStore';
 import { isSame } from '../entities/Position';
 
@@ -34,6 +35,7 @@ export interface GameState {
   map: Tile[][];
   selectedTile: Tile | null;
   combatResult: CombatResult | null;
+  namingStats: NamingStats;
 
   selectUnit: (unitId: string | null) => void;
   selectTile: (tile: Tile | null) => void;
@@ -85,6 +87,7 @@ export const useGameStore = create<GameState>()(
     map: [],
     selectedTile: null,
     combatResult: null,
+    namingStats: {},
 
     selectUnit: (unitId) =>
       set((state) => {
@@ -252,9 +255,10 @@ export const useGameStore = create<GameState>()(
 
       const state = get();
       if (state.phase === TurnPhase.PRODUCTION) {
-        const updatedPlayers = TurnEngine.runProduction(state.players, state.map);
+        const { players: updatedPlayers, namingStats: updatedNamingStats } = TurnEngine.runProduction(state.players, state.map, state.namingStats);
         set((s) => {
           s.players = updatedPlayers;
+          s.namingStats = updatedNamingStats;
         });
         get().endTurn();
       } else if (state.phase === TurnPhase.TRADE) {
@@ -288,10 +292,13 @@ export const useGameStore = create<GameState>()(
 
         if (!SettlementSystem.canFoundSettlement(player, unit, state.map, allSettlements)) return;
 
+        const { name: settlementName, updatedStats } = NamingSystem.getNextName(player.nation, 'settlement', state.namingStats);
+        state.namingStats = updatedStats;
+
         const newSettlement = SettlementSystem.createSettlement(
           player,
           unit,
-          `${player.name}'s Settlement`,
+          settlementName,
           [BuildingType.TOWN_HALL, BuildingType.CARPENTERS_SHOP, BuildingType.BLACKSMITHS_HOUSE]
         );
 
@@ -570,9 +577,13 @@ export const useGameStore = create<GameState>()(
         }
 
         player.gold -= goldCost;
+        const { name: newUnitName, updatedStats } = NamingSystem.getNextName(player.nation, unitType === UnitType.SHIP ? 'ship' : 'unit', state.namingStats);
+        state.namingStats = updatedStats;
+
         player.units.push({
           id: `unit-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
           ownerId: player.id,
+          name: newUnitName,
           type: unitType,
           position: { ...selectedUnit.position },
           movesRemaining: 1,
@@ -597,10 +608,11 @@ export const useGameStore = create<GameState>()(
     },
 
     initGame: (params) => {
-      const { map, players } = GameSystem.initGame(params);
+      const { map, players, namingStats } = GameSystem.initGame(params);
       set((state) => {
         state.map = map;
         state.players = players;
+        state.namingStats = namingStats;
         state.currentPlayerId = 'player-1';
         state.turn = 1;
         state.phase = TurnPhase.MOVEMENT;

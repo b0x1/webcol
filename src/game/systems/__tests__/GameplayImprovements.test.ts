@@ -10,7 +10,7 @@ describe('TurnEngine Production', () => {
   it('should promote a colonist to an expert after 20 turns in a job', () => {
     const player = createPlayer('p1', 'Player 1', true, 0, Nation.ENGLAND);
     const settlement = createSettlement('s1', 'p1', 'Settlement 1', 5, 5, 1, 'EUROPEAN', 'STATE');
-    const unit = createUnit('u1', 'p1', UnitType.COLONIST, 5, 5, 1);
+    const unit = createUnit('u1', 'p1', 'Test Unit', UnitType.COLONIST, 5, 5, 1);
     unit.turnsInJob = COLONY_CONSTANTS.EXPERT_PROMOTION_TURNS - 1;
 
     settlement.units.push(unit);
@@ -27,7 +27,7 @@ describe('TurnEngine Production', () => {
   it('should produce refined goods (Blacksmith: Ore -> Tools)', () => {
     const player = createPlayer('p1', 'Player 1', true, 0, Nation.ENGLAND);
     const settlement = createSettlement('s1', 'p1', 'Settlement 1', 5, 5, 1, 'EUROPEAN', 'STATE');
-    const unit = createUnit('u1', 'p1', UnitType.COLONIST, 5, 5, 1);
+    const unit = createUnit('u1', 'p1', 'Test Unit', UnitType.COLONIST, 5, 5, 1);
 
     settlement.inventory.set(GoodType.ORE, 10);
     settlement.buildings.push(BuildingType.BLACKSMITHS_HOUSE);
@@ -46,7 +46,7 @@ describe('TurnEngine Production', () => {
   it('should use hammers to build a building from the production queue', () => {
     const player = createPlayer('p1', 'Player 1', true, 0, Nation.ENGLAND);
     const settlement = createSettlement('s1', 'p1', 'Settlement 1', 5, 5, 1, 'EUROPEAN', 'STATE');
-    const unit = createUnit('u1', 'p1', UnitType.COLONIST, 5, 5, 1);
+    const unit = createUnit('u1', 'p1', 'Test Unit', UnitType.COLONIST, 5, 5, 1);
 
     // Warehouse costs 40 hammers, 0 tools
     settlement.productionQueue.push(BuildingType.WAREHOUSE);

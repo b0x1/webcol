@@ -10,7 +10,7 @@ describe('Settlement Production and Building Logic', () => {
   it('calculates job-based production correctly', () => {
     const player = createPlayer('p1', 'Player 1', true, 1000, Nation.SPAIN);
     const settlement = createSettlement('c1', 'p1', 'Settlement 1', 0, 0, 1, 'EUROPEAN', 'STATE');
-    const unit = createUnit('u1', 'p1', UnitType.COLONIST, 0, 0, 1);
+    const unit = createUnit('u1', 'p1', 'Test Unit', UnitType.COLONIST, 0, 0, 1);
     settlement.units.push(unit);
     settlement.workforce.set(unit.id, JobType.LUMBERJACK);
     player.settlements.push(settlement);
@@ -27,7 +27,7 @@ describe('Settlement Production and Building Logic', () => {
   it('calculates tile-based production correctly', () => {
     const player = createPlayer('p1', 'Player 1', true, 1000, Nation.SPAIN);
     const settlement = createSettlement('c1', 'p1', 'Settlement 1', 5, 5, 1, 'EUROPEAN', 'STATE');
-    const unit = createUnit('u1', 'p1', UnitType.COLONIST, 5, 5, 1);
+    const unit = createUnit('u1', 'p1', 'Test Unit', UnitType.COLONIST, 5, 5, 1);
     settlement.units.push(unit);
 
     // Assign to tile 6,5 (Grassland -> Food)

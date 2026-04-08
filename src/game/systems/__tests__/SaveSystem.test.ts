@@ -26,7 +26,7 @@ describe('SaveSystem Serialization Round-trip', () => {
   it('should deeply preserve state after save and load', () => {
     // 1. Create a complex mock GameState
     const player1 = createPlayer('p1', 'Player 1', true, 1000, Nation.NORSEMEN);
-    const unit1 = createUnit('u1', 'p1', UnitType.COLONIST, 10, 10, 3);
+    const unit1 = createUnit('u1', 'p1', 'Test Unit', UnitType.COLONIST, 10, 10, 3);
     unit1.cargo.set(GoodType.FOOD, 50);
     player1.units.push(unit1);
 

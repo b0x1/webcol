@@ -22,7 +22,7 @@ describe('Player', () => {
 
   it('should be able to hold units and settlements', () => {
     const player = createPlayer('p1', 'Human', true, 100, Nation.FRANCE);
-    const unit = createUnit('u1', 'p1', UnitType.PIONEER, 1, 1, 3);
+    const unit = createUnit('u1', 'p1', 'Test Unit', UnitType.PIONEER, 1, 1, 3);
     const settlement = createSettlement('c1', 'p1', 'Port Royal', 10, 10, 1, 'EUROPEAN', 'STATE');
     player.units.push(unit);
     player.settlements.push(settlement);

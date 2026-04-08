@@ -22,7 +22,7 @@ describe('ForeignInteractionSystem', () => {
   };
 
   const getMockUnit = () => {
-    const u = createUnit('u1', 'player-1', UnitType.COLONIST, 10, 10, 3);
+    const u = createUnit('u1', 'player-1', 'Test Unit', UnitType.COLONIST, 10, 10, 3);
     u.cargo.set(GoodType.TRADE_GOODS, 50);
     return u;
   };
@@ -58,7 +58,7 @@ describe('ForeignInteractionSystem', () => {
 
   it('should throw error when non-colonist tries to learn', () => {
     const mockSettlement = getMockSettlement();
-    const soldier = createUnit('u2', 'player-1', UnitType.SOLDIER, 10, 10, 3);
+    const soldier = createUnit('u2', 'player-1', 'Test Unit', UnitType.SOLDIER, 10, 10, 3);
     expect(() => ForeignInteractionSystem.learn(mockSettlement, soldier)).toThrow();
   });
 
