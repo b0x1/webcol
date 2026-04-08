@@ -5,6 +5,7 @@ import type { Unit } from '../entities/Unit';
 import { TerrainType, ResourceType, UnitType, Attitude } from '../entities/types';
 import { eventBus } from '../state/EventBus';
 import { NATION_BONUSES } from '../constants';
+import { distance, isSame, isNeighbor } from '../entities/Position';
 
 export class AISystem {
   static runAITurn(players: Player[], map: Tile[][]): Player[] {
@@ -38,19 +39,18 @@ export class AISystem {
         let unitRemoved = false;
 
         if (unit.type === UnitType.COLONIST || unit.type === UnitType.VILLAGER) {
-          const currentTile = map[unit.y][unit.x];
+          const currentTile = map[unit.position.y][unit.position.x];
           const nationData = NATION_BONUSES[player.nation];
           if (currentTile.terrainType === TerrainType.PLAINS || currentTile.terrainType === TerrainType.GRASSLAND || currentTile.terrainType === TerrainType.PRAIRIE) {
             const hasAdjacentSettlement = updatedPlayers.flatMap(p => p.settlements).some(
-              (c) => Math.abs(c.x - unit.x) <= 1 && Math.abs(c.y - unit.y) <= 1,
+              (c) => distance(c.position, unit.position) <= 1,
             );
             if (!hasAdjacentSettlement) {
               const newSettlement: Settlement = {
                 id: `settlement-ai-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
                 ownerId: player.id,
                 name: `${player.name}'s Settlement`,
-                x: unit.x,
-                y: unit.y,
+                position: { ...unit.position },
                 population: 1,
                 culture: nationData.culture,
                 organization: nationData.organization,
@@ -75,17 +75,18 @@ export class AISystem {
           const allSettlements = updatedPlayers.flatMap((p) => p.settlements);
           const target = this.findNearestTarget(unit, map, allSettlements);
           if (target) {
-            const dx = Math.sign(target.x - unit.x);
-            const dy = Math.sign(target.y - unit.y);
+            const targetPos = { x: target.x, y: target.y };
+            const dx = Math.sign(targetPos.x - unit.position.x);
+            const dy = Math.sign(targetPos.y - unit.position.y);
 
-            const nx = unit.x + dx;
-            const ny = unit.y + dy;
+            const nx = unit.position.x + dx;
+            const ny = unit.position.y + dy;
 
             if (ny >= 0 && ny < map.length && nx >= 0 && nx < map[ny].length) {
               const targetTile = map[ny][nx];
               if (unit.movesRemaining >= targetTile.movementCost) {
-                unit.x = nx;
-                unit.y = ny;
+                unit.position.x = nx;
+                unit.position.y = ny;
                 unit.movesRemaining -= targetTile.movementCost;
                 eventBus.emit('unitMoved', unit);
               }
@@ -115,10 +116,11 @@ export class AISystem {
           tile.terrainType === TerrainType.PLAINS || tile.hasResource === ResourceType.FOREST;
         if (!isTargetType) continue;
 
-        const isColonized = allSettlements.some((c) => c.x === x && c.y === y);
+        const pos = { x, y };
+        const isColonized = allSettlements.some((c) => isSame(c.position, pos));
         if (isColonized) continue;
 
-        const dist = Math.max(Math.abs(x - unit.x), Math.abs(y - unit.y));
+        const dist = distance(pos, unit.position);
         if (dist > 0 && dist < minDistance) {
           minDistance = dist;
           nearest = { x, y };

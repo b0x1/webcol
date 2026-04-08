@@ -92,8 +92,8 @@ export class TurnEngine {
                     `unit-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
                     newSettlement.ownerId,
                     currentItem as UnitType,
-                    newSettlement.x,
-                    newSettlement.y,
+                    newSettlement.position.x,
+                    newSettlement.position.y,
                     3
                   );
                   newSettlement.units.push(newUnit);
@@ -115,8 +115,8 @@ export class TurnEngine {
                 `unit-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
                 newSettlement.ownerId,
                 UnitType.COLONIST,
-                newSettlement.x,
-                newSettlement.y,
+                newSettlement.position.x,
+                newSettlement.position.y,
                 3
               );
               newSettlement.units.push(newColonist);

@@ -4,6 +4,7 @@ import type { Settlement } from '../entities/Settlement';
 import type { Tile } from '../entities/Tile';
 import { BuildingType, JobType, UnitType, TerrainType } from '../entities/types';
 import { NATION_BONUSES } from '../constants';
+import { distance } from '../entities/Position';
 
 export class SettlementSystem {
   static createSettlement(
@@ -18,8 +19,7 @@ export class SettlementSystem {
       id: `settlement-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       ownerId: player.id,
       name,
-      x: unit.x,
-      y: unit.y,
+      position: { ...unit.position },
       population: 1,
       culture: nationData.culture,
       organization: nationData.organization,
@@ -45,7 +45,7 @@ export class SettlementSystem {
     if (nationData.culture === 'NATIVE' && unit.type !== UnitType.VILLAGER) return false;
 
     // Check terrain
-    const tile = map[unit.y]?.[unit.x];
+    const tile = map[unit.position.y]?.[unit.position.x];
     if (!tile) return false;
     if (
       tile.terrainType === TerrainType.OCEAN ||
@@ -57,9 +57,7 @@ export class SettlementSystem {
 
     // Check distance to other settlements (Chebyshev distance >= 2)
     const tooClose = allSettlements.some((s) => {
-      const dx = Math.abs(s.x - unit.x);
-      const dy = Math.abs(s.y - unit.y);
-      return Math.max(dx, dy) < 2;
+      return distance(s.position, unit.position) < 2;
     });
 
     if (tooClose) return false;

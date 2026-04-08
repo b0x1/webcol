@@ -1,9 +1,9 @@
 import type { ResourceType, TerrainType } from './types';
+import type { Position } from './Position';
 
 export interface Tile {
   id: string;
-  x: number;
-  y: number;
+  position: Position;
   terrainType: TerrainType;
   movementCost: number;
   hasResource: ResourceType | null;
@@ -19,8 +19,7 @@ export function createTile(
 ): Tile {
   return {
     id,
-    x,
-    y,
+    position: { x, y },
     terrainType,
     movementCost,
     hasResource,

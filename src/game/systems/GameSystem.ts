@@ -26,8 +26,7 @@ export class GameSystem {
       row.map((type, x) => {
         const tile: Tile = {
           id: `${x}-${y}`,
-          x,
-          y,
+          position: { x, y },
           terrainType: type,
           movementCost: 1, // Default, will be overridden by MovementSystem
           hasResource: null,
@@ -121,8 +120,7 @@ export class GameSystem {
         id: `settlement-start-${Date.now()}`,
         ownerId: 'player-1',
         name: `${playerName}'s Settlement`,
-        x: startX,
-        y: startY,
+        position: { x: startX, y: startY },
         population: 0,
         culture: nationData.culture,
         organization: nationData.organization,
@@ -199,13 +197,14 @@ export class GameSystem {
         units: [],
         settlements: settlements.map(s => ({
            ...s,
+           position: { x: s.position.x, y: s.position.y },
            ownerId: `ai-native-${nativeNation}`,
            attitude: nation === Nation.FRANCE ? Attitude.FRIENDLY : s.attitude
         })),
       };
       // Give each native nation a villager at their first settlement
       if (settlements.length > 0) {
-        aiPlayer.units.push(this.createBaseUnit(`ai-native-${nativeNation}-u1`, aiPlayer.id, UnitType.VILLAGER, settlements[0].x, settlements[0].y, 3));
+        aiPlayer.units.push(this.createBaseUnit(`ai-native-${nativeNation}-u1`, aiPlayer.id, UnitType.VILLAGER, settlements[0].position.x, settlements[0].position.y, 3));
       }
       players.push(aiPlayer);
     });
@@ -218,8 +217,7 @@ export class GameSystem {
       id,
       ownerId,
       type,
-      x,
-      y,
+      position: { x, y },
       movesRemaining: moves,
       maxMoves: moves,
       isSkipping: false,

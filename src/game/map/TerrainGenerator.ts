@@ -89,8 +89,8 @@ export class TerrainGenerator {
       }
 
       const tooClose = settlements.some((s) => {
-        const dx = s.x - x;
-        const dy = s.y - y;
+        const dx = s.position.x - x;
+        const dy = s.position.y - y;
         return Math.sqrt(dx * dx + dy * dy) < minDistance;
       });
 
@@ -105,8 +105,7 @@ export class TerrainGenerator {
         id,
         ownerId: nationKey, // Store nationKey directly as ownerId for now
         name,
-        x,
-        y,
+        position: { x, y },
         population: 3 + Math.floor(Math.random() * 5),
         culture: 'NATIVE',
         organization: nationData.organization,

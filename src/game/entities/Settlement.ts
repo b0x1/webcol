@@ -1,12 +1,12 @@
 import type { BuildingType, GoodType, UnitType, JobType, Culture, Organization, Attitude } from './types';
 import type { Unit } from './Unit';
+import type { Position } from './Position';
 
 export interface Settlement {
   id: string;
   ownerId: string;
   name: string;
-  x: number;
-  y: number;
+  position: Position;
   population: number;
   culture: Culture;
   organization: Organization;
@@ -34,8 +34,7 @@ export function createSettlement(
     id,
     ownerId,
     name,
-    x,
-    y,
+    position: { x, y },
     population,
     culture,
     organization,

@@ -2,6 +2,7 @@ import type { Player } from '../entities/Player';
 import type { Unit } from '../entities/Unit';
 import type { Tile } from '../entities/Tile';
 import { MovementSystem } from './MovementSystem';
+import { distance, isSame } from '../entities/Position';
 
 export class UnitSystem {
   static findNextAvailableUnit(
@@ -15,19 +16,19 @@ export class UnitSystem {
     if (!currentUnit) return availableUnits[0];
 
     return availableUnits.reduce((prev, curr) => {
-      if (curr.x === currentUnit.x && curr.y === currentUnit.y) {
+      if (isSame(curr.position, currentUnit.position)) {
         const currentIdx = player.units.indexOf(currentUnit);
         const nextSameTile = player.units
           .slice(currentIdx + 1)
-          .find((u) => u.x === currentUnit.x && u.y === currentUnit.y && u.movesRemaining > 0 && !u.isSkipping);
+          .find((u) => isSame(u.position, currentUnit.position) && u.movesRemaining > 0 && !u.isSkipping);
         if (nextSameTile) return nextSameTile;
       }
 
-      const distPrev = Math.abs(prev.x - currentUnit.x) + Math.abs(prev.y - currentUnit.y);
-      const distCurr = Math.abs(curr.x - currentUnit.x) + Math.abs(curr.y - currentUnit.y);
+      const distPrev = distance(prev.position, currentUnit.position);
+      const distCurr = distance(curr.position, currentUnit.position);
 
-      if (curr.x === currentUnit.x && curr.y === currentUnit.y) return curr;
-      if (prev.x === currentUnit.x && prev.y === currentUnit.y) return prev;
+      if (isSame(curr.position, currentUnit.position)) return curr;
+      if (isSame(prev.position, currentUnit.position)) return prev;
 
       return distCurr < distPrev ? curr : prev;
     }, availableUnits[0]);
