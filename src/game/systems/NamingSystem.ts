@@ -1,4 +1,4 @@
-import { Nation, UnitType } from '../entities/types';
+import { Nation } from '../entities/types';
 import englandSettlements from '../../assets/names/settlement/ENGLAND.json';
 import englandUnits from '../../assets/names/unit/ENGLAND.json';
 import englandShips from '../../assets/names/ship/ENGLAND.json';
@@ -39,13 +39,11 @@ const NAME_LISTS: Record<string, Record<string, string[]>> = {
   [Nation.POWHATAN]: { settlement: powhatanSettlements, unit: powhatanUnits, ship: powhatanShips },
 };
 
-export interface NamingStats {
-  [nation: string]: {
-    settlement: number;
-    unit: number;
-    ship: number;
-  };
-}
+export type NamingStats = Record<string, {
+  settlement: number;
+  unit: number;
+  ship: number;
+}>;
 
 export class NamingSystem {
   static getNextName(nation: Nation, type: 'settlement' | 'unit' | 'ship', stats: NamingStats): { name: string; updatedStats: NamingStats } {

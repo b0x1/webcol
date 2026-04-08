@@ -77,7 +77,7 @@ export class GameSystem {
       if (found) break;
     }
 
-    let units: Unit[] = [];
+    const units: Unit[] = [];
     if (nationData.culture === 'EUROPEAN') {
       const startingUnitTypes = [UnitType.COLONIST, UnitType.COLONIST, UnitType.SOLDIER, UnitType.PIONEER];
       if (nation === Nation.ENGLAND) {
