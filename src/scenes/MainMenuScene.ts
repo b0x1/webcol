@@ -42,8 +42,7 @@ export class MainMenuScene extends Phaser.Scene {
         }
         return {
           id: `${x}-${y}`,
-          x,
-          y,
+          position: { x, y },
           terrainType: type,
           movementCost: cost,
           hasResource: null,

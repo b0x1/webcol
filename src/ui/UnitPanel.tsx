@@ -3,6 +3,7 @@ import { useGameStore } from '../game/state/gameStore';
 import { useUIStore } from '../game/state/uiStore';
 import { UnitType } from '../game/entities/types';
 import { UnitSelector } from './UnitPanel/components/UnitSelector';
+import { isSame, distance } from '../game/entities/Position';
 
 export const UnitPanel: React.FC = () => {
   const {
@@ -60,11 +61,11 @@ export const UnitPanel: React.FC = () => {
 
   const player = players.find(p => p.id === currentPlayerId);
   const settlementAtTile = selectedTile
-    ? players.flatMap(p => p.settlements).find(s => s.x === selectedTile.x && s.y === selectedTile.y)
+    ? players.flatMap(p => p.settlements).find(s => isSame(s.position, selectedTile.position))
     : null;
 
   const unitsAtTile = selectedTile
-    ? allUnits.filter(u => u.x === selectedTile.x && u.y === selectedTile.y)
+    ? allUnits.filter(u => isSame(u.position, selectedTile.position))
     : [];
 
   if (selectedTile && settlementAtTile && player && settlementAtTile.ownerId === player.id) {
@@ -96,7 +97,7 @@ export const UnitPanel: React.FC = () => {
   const allSettlements = players.flatMap(p => p.settlements);
 
   const isAdjacentToSettlement = allSettlements.some(s =>
-    Math.abs(s.x - unit.x) <= 1 && Math.abs(s.y - unit.y) <= 1
+    distance(s.position, unit.position) <= 1
   );
 
   const canBuildSettlement = (unit.type === UnitType.COLONIST || unit.type === UnitType.VILLAGER) && !isAdjacentToSettlement;

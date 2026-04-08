@@ -116,8 +116,8 @@ export class WorldScene extends Phaser.Scene {
     const unit = state.players.flatMap((p) => p.units).find((u) => u.id === unitId);
     if (!unit) return;
 
-    const fromX = unit.x;
-    const fromY = unit.y;
+    const fromX = unit.position.x;
+    const fromY = unit.position.y;
 
     this.isAnimating = true;
 

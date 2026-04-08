@@ -1,6 +1,7 @@
 import React from 'react';
 import { useGameStore } from '../../game/state/gameStore';
 import { Sprite } from '../Sprite';
+import { isSame, toKey } from '../../game/entities/Position';
 
 interface Props {
   settlementId: string;
@@ -15,17 +16,17 @@ export const MapGrid: React.FC<Props> = ({ settlementId }) => {
   const tiles = [];
   for (let dy = -1; dy <= 1; dy++) {
     for (let dx = -1; dx <= 1; dx++) {
-      const tx = settlement.x + dx;
-      const ty = settlement.y + dy;
+      const tx = settlement.position.x + dx;
+      const ty = settlement.position.y + dy;
       tiles.push(map[ty]?.[tx]);
     }
   }
 
-  const handleDrop = (e: React.DragEvent, tx: number, ty: number) => {
+  const handleDrop = (e: React.DragEvent, tilePos: { x: number; y: number }) => {
     e.preventDefault();
     const unitId = e.dataTransfer.getData('unitId');
     if (unitId) {
-      assignJob(settlementId, unitId, `${tx}-${ty}`);
+      assignJob(settlementId, unitId, toKey(tilePos));
     }
   };
 
@@ -39,17 +40,17 @@ export const MapGrid: React.FC<Props> = ({ settlementId }) => {
         if (!tile) return <div key={i} className="aspect-square bg-black/50" />;
 
         const workers = Array.from(settlement.workforce.entries())
-          .filter(([_, assignment]) => assignment === `${tile.x}-${tile.y}`)
+          .filter(([_, assignment]) => assignment === toKey(tile.position))
           .map(([id]) => settlement.units.find(u => u.id === id))
           .filter(Boolean);
 
-        const isSettlementTile = tile.x === settlement.x && tile.y === settlement.y;
+        const isSettlementTile = isSame(tile.position, settlement.position);
 
         return (
           <div
-            key={`${tile.x}-${tile.y}`}
+            key={toKey(tile.position)}
             onDragOver={(e) => e.preventDefault()}
-            onDrop={(e) => handleDrop(e, tile.x, tile.y)}
+            onDrop={(e) => handleDrop(e, tile.position)}
             className={`aspect-square relative flex items-center justify-center border border-white/5 overflow-hidden group hover:border-blue-500/50 transition-colors ${isSettlementTile ? 'bg-blue-900/40' : 'bg-slate-800'}`}
           >
             <div className="absolute inset-0 flex items-center justify-center opacity-80 pointer-events-none">

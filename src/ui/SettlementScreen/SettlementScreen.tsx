@@ -6,6 +6,7 @@ import { MapGrid } from './MapGrid';
 import { AvailableUnits } from './AvailableUnits';
 import { InventoryPanel } from './InventoryPanel';
 import { Flag } from '../Flag';
+import { isSame } from '../../game/entities/Position';
 
 export const SettlementScreen: React.FC = () => {
   const { selectedSettlementId, players, currentPlayerId } = useGameStore();
@@ -35,7 +36,7 @@ export const SettlementScreen: React.FC = () => {
   // Collect units physically at the settlement
   const unitsAtSettlement = [
     ...settlement.units,
-    ...settlementOwner.units.filter(u => u.x === settlement.x && u.y === settlement.y)
+    ...settlementOwner.units.filter(u => isSame(u.position, settlement.position))
   ].reduce((acc, unit) => {
     // Avoid duplicates by ID
     if (!acc.find(u => u.id === unit.id)) {

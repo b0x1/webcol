@@ -124,7 +124,7 @@ export class TerrainRenderer {
     this.playerSettlementGraphics = this.scene.add.group();
 
     playerSettlements.forEach((settlement) => {
-      const { x: worldX, y: worldY } = this.tileToWorld(settlement.x, settlement.y);
+      const { x: worldX, y: worldY } = this.tileToWorld(settlement.position.x, settlement.position.y);
       const frame = `settlement_${settlement.organization.toLowerCase()}`;
       const sprite = this.scene.add.image(worldX, worldY, 'other', frame)
         .setOrigin(0, 0)
