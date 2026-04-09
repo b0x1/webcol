@@ -8,6 +8,7 @@ import type { GameState } from '../state/gameStore';
 import { BUILDING_COSTS, COLONY_CONSTANTS, UNIT_BUILD_COSTS } from '../constants';
 import { createUnit } from '../entities/Unit';
 import { ProductionSystem } from './ProductionSystem';
+import { NamingSystem } from './NamingSystem';
 
 export class TurnEngine {
   static autoSave(state: GameState): void {
@@ -15,7 +16,8 @@ export class TurnEngine {
     eventBus.emit('notification', 'Auto-saved');
   }
 
-  static runProduction(players: Player[], map: Tile[][]): Player[] {
+  static runProduction(players: Player[], map: Tile[][], namingStats: any): { players: Player[]; namingStats: any } {
+    let currentNamingStats = { ...namingStats };
     const updatedPlayers = players.map((player) => {
       const newPlayerUnits = player.units.map((u) => ({ ...u, cargo: new Map(u.cargo) }));
 
@@ -88,9 +90,13 @@ export class TurnEngine {
                   newSettlement.buildings.push(currentItem as BuildingType);
                   eventBus.emit('notification', `${newSettlement.name} completed ${currentItem}!`);
                 } else if (isUnit) {
+                  const { name: unitName, updatedStats } = NamingSystem.getNextName(player.nation, (currentItem as UnitType) === UnitType.SHIP ? 'ship' : 'unit', currentNamingStats);
+                  currentNamingStats = updatedStats;
+
                   const newUnit = createUnit(
                     `unit-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
                     newSettlement.ownerId,
+                    unitName,
                     currentItem as UnitType,
                     newSettlement.position.x,
                     newSettlement.position.y,
@@ -111,9 +117,13 @@ export class TurnEngine {
           if (netFood >= COLONY_CONSTANTS.FOOD_GROWTH_THRESHOLD) {
               newSettlement.inventory.set(GoodType.FOOD, netFood - COLONY_CONSTANTS.FOOD_GROWTH_THRESHOLD);
               newSettlement.population += 1;
+              const { name: colonistName, updatedStats } = NamingSystem.getNextName(player.nation, 'unit', currentNamingStats);
+              currentNamingStats = updatedStats;
+
               const newColonist = createUnit(
                 `unit-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
                 newSettlement.ownerId,
+                colonistName,
                 UnitType.COLONIST,
                 newSettlement.position.x,
                 newSettlement.position.y,
@@ -146,6 +156,6 @@ export class TurnEngine {
     });
 
     eventBus.emit('productionCompleted', updatedPlayers);
-    return updatedPlayers;
+    return { players: updatedPlayers, namingStats: currentNamingStats };
   }
 }

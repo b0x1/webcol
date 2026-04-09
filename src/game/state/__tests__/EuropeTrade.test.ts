@@ -8,7 +8,7 @@ describe('Europe Trade', () => {
   beforeEach(() => {
     // Reset store state before each test
     const p1 = createPlayer('p1', 'Player 1', true, 1000, Nation.ENGLAND);
-    const ship = createUnit('ship1', 'p1', UnitType.SHIP, 0, 0, 1);
+    const ship = createUnit('ship1', 'p1', 'Test Unit', UnitType.SHIP, 0, 0, 1);
     ship.cargo.set(GoodType.LUMBER, 50);
     p1.units.push(ship);
 

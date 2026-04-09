@@ -104,7 +104,8 @@ export const UnitPanel: React.FC = () => {
 
   return (
     <div className="absolute bottom-5 left-5 w-64 bg-black/80 text-white p-5 rounded-xl pointer-events-auto shadow-2xl border border-white/10 backdrop-blur-sm font-sans">
-      <h3 className="text-xl font-black uppercase tracking-tight mb-1 text-blue-400">Unit: {unit.type}</h3>
+      <h3 className="text-xl font-black uppercase tracking-tight mb-0 text-blue-400">{unit.name}</h3>
+      <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{unit.type}</div>
       {unit.specialty && <div className="text-[10px] font-black uppercase tracking-widest text-yellow-500 mb-1 bg-yellow-900/40 px-1.5 py-0.5 rounded border border-yellow-800/30 w-fit">Expert {unit.specialty}</div>}
       {isReadOnly && <div className="text-[10px] font-black uppercase tracking-widest text-red-500 mb-2">[READ ONLY - {unitOwner?.name}]</div>}
       <div className="flex items-center gap-2 mb-4">

@@ -4,6 +4,7 @@ import type { Position } from './Position';
 export interface Unit {
   id: string;
   ownerId: string;
+  name: string;
   type: UnitType;
   position: Position;
   movesRemaining: number;
@@ -17,6 +18,7 @@ export interface Unit {
 export function createUnit(
   id: string,
   ownerId: string,
+  name: string,
   type: UnitType,
   x: number,
   y: number,
@@ -25,6 +27,7 @@ export function createUnit(
   return {
     id,
     ownerId,
+    name,
     type,
     position: { x, y },
     movesRemaining,

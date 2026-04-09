@@ -19,7 +19,7 @@ describe('MovementSystem', () => {
 
   it('should return reachable tiles within movesRemaining', () => {
     const map = createMap(10, 10);
-    const unit = createUnit('u1', 'p1', UnitType.COLONIST, 5, 5, 1);
+    const unit = createUnit('u1', 'p1', 'Test Unit', UnitType.COLONIST, 5, 5, 1);
     const reachable = MovementSystem.getReachableTiles(unit, map);
 
     // 8 neighbors should be reachable
@@ -31,7 +31,7 @@ describe('MovementSystem', () => {
     map[5][6].terrainType = TerrainType.FOREST;
     map[5][6].movementCost = 2;
 
-    const unit = createUnit('u1', 'p1', UnitType.COLONIST, 5, 5, 1);
+    const unit = createUnit('u1', 'p1', 'Test Unit', UnitType.COLONIST, 5, 5, 1);
     const reachable = MovementSystem.getReachableTiles(unit, map);
 
     // Forest at (6,5) cost 2, so it shouldn't be reachable with 1 move
@@ -43,7 +43,7 @@ describe('MovementSystem', () => {
     const map = createMap(10, 10, TerrainType.PLAINS);
     map[5][6].terrainType = TerrainType.OCEAN;
 
-    const ship = createUnit('s1', 'p1', UnitType.SHIP, 5, 5, 1);
+    const ship = createUnit('s1', 'p1', 'Test Unit', UnitType.SHIP, 5, 5, 1);
     const reachable = MovementSystem.getReachableTiles(ship, map);
 
     // Only (6,5) which is OCEAN should be reachable
@@ -56,7 +56,7 @@ describe('MovementSystem', () => {
     const map = createMap(10, 10, TerrainType.OCEAN);
     map[5][6].terrainType = TerrainType.PLAINS;
 
-    const colonist = createUnit('u1', 'p1', UnitType.COLONIST, 5, 5, 1);
+    const colonist = createUnit('u1', 'p1', 'Test Unit', UnitType.COLONIST, 5, 5, 1);
     const reachable = MovementSystem.getReachableTiles(colonist, map);
 
     // Only (6,5) which is PLAINS should be reachable
@@ -69,7 +69,7 @@ describe('MovementSystem', () => {
     const map = createMap(10, 10, TerrainType.COAST);
     map[5][6].terrainType = TerrainType.PLAINS;
 
-    const colonist = createUnit('u1', 'p1', UnitType.COLONIST, 5, 5, 1);
+    const colonist = createUnit('u1', 'p1', 'Test Unit', UnitType.COLONIST, 5, 5, 1);
     const reachable = MovementSystem.getReachableTiles(colonist, map);
 
     // Only (6,5) which is PLAINS should be reachable, COAST is now blocked

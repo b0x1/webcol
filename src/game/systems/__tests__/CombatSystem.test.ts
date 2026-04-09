@@ -15,8 +15,8 @@ describe('CombatSystem', () => {
   let mountainTile: any;
 
   beforeEach(() => {
-    attacker = createUnit('u1', 'p1', UnitType.SOLDIER, 0, 0, 3);
-    defenderUnit = createUnit('u2', 'p2', UnitType.COLONIST, 1, 1, 3);
+    attacker = createUnit('u1', 'p1', 'Test Unit', UnitType.SOLDIER, 0, 0, 3);
+    defenderUnit = createUnit('u2', 'p2', 'Test Unit', UnitType.COLONIST, 1, 1, 3);
     npcSettlement = createSettlement('s1', 'npc-IROQUOIS', 'Village', 1, 1, 5, 'NATIVE', 'TRIBE');
     playerSettlement = createSettlement('c1', 'p2', 'New Town', 1, 1, 1, 'EUROPEAN', 'STATE');
 
@@ -39,7 +39,7 @@ describe('CombatSystem', () => {
   it('applies hills modifier to defender', () => {
     const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.5);
 
-    const defenderSoldier = createUnit('u3', 'p2', UnitType.SOLDIER, 1, 1, 3);
+    const defenderSoldier = createUnit('u3', 'p2', 'Test Unit', UnitType.SOLDIER, 1, 1, 3);
     const result = CombatSystem.resolveCombat(attacker, defenderSoldier, hillTile);
 
     expect(result.winner).toBe('defender');
@@ -65,7 +65,7 @@ describe('CombatSystem', () => {
     const result = CombatSystem.resolveCombat(attacker, defenderUnit, flatTile, playerSettlement);
     expect(result.winner).toBe('attacker');
 
-    const attackerColonist = createUnit('u4', 'p1', UnitType.COLONIST, 0, 0, 3);
+    const attackerColonist = createUnit('u4', 'p1', 'Test Unit', UnitType.COLONIST, 0, 0, 3);
     const result2 = CombatSystem.resolveCombat(attackerColonist, defenderUnit, flatTile, playerSettlement);
     expect(result2.winner).toBe('defender');
 
@@ -79,7 +79,7 @@ describe('CombatSystem', () => {
     const result = CombatSystem.resolveCombat(attacker, npcSettlement, flatTile);
     expect(result.winner).toBe('attacker');
 
-    const attackerColonist = createUnit('u4', 'p1', UnitType.COLONIST, 0, 0, 3);
+    const attackerColonist = createUnit('u4', 'p1', 'Test Unit', UnitType.COLONIST, 0, 0, 3);
     const result2 = CombatSystem.resolveCombat(attackerColonist, npcSettlement, flatTile);
     expect(result2.winner).toBe('defender');
 
@@ -89,8 +89,8 @@ describe('CombatSystem', () => {
   it('handles ship combat', () => {
     const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(1.0);
 
-    const attackerShip = createUnit('s1', 'p1', UnitType.SHIP, 0, 0, 6);
-    const defenderShip = createUnit('s2', 'p2', UnitType.SHIP, 1, 1, 6);
+    const attackerShip = createUnit('s1', 'p1', 'Test Unit', UnitType.SHIP, 0, 0, 6);
+    const defenderShip = createUnit('s2', 'p2', 'Test Unit', UnitType.SHIP, 1, 1, 6);
 
     randomSpy.mockReturnValueOnce(1.0).mockReturnValueOnce(0.9);
     const result = CombatSystem.resolveCombat(attackerShip, defenderShip, flatTile);

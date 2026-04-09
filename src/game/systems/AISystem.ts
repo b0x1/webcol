@@ -6,10 +6,12 @@ import { TerrainType, ResourceType, UnitType, Attitude } from '../entities/types
 import { eventBus } from '../state/EventBus';
 import { NATION_BONUSES } from '../constants';
 import { distance, isSame } from '../entities/Position';
+import { NamingSystem, type NamingStats } from './NamingSystem';
 
 export class AISystem {
-  static runAITurn(players: Player[], map: Tile[][]): Player[] {
+  static runAITurn(players: Player[], map: Tile[][], namingStats: NamingStats): { players: Player[]; namingStats: NamingStats } {
     eventBus.emit('aiTurnStarted');
+    let currentNamingStats = { ...namingStats };
 
     const updatedPlayers = players.map((p) => ({
       ...p,
@@ -46,10 +48,13 @@ export class AISystem {
               (c) => distance(c.position, unit.position) <= 1,
             );
             if (!hasAdjacentSettlement) {
+              const { name: settlementName, updatedStats } = NamingSystem.getNextName(player.nation, 'settlement', currentNamingStats);
+              currentNamingStats = updatedStats;
+
               const newSettlement: Settlement = {
                 id: `settlement-ai-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
                 ownerId: player.id,
-                name: `${player.name}'s Settlement`,
+                name: settlementName,
                 position: { ...unit.position },
                 population: 1,
                 culture: nationData.culture,
@@ -98,7 +103,7 @@ export class AISystem {
     }
 
     eventBus.emit('aiTurnCompleted', updatedPlayers);
-    return updatedPlayers;
+    return { players: updatedPlayers, namingStats: currentNamingStats };
   }
 
   private static findNearestTarget(
