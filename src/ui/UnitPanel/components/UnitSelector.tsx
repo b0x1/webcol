@@ -46,8 +46,8 @@ export const UnitSelector: React.FC<Props> = ({ unitsAtTile, settlementAtTile, p
               <span className="text-xs font-black text-slate-500">{u.type[0]}</span>
             </div>
             <div>
-              <div className="text-xs font-black uppercase tracking-widest text-slate-300">{u.type}</div>
-              <div className="text-[10px] text-slate-500 font-bold uppercase tracking-tight">{owner?.name}</div>
+              <div className="text-xs font-black uppercase tracking-widest text-slate-300">{u.name}</div>
+              <div className="text-[10px] text-slate-500 font-bold uppercase tracking-tight">{u.type} • {owner?.name}</div>
             </div>
           </button>
         );

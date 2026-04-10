@@ -60,7 +60,20 @@ export class TurnEngine {
         newSettlement.hammers += hammersProduced;
 
         if (newSettlement.buildings.includes(BuildingType.PRINTING_PRESS)) {
-          newSettlement.population += 1;
+          const { name: unitName, updatedStats } = NamingSystem.getNextName(player.nation, 'unit', currentNamingStats);
+          currentNamingStats = updatedStats;
+
+          const newUnit = createUnit(
+            `unit-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+            newSettlement.ownerId,
+            unitName,
+            UnitType.COLONIST,
+            newSettlement.position.x,
+            newSettlement.position.y,
+            3
+          );
+          newPlayerUnits.push(newUnit);
+          eventBus.emit('notification', `An intellectual has joined the cause in ${newSettlement.name}!`);
         }
 
         // 3. Construction
@@ -116,7 +129,6 @@ export class TurnEngine {
 
           if (netFood >= COLONY_CONSTANTS.FOOD_GROWTH_THRESHOLD) {
               newSettlement.inventory.set(GoodType.FOOD, netFood - COLONY_CONSTANTS.FOOD_GROWTH_THRESHOLD);
-              newSettlement.population += 1;
               const { name: colonistName, updatedStats } = NamingSystem.getNextName(player.nation, 'unit', currentNamingStats);
               currentNamingStats = updatedStats;
 
@@ -129,7 +141,6 @@ export class TurnEngine {
                 newSettlement.position.y,
                 3
               );
-              newSettlement.units.push(newColonist);
               newPlayerUnits.push(newColonist);
               eventBus.emit('notification', `A new colonist has been born in ${newSettlement.name}!`);
           } else {

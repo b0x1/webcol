@@ -4,16 +4,19 @@ import type { Settlement } from '../entities/Settlement';
 import type { Tile } from '../entities/Tile';
 import { BuildingType, JobType, UnitType, TerrainType } from '../entities/types';
 import { NATION_BONUSES } from '../constants';
-import { distance } from '../entities/Position';
+import { distance, getNeighbors, toKey } from '../entities/Position';
 
 export class SettlementSystem {
   static createSettlement(
     player: Player,
     unit: Unit,
     name: string,
-    buildings: BuildingType[]
+    buildings: BuildingType[],
+    map: Tile[][]
   ): Settlement {
     const nationData = NATION_BONUSES[player.nation];
+    const neighbors = getNeighbors(unit.position, map[0].length, map.length);
+    const randomNeighbor = neighbors[Math.floor(Math.random() * neighbors.length)];
 
     return {
       id: `settlement-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
@@ -26,7 +29,7 @@ export class SettlementSystem {
       buildings: [...buildings],
       inventory: new Map(),
       productionQueue: [],
-      workforce: new Map([[unit.id, JobType.FARMER]]),
+      workforce: new Map([[unit.id, toKey(randomNeighbor)]]),
       units: [{ ...unit }],
       attitude: 'NEUTRAL',
       goods: new Map(),

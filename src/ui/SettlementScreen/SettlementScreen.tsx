@@ -7,9 +7,10 @@ import { AvailableUnits } from './AvailableUnits';
 import { InventoryPanel } from './InventoryPanel';
 import { Flag } from '../Flag';
 import { isSame } from '../../game/entities/Position';
+import { ProductionSystem } from '../../game/systems/ProductionSystem';
 
 export const SettlementScreen: React.FC = () => {
-  const { selectedSettlementId, players, currentPlayerId } = useGameStore();
+  const { selectedSettlementId, players, currentPlayerId, map } = useGameStore();
   const { isSettlementScreenOpen, setSettlementScreenOpen } = useUIStore();
 
   useEffect(() => {
@@ -66,6 +67,9 @@ export const SettlementScreen: React.FC = () => {
               <div className="flex items-center gap-1.5 text-blue-300 text-sm">
                 <span className="text-[9px] font-black uppercase tracking-widest bg-blue-900/50 px-1.5 py-0.5 rounded border border-blue-700/50">Hammers</span>
                 {settlement.hammers}
+                <span className="text-xs font-bold text-blue-400">
+                  (+{ProductionSystem.calculateSettlementProduction(settlement, map).hammersProduced})
+                </span>
               </div>
               {isReadOnly && <span className="text-red-500 text-[10px] font-black uppercase tracking-widest bg-red-950/30 px-2 py-0.5 rounded border border-red-900/30">[READ ONLY - {settlementOwner.name}]</span>}
             </div>

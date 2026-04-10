@@ -90,6 +90,8 @@ describe('Settlement Production and Building Logic', () => {
     player.settlements.push(settlement);
 
     const { players: updatedPlayers } = TurnEngine.runProduction([player], [], {});
-    expect(updatedPlayers[0].settlements[0].population).toBe(2);
+    // Population is workforce size. Printing press adds a unit to player.units.
+    expect(updatedPlayers[0].settlements[0].population).toBe(1);
+    expect(updatedPlayers[0].units.length).toBe(1);
   });
 });

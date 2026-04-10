@@ -299,7 +299,8 @@ export const useGameStore = create<GameState>()(
           player,
           unit,
           settlementName,
-          [BuildingType.TOWN_HALL, BuildingType.CARPENTERS_SHOP, BuildingType.BLACKSMITHS_HOUSE]
+          [BuildingType.TOWN_HALL, BuildingType.CARPENTERS_SHOP, BuildingType.BLACKSMITHS_HOUSE],
+          state.map
         );
 
         player.units.splice(unitIndex, 1);
@@ -331,11 +332,21 @@ export const useGameStore = create<GameState>()(
           if (settlement) {
             if (job === null) {
               settlement.workforce.delete(unitId);
+              // Move unit back to player units if it was in the settlement
+              const uIdx = settlement.units.findIndex(u => u.id === unitId);
+              if (uIdx !== -1) {
+                const unit = settlement.units[uIdx];
+                const player = state.players.find(pl => pl.id === settlement.ownerId);
+                if (player && !player.units.some(u => u.id === unitId)) {
+                  player.units.push({ ...unit });
+                }
+                settlement.units.splice(uIdx, 1);
+              }
             } else {
               // Check in settlement units or player units
               let unit = settlement.units.find((u) => u.id === unitId);
               if (!unit) {
-                const player = state.players.find(pl => pl.id === state.currentPlayerId);
+                const player = state.players.find(pl => pl.id === settlement.ownerId);
                 const pUnitIdx = player?.units.findIndex(u => u.id === unitId) ?? -1;
                 if (pUnitIdx !== -1) {
                   unit = player!.units[pUnitIdx];
@@ -350,6 +361,7 @@ export const useGameStore = create<GameState>()(
                 settlement.workforce.set(unitId, (job as any));
               }
             }
+            settlement.population = settlement.workforce.size;
             return;
           }
         }

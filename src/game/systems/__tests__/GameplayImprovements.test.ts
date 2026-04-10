@@ -71,15 +71,15 @@ describe('TurnEngine Production', () => {
     const player = createPlayer('p1', 'Player 1', true, 0, Nation.ENGLAND);
     const settlement = createSettlement('s1', 'p1', 'Settlement 1', 5, 5, 1, 'EUROPEAN', 'STATE');
 
-    settlement.inventory.set(GoodType.FOOD, 205); // threshold is 200, but pop 1 consumes 2
+    settlement.inventory.set(GoodType.FOOD, 205);
     player.settlements.push(settlement);
 
     const { players: updatedPlayers } = TurnEngine.runProduction([player], [], {});
     const updatedSettlement = updatedPlayers[0].settlements[0];
 
-    expect(updatedSettlement.population).toBe(2);
-    expect(updatedSettlement.inventory.get(GoodType.FOOD)).toBe(3); // 205 - 2 - 200
-    expect(updatedSettlement.units.length).toBe(1);
-    expect(updatedPlayers[0].units.length).toBe(1);
+    expect(updatedSettlement.population).toBe(1); // Population is workforce size
+    expect(updatedSettlement.inventory.get(GoodType.FOOD)).toBe(5); // 205 - 200 (threshold)
+    expect(updatedSettlement.units.length).toBe(0);
+    expect(updatedPlayers[0].units.length).toBe(1); // Born unit is outside
   });
 });
