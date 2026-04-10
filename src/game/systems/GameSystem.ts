@@ -6,6 +6,7 @@ import { TerrainGenerator } from '../map/TerrainGenerator';
 import { NATION_BONUSES } from '../constants';
 import type { Unit } from '../entities/Unit';
 import { NamingSystem, type NamingStats } from './NamingSystem';
+import type { Position } from '../entities/Position';
 
 export class GameSystem {
   static initGame(params: { playerName: string; nation: Nation; mapSize: 'Small' | 'Medium' | 'Large'; aiCount: number }): {
@@ -87,7 +88,12 @@ export class GameSystem {
       startingUnitTypes.forEach((type, i) => {
         const { name, updatedStats } = NamingSystem.getNextName(nation, 'unit', namingStats);
         namingStats = updatedStats;
-        units.push(this.createBaseUnit(`u${i + 1}`, 'player-1', name, type, startX + (type === UnitType.SOLDIER ? 1 : 0), startY + (type === UnitType.PIONEER ? 1 : 0), 3));
+        units.push(
+          this.createBaseUnit(`u${i + 1}`, 'player-1', name, type, {
+            x: startX + (type === UnitType.SOLDIER ? 1 : 0),
+            y: startY + (type === UnitType.PIONEER ? 1 : 0),
+          }, 3)
+        );
       });
 
       let shipX = startX;
@@ -113,13 +119,13 @@ export class GameSystem {
       }
       const { name: shipName, updatedStats: shipStats } = NamingSystem.getNextName(nation, 'ship', namingStats);
       namingStats = shipStats;
-      units.push(this.createBaseUnit('u5', 'player-1', shipName, UnitType.SHIP, shipX, shipY, 6));
+      units.push(this.createBaseUnit('u5', 'player-1', shipName, UnitType.SHIP, { x: shipX, y: shipY }, 6));
     } else {
       // Native nation
       for (let i = 0; i < 3; i++) {
         const { name, updatedStats } = NamingSystem.getNextName(nation, 'unit', namingStats);
         namingStats = updatedStats;
-        units.push(this.createBaseUnit(`u${i + 1}`, 'player-1', name, UnitType.VILLAGER, startX, startY, 3));
+        units.push(this.createBaseUnit(`u${i + 1}`, 'player-1', name, UnitType.VILLAGER, { x: startX, y: startY }, 3));
       }
 
       // Native settlement (starts empty but exists)
@@ -187,7 +193,7 @@ export class GameSystem {
 
       const { name: aiUnitName, updatedStats: aiUnitStats } = NamingSystem.getNextName(aiNation, 'unit', namingStats);
       namingStats = aiUnitStats;
-      aiPlayer.units = [this.createBaseUnit(`ai-euro-${i}-u1`, aiPlayer.id, aiUnitName, UnitType.COLONIST, aiStartX, aiStartY, 3)];
+      aiPlayer.units = [this.createBaseUnit(`ai-euro-${i}-u1`, aiPlayer.id, aiUnitName, UnitType.COLONIST, { x: aiStartX, y: aiStartY }, 3)];
       players.push(aiPlayer);
     }
 
@@ -225,7 +231,7 @@ export class GameSystem {
       if (renamedSettlements.length > 0) {
         const { name: nativeUnitName, updatedStats: nativeUnitStats } = NamingSystem.getNextName(nativeNation, 'unit', namingStats);
         namingStats = nativeUnitStats;
-        aiPlayer.units.push(this.createBaseUnit(`ai-native-${nativeNation}-u1`, aiPlayer.id, nativeUnitName, UnitType.VILLAGER, renamedSettlements[0].position.x, renamedSettlements[0].position.y, 3));
+        aiPlayer.units.push(this.createBaseUnit(`ai-native-${nativeNation}-u1`, aiPlayer.id, nativeUnitName, UnitType.VILLAGER, renamedSettlements[0].position, 3));
       }
       players.push(aiPlayer);
     });
@@ -233,13 +239,13 @@ export class GameSystem {
     return { map, players, namingStats };
   }
 
-  private static createBaseUnit(id: string, ownerId: string, name: string, type: UnitType, x: number, y: number, moves: number): Unit {
+  private static createBaseUnit(id: string, ownerId: string, name: string, type: UnitType, position: Position, moves: number): Unit {
     return {
       id,
       ownerId,
       name,
       type,
-      position: { x, y },
+      position,
       movesRemaining: moves,
       maxMoves: moves,
       isSkipping: false,

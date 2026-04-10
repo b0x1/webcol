@@ -1,4 +1,5 @@
 import { TerrainType } from '../entities/types';
+import type { Position } from '../entities/Position';
 
 export class TileMap {
   public readonly width: number;
@@ -11,10 +12,10 @@ export class TileMap {
     this.data = data;
   }
 
-  public getTerrainAt(x: number, y: number): TerrainType | null {
-    if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
+  public getTerrainAt(pos: Position): TerrainType | null {
+    if (pos.x < 0 || pos.x >= this.width || pos.y < 0 || pos.y >= this.height) {
       return null;
     }
-    return this.data[y][x];
+    return this.data[pos.y][pos.x];
   }
 }

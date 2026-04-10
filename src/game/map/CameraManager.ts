@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import type { TerrainRenderer } from './TerrainRenderer';
 import { eventBus } from '../state/EventBus';
+import type { Position } from '../entities/Position';
 
 export class CameraManager {
   private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -47,8 +48,8 @@ export class CameraManager {
     }
   }
 
-  centerOn(x: number, y: number) {
-    const { x: wx, y: wy } = this.terrainRenderer.tileToWorld(x, y);
+  centerOn(pos: Position) {
+    const { x: wx, y: wy } = this.terrainRenderer.tileToWorld(pos);
     this.scene.cameras.main.centerOn(wx, wy);
   }
 

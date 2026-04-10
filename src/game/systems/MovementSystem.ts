@@ -1,49 +1,41 @@
 import type { Unit } from '../entities/Unit';
 import type { Tile } from '../entities/Tile';
 import { TerrainType, UnitType } from '../entities/types';
-import { isSame, toKey } from '../entities/Position';
+import { isSame, toKey, type Position, getNeighbors } from '../entities/Position';
 
 export class MovementSystem {
-  static getReachableTiles(unit: Unit, map: Tile[][]): { x: number; y: number; cost: number }[] {
-    const reachable: { x: number; y: number; cost: number }[] = [];
+  static getReachableTiles(unit: Unit, map: Tile[][]): (Position & { cost: number })[] {
+    const reachable: (Position & { cost: number })[] = [];
     const visited = new Map<string, number>();
-    const queue: { x: number; y: number; cost: number }[] = [];
+    const queue: (Position & { cost: number })[] = [];
 
-    queue.push({ x: unit.position.x, y: unit.position.y, cost: 0 });
+    queue.push({ ...unit.position, cost: 0 });
     visited.set(toKey(unit.position), 0);
+
+    const height = map.length;
+    const width = map[0]?.length || 0;
 
     while (queue.length > 0) {
       const current = queue.shift()!;
-      const currentPos = { x: current.x, y: current.y };
 
       // Add to reachable if it's not the starting tile
-      if (!isSame(currentPos, unit.position)) {
+      if (!isSame(current, unit.position)) {
         reachable.push(current);
       }
 
-      // Check neighbors (8-way movement)
-      for (let dy = -1; dy <= 1; dy++) {
-        for (let dx = -1; dx <= 1; dx++) {
-          if (dx === 0 && dy === 0) continue;
+      const neighbors = getNeighbors(current, width, height);
+      for (const neighbor of neighbors) {
+        const targetTile = map[neighbor.y][neighbor.x];
+        const moveCost = this.getMovementCost(unit, targetTile);
 
-          const nx = current.x + dx;
-          const ny = current.y + dy;
-          const nextPos = { x: nx, y: ny };
+        if (moveCost !== Infinity) {
+          const totalCost = current.cost + moveCost;
 
-          if (ny >= 0 && ny < map.length && nx >= 0 && nx < map[ny].length) {
-            const targetTile = map[ny][nx];
-            const moveCost = this.getMovementCost(unit, targetTile);
-
-            if (moveCost !== Infinity) {
-              const totalCost = current.cost + moveCost;
-
-              if (totalCost <= unit.movesRemaining) {
-                const key = toKey(nextPos);
-                if (!visited.has(key) || visited.get(key)! > totalCost) {
-                  visited.set(key, totalCost);
-                  queue.push({ x: nx, y: ny, cost: totalCost });
-                }
-              }
+          if (totalCost <= unit.movesRemaining) {
+            const key = toKey(neighbor);
+            if (!visited.has(key) || visited.get(key)! > totalCost) {
+              visited.set(key, totalCost);
+              queue.push({ ...neighbor, cost: totalCost });
             }
           }
         }

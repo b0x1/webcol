@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../game/state/gameStore';
 import { useUIStore } from '../game/state/uiStore';
 import { eventBus } from '../game/state/EventBus';
+import type { Position } from '../game/entities/Position';
 import { UnitsTab } from './ReportsModal/components/UnitsTab';
 import { SettlementsTab } from './ReportsModal/components/SettlementsTab';
 import { ResourcesTab } from './ReportsModal/components/ResourcesTab';
@@ -41,14 +42,14 @@ export const ReportsModal: React.FC = () => {
 
   const displayedPlayers = isDebugMode ? players : [currentPlayer];
 
-  const handleUnitClick = (unitId: string, x: number, y: number) => {
-    eventBus.emit('cameraJump', { x, y });
+  const handleUnitClick = (unitId: string, pos: Position) => {
+    eventBus.emit('cameraJump', pos);
     selectUnit(unitId);
     setReportsModalOpen(false);
   };
 
-  const handleSettlementClick = (settlementId: string, x: number, y: number) => {
-    eventBus.emit('cameraJump', { x, y });
+  const handleSettlementClick = (settlementId: string, pos: Position) => {
+    eventBus.emit('cameraJump', pos);
     selectSettlement(settlementId);
     setSettlementScreenOpen(true);
     setReportsModalOpen(false);

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useGameStore } from '../../game/state/gameStore';
 import { Sprite } from '../Sprite';
-import { isSame, toKey } from '../../game/entities/Position';
+import { isSame, toKey, type Position } from '../../game/entities/Position';
 
 interface Props {
   settlementId: string;
@@ -22,7 +22,7 @@ export const MapGrid: React.FC<Props> = ({ settlementId }) => {
     }
   }
 
-  const handleDrop = (e: React.DragEvent, tilePos: { x: number; y: number }) => {
+  const handleDrop = (e: React.DragEvent, tilePos: Position) => {
     e.preventDefault();
     const unitId = e.dataTransfer.getData('unitId');
     if (unitId) {

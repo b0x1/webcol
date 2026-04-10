@@ -5,7 +5,7 @@ import type { Unit } from '../entities/Unit';
 import { TerrainType, ResourceType, UnitType, Attitude } from '../entities/types';
 import { eventBus } from '../state/EventBus';
 import { NATION_BONUSES } from '../constants';
-import { distance, isSame } from '../entities/Position';
+import { distance, isSame, type Position } from '../entities/Position';
 import { NamingSystem, type NamingStats } from './NamingSystem';
 
 export class AISystem {
@@ -80,9 +80,8 @@ export class AISystem {
           const allSettlements = updatedPlayers.flatMap((p) => p.settlements);
           const target = this.findNearestTarget(unit, map, allSettlements);
           if (target) {
-            const targetPos = { x: target.x, y: target.y };
-            const dx = Math.sign(targetPos.x - unit.position.x);
-            const dy = Math.sign(targetPos.y - unit.position.y);
+            const dx = Math.sign(target.x - unit.position.x);
+            const dy = Math.sign(target.y - unit.position.y);
 
             const nx = unit.position.x + dx;
             const ny = unit.position.y + dy;
@@ -110,8 +109,8 @@ export class AISystem {
     unit: Unit,
     map: Tile[][],
     allSettlements: Settlement[],
-  ): { x: number; y: number } | null {
-    let nearest: { x: number; y: number } | null = null;
+  ): Position | null {
+    let nearest: Position | null = null;
     let minDistance = Infinity;
 
     for (let y = 0; y < map.length; y++) {

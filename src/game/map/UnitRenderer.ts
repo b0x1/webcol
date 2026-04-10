@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import type { Unit } from '../entities/Unit';
 import type { Player } from '../entities/Player';
 import type { TerrainRenderer } from './TerrainRenderer';
-import { isSame } from '../entities/Position';
+import { isSame, toKey } from '../entities/Position';
 
 export class UnitRenderer {
   public unitSprites: Phaser.GameObjects.Group;
@@ -28,15 +28,15 @@ export class UnitRenderer {
         const inSettlement = player.settlements.some(s => isSame(s.position, unit.position));
         if (inSettlement && selectedUnitId !== unit.id) return;
 
-        const key = `${unit.position.x}-${unit.position.y}`;
+        const key = toKey(unit.position);
         if (!unitsByTile[key]) unitsByTile[key] = [];
         unitsByTile[key].push(unit);
       });
     });
 
     Object.entries(unitsByTile).forEach(([key, units]) => {
-      const [tx, ty] = key.split('-').map(Number);
-      const { x: worldX, y: worldY } = this.terrainRenderer.tileToWorld(tx, ty);
+      const [tx, ty] = key.split(',').map(Number);
+      const { x: worldX, y: worldY } = this.terrainRenderer.tileToWorld({ x: tx, y: ty });
 
       units.forEach((unit, index) => {
         const offset = index * 4;

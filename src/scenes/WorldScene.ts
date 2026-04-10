@@ -10,6 +10,7 @@ import { MAP_CONSTANTS, UNIT_CONSTANTS } from '../game/constants';
 import { UnitRenderer } from '../game/map/UnitRenderer';
 import { CameraManager } from '../game/map/CameraManager';
 import { InputHandler } from '../game/map/InputHandler';
+import type { Position } from '../game/entities/Position';
 
 export class WorldScene extends Phaser.Scene {
   public tileMap!: TileMap;
@@ -34,7 +35,7 @@ export class WorldScene extends Phaser.Scene {
     SpriteLoader.preload(this, 'other', 'other.avif', 'other.json');
   }
 
-  private reachableTiles: { x: number; y: number; cost: number }[] = [];
+  private reachableTiles: (Position & { cost: number })[] = [];
 
   create() {
     ['terrain', 'units', 'resources', 'other'].forEach((key) => {
@@ -59,7 +60,7 @@ export class WorldScene extends Phaser.Scene {
       mapWidth,
       mapHeight,
       () => this.reachableTiles,
-      (id, x, y) => this.handleMove(id, x, y)
+      (id, pos) => this.handleMove(id, pos)
     );
 
     this.storeUnsubscribe = useGameStore.subscribe((state, prevState) => {
@@ -92,8 +93,8 @@ export class WorldScene extends Phaser.Scene {
       this.scene.restart();
     });
 
-    this.cameraJumpUnsubscribe = eventBus.on('cameraJump', ({ x, y }) => {
-      this.cameraManager.centerOn(x, y);
+    this.cameraJumpUnsubscribe = eventBus.on('cameraJump', (pos: Position) => {
+      this.cameraManager.centerOn(pos);
     });
 
     this.scale.on('resize', (gameSize: Phaser.Structs.Size) => {
@@ -109,28 +110,27 @@ export class WorldScene extends Phaser.Scene {
 
   private isAnimating = false;
 
-  private handleMove(unitId: string, toX: number, toY: number) {
+  private handleMove(unitId: string, to: Position) {
     if (this.isAnimating) return;
 
     const state = useGameStore.getState();
     const unit = state.players.flatMap((p) => p.units).find((u) => u.id === unitId);
     if (!unit) return;
 
-    const fromX = unit.position.x;
-    const fromY = unit.position.y;
+    const from = unit.position;
 
     this.isAnimating = true;
 
-    this.animateUnitMove(unit, fromX, fromY, toX, toY, () => {
-      useGameStore.getState().moveUnit(unitId, toX, toY);
+    this.animateUnitMove(unit, from, to, () => {
+      useGameStore.getState().moveUnit(unitId, to);
       this.isAnimating = false;
-      eventBus.emit('unitMoved', { id: unitId, fromX, fromY, toX, toY });
+      eventBus.emit('unitMoved', { id: unitId, fromX: from.x, fromY: from.y, toX: to.x, toY: to.y });
     });
   }
 
-  private animateUnitMove(unit: Unit, fromX: number, fromY: number, toX: number, toY: number, onComplete: () => void) {
-    const { x: startX, y: startY } = this.terrainRenderer.tileToWorld(fromX, fromY);
-    const { x: endX, y: endY } = this.terrainRenderer.tileToWorld(toX, toY);
+  private animateUnitMove(unit: Unit, from: Position, to: Position, onComplete: () => void) {
+    const { x: startX, y: startY } = this.terrainRenderer.tileToWorld(from);
+    const { x: endX, y: endY } = this.terrainRenderer.tileToWorld(to);
 
     this.unitRenderer.unitSprites.getChildren().forEach((child: any) => {
       if (

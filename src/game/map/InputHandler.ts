@@ -3,35 +3,34 @@ import type { TerrainRenderer } from './TerrainRenderer';
 import { useGameStore } from '../state/gameStore';
 import { useUIStore } from '../state/uiStore';
 import { UnitType, Attitude } from '../entities/types';
-import { isSame } from '../entities/Position';
+import { isSame, type Position } from '../entities/Position';
 
 export class InputHandler {
   constructor(private scene: Phaser.Scene, private terrainRenderer: TerrainRenderer) {}
 
-  setup(mapWidth: number, mapHeight: number, getReachableTiles: () => { x: number; y: number }[], handleMove: (id: string, x: number, y: number) => void) {
+  setup(mapWidth: number, mapHeight: number, getReachableTiles: () => Position[], handleMove: (id: string, position: Position) => void) {
     this.scene.input.mouse?.disableContextMenu();
 
     this.scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       const worldPoint = pointer.positionToCamera(this.scene.cameras.main) as Phaser.Math.Vector2;
-      const { x, y } = this.terrainRenderer.worldToTile(worldPoint.x, worldPoint.y);
+      const pos = this.terrainRenderer.worldToTile(worldPoint);
 
-      if (x < 0 || x >= mapWidth || y < 0 || y >= mapHeight) return;
+      if (pos.x < 0 || pos.x >= mapWidth || pos.y < 0 || pos.y >= mapHeight) return;
 
       if (pointer.leftButtonDown()) {
-        this.handleLeftClick(x, y);
+        this.handleLeftClick(pos);
       } else if (pointer.rightButtonDown()) {
-        this.handleRightClick(x, y, getReachableTiles(), handleMove);
+        this.handleRightClick(pos, getReachableTiles(), handleMove);
       }
     });
 
     this.scene.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
       const worldPoint = pointer.positionToCamera(this.scene.cameras.main) as Phaser.Math.Vector2;
-      const { x, y } = this.terrainRenderer.worldToTile(worldPoint.x, worldPoint.y);
+      const pos = this.terrainRenderer.worldToTile(worldPoint);
 
-      if (x >= 0 && x < mapWidth && y >= 0 && y < mapHeight) {
-        const pos = { x, y };
+      if (pos.x >= 0 && pos.x < mapWidth && pos.y >= 0 && pos.y < mapHeight) {
         const settlement = useGameStore.getState().players.flatMap(p => p.settlements).find((s) => isSame(s.position, pos));
-        this.terrainRenderer.showTooltip(x, y, worldPoint.x, worldPoint.y, settlement?.name);
+        this.terrainRenderer.showTooltip(pos, worldPoint, settlement?.name);
       } else {
         this.terrainRenderer.hideTooltip();
       }
@@ -45,14 +44,13 @@ export class InputHandler {
       useGameStore.getState().selectUnit(null);
       this.scene.events.emit('unitSelected', null as any);
       useGameStore.getState().selectTile(null);
-      this.terrainRenderer.updateSelectionHighlight(null, null);
+      this.terrainRenderer.updateSelectionHighlight(null);
     });
   }
 
-  private handleLeftClick(x: number, y: number) {
+  private handleLeftClick(pos: Position) {
     const state = useGameStore.getState();
     const player = state.players.find(p => p.id === state.currentPlayerId);
-    const pos = { x, y };
 
     // Units on map + available units in own settlement
     const unitsAtTile = state.players.flatMap((p) => p.units).filter((u) => isSame(u.position, pos));
@@ -63,7 +61,7 @@ export class InputHandler {
        unitsAtTile.push(...availableUnitsInSettlement);
     }
 
-    const tile = state.map[y]?.[x] || { position: { x, y }, terrainType: 'UNKNOWN', movementCost: 1, hasResource: null };
+    const tile = state.map[pos.y]?.[pos.x] || { position: pos, terrainType: 'UNKNOWN', movementCost: 1, hasResource: null };
     useGameStore.getState().selectTile(tile as any);
 
     if (settlementAtTile) {
@@ -88,17 +86,16 @@ export class InputHandler {
       this.scene.events.emit('unitSelected', null as any);
       this.scene.events.emit('settlementSelected', null as any);
     }
-    this.terrainRenderer.updateSelectionHighlight(x, y);
+    this.terrainRenderer.updateSelectionHighlight(pos);
   }
 
-  private handleRightClick(x: number, y: number, reachableTiles: { x: number; y: number }[], handleMove: (id: string, x: number, y: number) => void) {
+  private handleRightClick(pos: Position, reachableTiles: Position[], handleMove: (id: string, position: Position) => void) {
     const state = useGameStore.getState();
     if (!state.selectedUnitId) return;
 
     const selectedUnit = state.players.flatMap((p) => p.units).find((u) => u.id === state.selectedUnitId);
     if (!selectedUnit) return;
 
-    const pos = { x, y };
     const foreignUnitAtTile = state.players
       .filter((p) => p.id !== state.currentPlayerId)
       .flatMap((p) => p.units)
@@ -110,7 +107,7 @@ export class InputHandler {
       .find((c) => isSame(c.position, pos));
 
     if (selectedUnit.type === UnitType.SOLDIER && foreignUnitAtTile ) {
-      useGameStore.getState().resolveCombat(selectedUnit.id, x, y);
+      useGameStore.getState().resolveCombat(selectedUnit.id, pos);
     } else if (selectedUnit.type === UnitType.SOLDIER && foreignSettlementAtTile ) {
       useGameStore.getState().attackSettlement(foreignSettlementAtTile.id, selectedUnit.id);
     } else if (selectedUnit.type === UnitType.COLONIST &&
@@ -118,13 +115,13 @@ export class InputHandler {
         foreignSettlementAtTile.attitude !== Attitude.HOSTILE) {
       useUIStore.getState().setNativeTradeModalOpen(true, foreignSettlementAtTile.id);
     } else {
-      const isReachable = reachableTiles.some((t) => t.x === x && t.y === y);
+      const isReachable = reachableTiles.some((t) => isSame(t, pos));
       if (isReachable) {
-        handleMove(state.selectedUnitId, x, y);
+        handleMove(state.selectedUnitId, pos);
       } else {
         useGameStore.getState().selectUnit(null);
         this.scene.events.emit('unitSelected', null as any);
-        this.terrainRenderer.updateSelectionHighlight(null, null);
+        this.terrainRenderer.updateSelectionHighlight(null);
       }
     }
   }

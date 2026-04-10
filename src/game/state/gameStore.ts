@@ -5,6 +5,7 @@ import type { Player } from '../entities/Player';
 import type { Tile } from '../entities/Tile';
 import type { Unit } from '../entities/Unit';
 import type { Settlement } from '../entities/Settlement';
+import type { Position } from '../entities/Position';
 import { BuildingType, GoodType, JobType, Nation, TurnPhase, UnitType } from '../entities/types';
 import { TurnEngine } from '../systems/TurnEngine';
 import { AISystem } from '../systems/AISystem';
@@ -42,7 +43,7 @@ export interface GameState {
   selectNextUnit: () => void;
   skipUnit: (unitId: string) => void;
   selectSettlement: (settlementId: string | null) => void;
-  moveUnit: (unitId: string, toX: number, toY: number) => void;
+  moveUnit: (unitId: string, to: Position) => void;
   endTurn: () => void;
   foundSettlement: (unitId: string) => void;
   buyBuilding: (settlementId: string, building: BuildingType) => void;
@@ -53,7 +54,7 @@ export interface GameState {
   tradeWithSettlement: (settlementId: string, unitId: string, goodOffered: GoodType) => void;
   learnFromSettlement: (settlementId: string, unitId: string) => void;
   attackSettlement: (settlementId: string, unitId: string) => void;
-  resolveCombat: (attackerId: string, targetX: number, targetY: number) => void;
+  resolveCombat: (attackerId: string, target: Position) => void;
   clearCombatResult: () => void;
   loadGameState: (state: Partial<GameState>) => void;
   initGame: (params: { playerName: string; nation: Nation; mapSize: 'Small' | 'Medium' | 'Large'; aiCount: number }) => void;
@@ -176,7 +177,7 @@ export const useGameStore = create<GameState>()(
         }
       }),
 
-    moveUnit: (unitId, toX, toY) =>
+    moveUnit: (unitId, to) =>
       set((state) => {
         const player = state.players.find((p) => p.id === state.currentPlayerId);
         if (!player) return;
@@ -185,15 +186,13 @@ export const useGameStore = create<GameState>()(
         if (unitIndex === -1) return;
         const unit = player.units[unitIndex];
 
-        if (UnitSystem.canMoveTo(unit, toX, toY, state.map)) {
-          const targetTile = state.map[toY][toX];
-          const toPos = { x: toX, y: toY };
-          unit.position.x = toX;
-          unit.position.y = toY;
+        if (UnitSystem.canMoveTo(unit, to.x, to.y, state.map)) {
+          const targetTile = state.map[to.y][to.x];
+          unit.position = { ...to };
           unit.movesRemaining -= MovementSystem.getMovementCost(unit, targetTile);
 
           // Check if entering own settlement
-          const settlement = player.settlements.find(s => isSame(s.position, toPos));
+          const settlement = player.settlements.find(s => isSame(s.position, to));
           if (settlement) {
             if (!settlement.units.some(u => u.id === unit.id)) {
               settlement.units.push({ ...unit });
@@ -455,7 +454,7 @@ export const useGameStore = create<GameState>()(
       }
 
       if (settlement) {
-        state.resolveCombat(unitId, settlement.position.x, settlement.position.y);
+        state.resolveCombat(unitId, settlement.position);
       }
     },
 
@@ -464,7 +463,7 @@ export const useGameStore = create<GameState>()(
         state.combatResult = null;
       }),
 
-    resolveCombat: (attackerId, targetX, targetY) =>
+    resolveCombat: (attackerId, target) =>
       set((state) => {
         const player = state.players.find((p) => p.id === state.currentPlayerId);
         if (!player) return;
@@ -475,11 +474,9 @@ export const useGameStore = create<GameState>()(
         let defender: Unit | Settlement | undefined;
         let defenderSettlement: Settlement | undefined;
 
-        const targetPos = { x: targetX, y: targetY };
-
         for (const p of state.players) {
           if (p.id !== state.currentPlayerId) {
-            const unit = p.units.find((u) => isSame(u.position, targetPos));
+            const unit = p.units.find((u) => isSame(u.position, target));
             if (unit) {
               defender = unit;
               break;
@@ -488,7 +485,7 @@ export const useGameStore = create<GameState>()(
         }
 
         for (const p of state.players) {
-          const settlement = p.settlements.find((c) => isSame(c.position, targetPos));
+          const settlement = p.settlements.find((c) => isSame(c.position, target));
           if (settlement) {
             defenderSettlement = settlement;
             if (!defender && p.id !== state.currentPlayerId) {
@@ -500,7 +497,7 @@ export const useGameStore = create<GameState>()(
 
         if (!defender) return;
 
-        const defenderTile = state.map[targetY][targetX];
+        const defenderTile = state.map[target.y][target.x];
         const result = CombatSystem.resolveCombat(attacker, defender, defenderTile, defenderSettlement);
 
         if (result.winner === 'attacker') {
@@ -527,8 +524,7 @@ export const useGameStore = create<GameState>()(
               const sIdx = capturedSettlementPlayer.settlements.findIndex(s => s.id === defender!.id);
               const s = capturedSettlementPlayer.settlements[sIdx];
 
-              attacker.position.x = targetX;
-              attacker.position.y = targetY;
+              attacker.position = { ...target };
               attacker.movesRemaining = 0;
 
               s.ownerId = player.id;

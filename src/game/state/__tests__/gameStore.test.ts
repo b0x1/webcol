@@ -29,7 +29,7 @@ describe('gameStore', () => {
 
       useGameStore.setState({ players: [player], currentPlayerId: 'p1', map });
 
-      useGameStore.getState().moveUnit('u1', 1, 0);
+      useGameStore.getState().moveUnit('u1', { x: 1, y: 0 });
 
       const updatedPlayer = useGameStore.getState().players[0];
       const updatedUnit = updatedPlayer.units[0];
@@ -49,7 +49,7 @@ describe('gameStore', () => {
 
       useGameStore.setState({ players: [player], currentPlayerId: 'p1', map });
 
-      useGameStore.getState().moveUnit('u1', 1, 0);
+      useGameStore.getState().moveUnit('u1', { x: 1, y: 0 });
 
       const updatedPlayer = useGameStore.getState().players[0];
       const updatedUnit = updatedPlayer.units[0];
