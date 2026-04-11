@@ -5,7 +5,7 @@ type EventTargetWithListeners = Pick<Window, 'addEventListener' | 'removeEventLi
 
 export class LazyRenderController {
   private idleTimeoutId: number | null = null;
-  private readonly windowEvents: ReadonlyArray<keyof WindowEventMap> = [
+  private readonly windowEvents: readonly (keyof WindowEventMap)[] = [
     'keydown',
     'keyup',
     'mousedown',
@@ -21,7 +21,7 @@ export class LazyRenderController {
     'wheel',
   ];
 
-  private readonly canvasEvents: ReadonlyArray<keyof HTMLElementEventMap> = [
+  private readonly canvasEvents: readonly (keyof HTMLElementEventMap)[] = [
     'pointerdown',
     'pointermove',
     'pointerup',
