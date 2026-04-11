@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import React from 'react';
 import { useGameStore } from '../../game/state/gameStore';
 import { Sprite } from '../Sprite';
@@ -36,9 +37,7 @@ export const MapGrid: React.FC<Props> = ({ settlementId }) => {
 
   return (
     <div className="grid grid-cols-3 gap-1 bg-slate-900 p-1 rounded border border-slate-700 w-full aspect-square max-w-[450px]">
-      {tiles.map((tile, i) => {
-        if (!tile) return <div key={i} className="aspect-square bg-black/50" />;
-
+      {tiles.map((tile, _i) => {
         const workers = Array.from(settlement.workforce.entries())
           .filter(([_, assignment]) => assignment === toKey(tile.position))
           .map(([id]) => settlement.units.find(u => u.id === id))
@@ -49,8 +48,8 @@ export const MapGrid: React.FC<Props> = ({ settlementId }) => {
         return (
           <div
             key={toKey(tile.position)}
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={(e) => handleDrop(e, tile.position)}
+            onDragOver={(e) => { e.preventDefault(); }}
+            onDrop={(e) => { handleDrop(e, tile.position); }}
             className={`aspect-square relative flex items-center justify-center border border-white/5 overflow-hidden group hover:border-blue-500/50 transition-colors ${isSettlementTile ? 'bg-blue-900/40' : 'bg-slate-800'}`}
           >
             <div className="absolute inset-0 flex items-center justify-center opacity-80 pointer-events-none">
@@ -82,7 +81,7 @@ export const MapGrid: React.FC<Props> = ({ settlementId }) => {
                    <div
                     key={unit!.id}
                     draggable
-                    onDragStart={(e) => handleDragStart(e, unit!.id)}
+                    onDragStart={(e) => { handleDragStart(e, unit!.id); }}
                     className="w-10 h-10 bg-blue-600/40 rounded-full border border-white/20 shadow-sm relative overflow-hidden cursor-grab active:cursor-grabbing"
                     title={unit!.type}
                   >

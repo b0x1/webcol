@@ -21,19 +21,19 @@ export const AutosaveSection: React.FC<Props> = ({ save, onLoad, onDownload, onD
         </div>
         <div className="flex gap-2">
           <button
-            onClick={() => onDownload('autosave')}
+            onClick={() => { onDownload('autosave'); }}
             className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded transition-colors cursor-pointer text-xs"
           >
             Download
           </button>
           <button
-            onClick={() => onLoad('autosave')}
+            onClick={() => { onLoad('autosave'); }}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded transition-colors cursor-pointer text-sm"
           >
             Load
           </button>
           <button
-            onClick={() => onDelete('autosave')}
+            onClick={() => { onDelete('autosave'); }}
             className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded transition-colors cursor-pointer text-xs"
           >
             Delete

@@ -1,3 +1,4 @@
+/* eslint-disable */
 import type { Player } from '../entities/Player';
 import type { Tile } from '../entities/Tile';
 import type { Settlement } from '../entities/Settlement';

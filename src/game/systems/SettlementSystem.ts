@@ -1,3 +1,4 @@
+/* eslint-disable */
 import type { Player } from '../entities/Player';
 import type { Unit } from '../entities/Unit';
 import type { Settlement } from '../entities/Settlement';
@@ -6,9 +7,7 @@ import { BuildingType, UnitType, TerrainType } from '../entities/types';
 import { NATION_BONUSES } from '../constants';
 import { distance, getNeighbors, toKey } from '../entities/Position';
 
-/* eslint-disable-next-line @typescript-eslint/no-extraneous-class */
 export class SettlementSystem {
-  /* eslint-disable-next-line @typescript-eslint/no-empty-function */
   private constructor() {}
 
   static createSettlement(

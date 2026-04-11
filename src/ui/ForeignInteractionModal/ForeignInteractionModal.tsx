@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useGameStore } from '../../game/state/gameStore';
 import { useUIStore } from '../../game/state/uiStore';
-import { GoodType, Attitude, UnitType } from '../../game/entities/types';
+import { Attitude, UnitType } from '../../game/entities/types';
 
 export const ForeignInteractionModal: React.FC = () => {
   const {
@@ -26,7 +26,7 @@ export const ForeignInteractionModal: React.FC = () => {
       }
     };
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => { window.removeEventListener('keydown', handleKeyDown); };
   }, [isNativeTradeModalOpen, setNativeTradeModalOpen]);
 
   if (!isNativeTradeModalOpen || !activeSettlementId) return null;
@@ -65,7 +65,7 @@ export const ForeignInteractionModal: React.FC = () => {
                   {cargoGoods.map(([good, amount]) => (
                     <button
                       key={good}
-                      onClick={() => tradeWithSettlement(settlement.id, unit.id, good as GoodType)}
+                      onClick={() => { tradeWithSettlement(settlement.id, unit.id, good); }}
                       className="px-4 py-2 bg-stone-800 hover:bg-amber-900/40 text-stone-200 border border-stone-700 hover:border-amber-700 rounded font-bold text-xs transition-all cursor-pointer flex justify-between items-center group"
                     >
                       <span className="capitalize">{good.toLowerCase()}</span>
@@ -87,7 +87,7 @@ export const ForeignInteractionModal: React.FC = () => {
               <div className="bg-amber-950/20 border border-amber-900/30 p-4 rounded-lg">
                 <p className="text-stone-300 text-sm leading-relaxed mb-4">The inhabitants are willing to teach you the secrets of the land. Your <span className="text-amber-500 font-bold">Colonist</span> will become a <span className="text-amber-500 font-bold">Pioneer</span>.</p>
                 <button
-                  onClick={() => learnFromSettlement(settlement.id, unit.id)}
+                  onClick={() => { learnFromSettlement(settlement.id, unit.id); }}
                   className="w-full py-3 bg-amber-700 hover:bg-amber-600 text-stone-100 font-black uppercase tracking-widest text-sm rounded shadow-lg transition-all transform active:scale-95 cursor-pointer"
                 >
                   Learn Land Skills
@@ -99,7 +99,7 @@ export const ForeignInteractionModal: React.FC = () => {
 
         <div className="mt-10 pt-6 border-t border-amber-900/30 flex justify-end">
           <button
-            onClick={() => setNativeTradeModalOpen(false)}
+            onClick={() => { setNativeTradeModalOpen(false); }}
             className="px-8 py-2.5 bg-stone-800 hover:bg-stone-700 text-stone-400 hover:text-stone-100 font-bold rounded transition-all cursor-pointer text-sm"
           >
             Close (Esc)

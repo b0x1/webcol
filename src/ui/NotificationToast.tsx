@@ -7,7 +7,7 @@ export const NotificationToast: React.FC = () => {
   useEffect(() => {
     const unsubscribe = eventBus.on('notification', (msg: string) => {
       setMessage(msg);
-      setTimeout(() => setMessage(null), 3000);
+      setTimeout(() => { setMessage(null); }, 3000);
     });
     return unsubscribe;
   }, []);

@@ -67,6 +67,12 @@ export default tseslint.config(
       // System classes are intentional static-method containers
       '@typescript-eslint/no-extraneous-class': 'warn',
 
+      '@typescript-eslint/restrict-template-expressions': ['error', {
+        allowNumber: true,
+        allowBoolean: false,
+        allowNullish: false,
+      }],
+
       '@typescript-eslint/prefer-for-of': 'error',
 
       // No console.log in src — matches AGENTS.md
@@ -128,6 +134,23 @@ export default tseslint.config(
           { group: ['react', 'react-dom'], message: 'Scenes must not import React.' },
         ],
       }],
+    },
+  },
+
+  // Tests: disable strict type-checking and other restrictive rules for test files
+  {
+    files: ['**/*.test.ts', '**/*.test.tsx'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      '@typescript-eslint/unbound-method': 'off',
+      '@typescript-eslint/restrict-template-expressions': 'off',
+      '@typescript-eslint/no-confusing-void-expression': 'off',
     },
   },
 );

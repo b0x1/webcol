@@ -19,7 +19,7 @@ export const EuropeScreen: React.FC = () => {
       }
     };
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => { window.removeEventListener('keydown', handleKeyDown); };
   }, [isEuropeScreenOpen, setEuropeScreenOpen]);
 
   if (!isEuropeScreenOpen) return null;
@@ -32,7 +32,7 @@ export const EuropeScreen: React.FC = () => {
         <div className="flex justify-between items-center border-b border-slate-700 pb-4">
           <h2 className="text-4xl font-black uppercase tracking-tight text-blue-400">Europe Trade</h2>
           <button
-            onClick={() => setEuropeScreenOpen(false)}
+            onClick={() => { setEuropeScreenOpen(false); }}
             className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded transition-all transform active:scale-95 cursor-pointer shadow-lg"
           >
             Return to Settlement (Esc)

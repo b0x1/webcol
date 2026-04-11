@@ -10,11 +10,7 @@ import { createUnit } from '../entities/Unit';
 import { ProductionSystem } from './ProductionSystem';
 import { NamingSystem, type NamingStats } from './NamingSystem';
 
-/* eslint-disable-next-line @typescript-eslint/no-extraneous-class */
-export class TurnEngine {
-  /* eslint-disable-next-line @typescript-eslint/no-empty-function */
-  private constructor() {}
-
+export class TurnEngine {  // eslint-disable-line @typescript-eslint/no-extraneous-class
   static autoSave(state: GameState): void {
     SaveSystem.save(state, 'autosave');
     eventBus.emit('notification', 'Auto-saved');

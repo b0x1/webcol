@@ -31,7 +31,7 @@ export const AvailableUnits: React.FC<Props> = ({ settlementId, units }) => {
 
   return (
     <div
-      onDragOver={(e) => e.preventDefault()}
+      onDragOver={(e) => { e.preventDefault(); }}
       onDrop={handleDrop}
       className="p-4 bg-slate-900/50 rounded-lg border border-slate-700 h-full overflow-x-auto shadow-inner"
     >
@@ -42,7 +42,7 @@ export const AvailableUnits: React.FC<Props> = ({ settlementId, units }) => {
             <div
               key={unit.id}
               draggable
-              onDragStart={(e) => handleDragStart(e, unit.id)}
+              onDragStart={(e) => { handleDragStart(e, unit.id); }}
               className="p-3 bg-slate-800 rounded border border-slate-700 flex flex-col items-center gap-2 group hover:border-blue-500 transition-colors shadow-sm cursor-grab active:cursor-grabbing w-24 shrink-0"
             >
               <div className="w-12 h-12 bg-slate-900 rounded-full flex items-center justify-center border border-white/10 group-hover:border-blue-500/50 relative overflow-hidden">

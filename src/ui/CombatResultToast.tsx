@@ -10,7 +10,7 @@ export const CombatResultToast: React.FC = () => {
       const timer = setTimeout(() => {
         clearCombatResult();
       }, 3000);
-      return () => clearTimeout(timer);
+      return () => { clearTimeout(timer); };
     }
   }, [combatResult, clearCombatResult]);
 

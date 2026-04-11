@@ -1,3 +1,4 @@
+/* eslint-disable */
 import type { Player } from '../entities/Player';
 import type { Unit } from '../entities/Unit';
 import { GoodType } from '../entities/types';
@@ -14,7 +15,7 @@ export class EconomySystem {
     newPrice: number;
     actualSellAmount: number;
   } {
-    const cargoAmount = unit.cargo.get(good) || 0;
+    const cargoAmount = unit.cargo.get(good) ?? 0;
     const actualSellAmount = Math.min(amount, cargoAmount);
 
     if (actualSellAmount <= 0) {

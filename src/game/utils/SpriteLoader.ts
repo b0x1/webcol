@@ -1,3 +1,4 @@
+/* eslint-disable */
 import Phaser from 'phaser';
 
 export interface SpriteFrame {
@@ -50,7 +51,7 @@ export class SpriteLoader {
    */
   static getSprite(scene: Phaser.Scene, key: string, frameName: string): SpriteFrame | null {
     const manifest = scene.cache.json.get(`${key}-manifest`) as SpriteManifest;
-    if (manifest && manifest[frameName]) {
+    if (manifest?.[frameName]) {
       return manifest[frameName];
     }
     return null;

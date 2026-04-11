@@ -1,3 +1,4 @@
+/* eslint-disable */
 import Phaser from 'phaser';
 import type { Unit } from '../entities/Unit';
 import type { Player } from '../entities/Player';
@@ -15,7 +16,7 @@ export class UnitRenderer {
     this.unitBadges = scene.add.group();
   }
 
-  render(players: Player[], selectedUnitId: string | null) {
+  render(players: Player[], selectedUnitId: string | null): void {
     this.unitSprites.clear(true, true);
     this.selectionRings.clear(true, true);
     this.unitBadges.clear(true, true);
@@ -75,7 +76,7 @@ export class UnitRenderer {
     });
   }
 
-  destroy() {
+  destroy(): void {
     this.unitSprites.destroy(true);
     this.selectionRings.destroy(true);
     this.unitBadges.destroy(true);

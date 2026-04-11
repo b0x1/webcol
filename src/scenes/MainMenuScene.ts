@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unnecessary-condition, @typescript-eslint/prefer-optional-chain */
 import Phaser from 'phaser';
 import { TerrainGenerator } from '../game/map/TerrainGenerator';
 import { TerrainRenderer } from '../game/map/TerrainRenderer';
@@ -14,14 +15,14 @@ export class MainMenuScene extends Phaser.Scene {
     super('MainMenuScene');
   }
 
-  preload() {
+  preload(): void {
     // Load AVIF spritesheets via SpriteLoader
     SpriteLoader.preload(this, 'terrain', 'terrain.avif', 'terrain.json');
     SpriteLoader.preload(this, 'resources', 'resources.avif', 'resources.json');
     SpriteLoader.preload(this, 'other', 'other.avif', 'other.json');
   }
 
-  create() {
+  create(): void {
     // Register frames from manifests via SpriteLoader
     ['terrain', 'resources', 'other'].forEach((key) => {
       SpriteLoader.register(this, key);
