@@ -62,7 +62,8 @@ export class InputHandler {
        unitsAtTile.push(...availableUnitsInSettlement);
     }
 
-    const tile = state.map[pos.y]?.[pos.x];
+    const tile = state.map[pos.y]?.[pos.x] ||  // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+      { position: pos, terrainType: 'UNKNOWN', movementCost: 1, hasResource: null };
     useGameStore.getState().selectTile(tile as any);
 
     if (settlementAtTile) {

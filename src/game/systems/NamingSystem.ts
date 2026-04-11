@@ -89,7 +89,7 @@ export class NamingSystem {  // eslint-disable-line @typescript-eslint/no-extran
     const lists = NAME_LISTS[nationKey] ?? NAME_LISTS[Nation.ENGLAND]; // Fallback to England if missing
     const list = lists[type] ?? lists.unit;
 
-    if (!stats[nationKey]) {
+    if (!stats[nationKey]) {  // eslint-disable-line @typescript-eslint/no-unnecessary-condition
       stats[nationKey] = { settlement: 0, unit: 0, ship: 0 };
     }
 
