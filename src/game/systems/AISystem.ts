@@ -11,7 +11,6 @@ import { NamingSystem, type NamingStats } from './NamingSystem';
 
 export class AISystem {
   static runAITurn(players: Player[], map: Tile[][], namingStats: NamingStats): { players: Player[]; namingStats: NamingStats } {
-    eventBus.emit('aiTurnStarted');
     let currentNamingStats = { ...namingStats };
 
     const updatedPlayers = players.map((p) => ({
@@ -71,7 +70,6 @@ export class AISystem {
               };
               player.settlements.push(newSettlement);
               player.units.splice(unitIndex, 1);
-              eventBus.emit('settlementFounded', newSettlement);
               unitRemoved = true;
             }
           }
@@ -90,10 +88,12 @@ export class AISystem {
             if (ny >= 0 && ny < map.length && nx >= 0 && nx < map[ny].length) {
               const targetTile = map[ny][nx];
               if (unit.movesRemaining >= targetTile.movementCost) {
+                const fromX = unit.position.x;
+                const fromY = unit.position.y;
                 unit.position.x = nx;
                 unit.position.y = ny;
                 unit.movesRemaining -= targetTile.movementCost;
-                eventBus.emit('unitMoved', unit);
+                eventBus.emit('unitMoved', { id: unit.id, fromX, fromY, toX: nx, toY: ny });
               }
             }
           }
@@ -102,7 +102,6 @@ export class AISystem {
       }
     }
 
-    eventBus.emit('aiTurnCompleted', updatedPlayers);
     return { players: updatedPlayers, namingStats: currentNamingStats };
   }
 

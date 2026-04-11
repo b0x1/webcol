@@ -159,7 +159,6 @@ export class TurnEngine {  // eslint-disable-line @typescript-eslint/no-extraneo
       };
     });
 
-    eventBus.emit('productionCompleted', updatedPlayers);
     return { players: updatedPlayers, namingStats: currentNamingStats };
   }
 }
