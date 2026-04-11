@@ -15,7 +15,7 @@ describe('TurnEngine', () => {
     for (let y = 0; y < height; y++) {
       const row: Tile[] = [];
       for (let x = 0; x < width; x++) {
-        row.push(createTile(`${x.toString()}-${y.toString()}`, x, y, TerrainType.GRASSLAND, 1));
+        row.push(createTile(`${x}-${y}`, x, y, TerrainType.GRASSLAND, 1));
       }
       map.push(row);
     }

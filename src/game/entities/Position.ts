@@ -16,7 +16,7 @@ export function isSame(p1: Position, p2: Position): boolean {
 }
 
 export function toKey(p: Position): string {
-  return `${p.x.toString()},${p.y.toString()}`;
+  return `${p.x},${p.y}`;
 }
 
 export function isWithinBounds(p: Position, width: number, height: number): boolean {
