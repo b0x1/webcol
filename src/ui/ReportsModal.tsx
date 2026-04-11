@@ -15,6 +15,7 @@ export const ReportsModal: React.FC = () => {
     currentPlayerId,
     selectUnit,
     selectSettlement,
+    map,
   } = useGameStore();
   const {
     isReportsModalOpen,
@@ -101,6 +102,7 @@ export const ReportsModal: React.FC = () => {
             <ResourcesTab
               displayedPlayers={displayedPlayers}
               onSettlementClick={handleSettlementClick}
+              map={map}
             />
           )}
         </div>
