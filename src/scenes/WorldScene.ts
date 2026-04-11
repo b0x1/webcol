@@ -4,9 +4,8 @@ import { TileMap } from '../game/map/TileMap';
 import { TerrainRenderer } from '../game/map/TerrainRenderer';
 import { SpriteLoader } from '../game/utils/SpriteLoader';
 import { getReachableTilesForUnit, useGameStore } from '../game/state/gameStore';
-import type { Unit } from '../game/entities/Unit';
 import { eventBus } from '../game/state/EventBus';
-import { MAP_CONSTANTS, UNIT_CONSTANTS } from '../game/constants';
+import { MAP_CONSTANTS } from '../game/constants';
 import { UnitRenderer } from '../game/map/UnitRenderer';
 import { CameraManager } from '../game/map/CameraManager';
 import { InputHandler } from '../game/map/InputHandler';
@@ -45,7 +44,7 @@ export class WorldScene extends Phaser.Scene {
     this.terrainRenderer = new TerrainRenderer(this as any, this.TILE_SIZE);
     this.unitRenderer = new UnitRenderer(this, this.terrainRenderer, this.TILE_SIZE);
     this.cameraManager = new CameraManager(this, this.terrainRenderer, this.TILE_SIZE);
-    this.inputHandler = new InputHandler(this, this.terrainRenderer);
+    this.inputHandler = new InputHandler(this, this.terrainRenderer, this.cameraManager);
 
     const state = useGameStore.getState();
     const tiles = state.map;
@@ -108,71 +107,22 @@ export class WorldScene extends Phaser.Scene {
     this.cameraManager.emitViewportUpdate();
   }
 
-  private isAnimating = false;
-
   private handleMove(unitId: string, to: Position) {
-    if (this.isAnimating) return;
-
     const state = useGameStore.getState();
     const unit = state.players.flatMap((p) => p.units).find((u) => u.id === unitId);
     if (!unit) return;
 
     const from = unit.position;
-
-    this.isAnimating = true;
-
-    this.animateUnitMove(unit, from, to, () => {
-      useGameStore.getState().moveUnit(unitId, to);
-      this.isAnimating = false;
-      eventBus.emit('unitMoved', { id: unitId, fromX: from.x, fromY: from.y, toX: to.x, toY: to.y });
-    });
-  }
-
-  private animateUnitMove(unit: Unit, from: Position, to: Position, onComplete: () => void) {
-    const { x: startX, y: startY } = this.terrainRenderer.tileToWorld(from);
-    const { x: endX, y: endY } = this.terrainRenderer.tileToWorld(to);
-
-    this.unitRenderer.unitSprites.getChildren().forEach((child: any) => {
-      if (
-        child instanceof Phaser.GameObjects.Image &&
-        child.texture.key === 'units' &&
-        child.frame.name === unit.type &&
-        child.x === startX + this.TILE_SIZE / 2 &&
-        child.y === startY + this.TILE_SIZE / 2
-      ) {
-        child.setVisible(false);
-      }
-    });
-
-    const tempSprite = this.add.image(
-      startX + this.TILE_SIZE / 2,
-      startY + this.TILE_SIZE / 2,
-      'units',
-      unit.type
-    );
-    tempSprite.setDepth(300);
-
-    this.tweens.add({
-      targets: tempSprite,
-      x: endX + this.TILE_SIZE / 2,
-      y: endY + this.TILE_SIZE / 2,
-      duration: UNIT_CONSTANTS.ANIMATION_DURATION,
-      onComplete: () => {
-        tempSprite.destroy();
-        onComplete();
-      },
-    });
+    useGameStore.getState().moveUnit(unitId, to);
+    eventBus.emit('unitMoved', { id: unitId, fromX: from.x, fromY: from.y, toX: to.x, toY: to.y });
   }
 
   destroy(): void {
     if (this.storeUnsubscribe) this.storeUnsubscribe();
     if (this.gameLoadedUnsubscribe) this.gameLoadedUnsubscribe();
     if (this.cameraJumpUnsubscribe) this.cameraJumpUnsubscribe();
+    this.inputHandler.destroy();
     this.terrainRenderer.destroy();
     this.unitRenderer.destroy();
-  }
-
-  override update(): void {
-    this.cameraManager.update();
   }
 }

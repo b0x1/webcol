@@ -13,7 +13,17 @@ export const UNIT_CONSTANTS = {
   SHIP_MOVES: 6,
   PIONEER_MOVES: 3,
   SOLDIER_MOVES: 3,
-  ANIMATION_DURATION: 200,
+} as const;
+
+export const CAMERA_CONSTANTS = {
+  PAN_STEP: 30,
+  ZOOM_STEP: 0.02,
+  MIN_ZOOM: 0.5,
+  MAX_ZOOM: 2.0,
+} as const;
+
+export const RENDER_CONSTANTS = {
+  LAZY_RENDER_IDLE_MS: 120,
 } as const;
 
 export const COLONY_CONSTANTS = {

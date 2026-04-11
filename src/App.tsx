@@ -20,9 +20,11 @@ import { MainMenu } from './ui/MainMenu/MainMenu';
 import { HowToPlayModal } from './ui/MainMenu/HowToPlayModal';
 import { GameSetupModal } from './ui/MainMenu/GameSetupModal';
 import { EndTurnConfirmationModal } from './ui/EndTurnConfirmationModal';
+import { LazyRenderController } from './game/rendering/LazyRenderController';
 
 function App(): React.ReactElement {
   const gameRef = useRef<Phaser.Game | null>(null);
+  const lazyRenderControllerRef = useRef<LazyRenderController | null>(null);
   const {
     selectUnit,
     selectSettlement,
@@ -55,6 +57,12 @@ function App(): React.ReactElement {
 
     const game = new Phaser.Game(config);
     gameRef.current = game;
+    const lazyRenderController = new LazyRenderController(game);
+    lazyRenderController.bind();
+    lazyRenderControllerRef.current = lazyRenderController;
+    const unsubscribeRender = useGameStore.subscribe(() => {
+      lazyRenderController.requestRender();
+    });
 
     game.events.once('ready', () => {
       const worldScene = game.scene.getScene('WorldScene') as WorldScene;
@@ -67,6 +75,9 @@ function App(): React.ReactElement {
     });
 
     return () => {
+      unsubscribeRender();
+      lazyRenderControllerRef.current?.destroy();
+      lazyRenderControllerRef.current = null;
       if (gameRef.current) {
         gameRef.current.destroy(true);
         gameRef.current = null;

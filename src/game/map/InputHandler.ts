@@ -1,18 +1,31 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument */
 import type Phaser from 'phaser';
 import type { TerrainRenderer } from './TerrainRenderer';
+import type { CameraManager } from './CameraManager';
 import { useGameStore } from '../state/gameStore';
 import { useUIStore } from '../state/uiStore';
 import { UnitType, Attitude } from '../entities/types';
 import { isSame, type Position } from '../entities/Position';
+import { CAMERA_CONSTANTS } from '../constants';
 
 export class InputHandler {
-  constructor(private scene: Phaser.Scene, private terrainRenderer: TerrainRenderer) {}
+  private pointerDownHandler: ((pointer: Phaser.Input.Pointer) => void) | null = null;
+  private pointerMoveHandler: ((pointer: Phaser.Input.Pointer) => void) | null = null;
+  private pointerOutHandler: (() => void) | null = null;
+  private wheelHandler: ((pointer: Phaser.Input.Pointer, _gameObjects: Phaser.GameObjects.GameObject[], _deltaX: number, deltaY: number) => void) | null = null;
+  private escapeHandler: (() => void) | null = null;
+  private keydownHandler: ((event: KeyboardEvent) => void) | null = null;
+
+  constructor(
+    private scene: Phaser.Scene,
+    private terrainRenderer: TerrainRenderer,
+    private cameraManager: CameraManager
+  ) {}
 
   setup(mapWidth: number, mapHeight: number, getReachableTiles: () => Position[], handleMove: (id: string, position: Position) => void): void {
     this.scene.input.mouse?.disableContextMenu();
 
-    this.scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+    this.pointerDownHandler = (pointer: Phaser.Input.Pointer) => {
       const worldPoint = pointer.positionToCamera(this.scene.cameras.main) as Phaser.Math.Vector2;
       const pos = this.terrainRenderer.worldToTile(worldPoint);
 
@@ -23,9 +36,10 @@ export class InputHandler {
       } else if (pointer.rightButtonDown()) {
         this.handleRightClick(pos, getReachableTiles(), handleMove);
       }
-    });
+    };
+    this.scene.input.on('pointerdown', this.pointerDownHandler);
 
-    this.scene.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+    this.pointerMoveHandler = (pointer: Phaser.Input.Pointer) => {
       const worldPoint = pointer.positionToCamera(this.scene.cameras.main) as Phaser.Math.Vector2;
       const pos = this.terrainRenderer.worldToTile(worldPoint);
 
@@ -35,18 +49,53 @@ export class InputHandler {
       } else {
         this.terrainRenderer.hideTooltip();
       }
-    });
+    };
+    this.scene.input.on('pointermove', this.pointerMoveHandler);
 
-    this.scene.input.on('pointerout', () => {
+    this.pointerOutHandler = () => {
       this.terrainRenderer.hideTooltip();
-    });
+    };
+    this.scene.input.on('pointerout', this.pointerOutHandler);
 
-    this.scene.input.keyboard?.on('keydown-ESC', () => {
+    this.wheelHandler = (_pointer, _gameObjects, _deltaX, deltaY) => {
+      const zoomStep = deltaY < 0 ? CAMERA_CONSTANTS.ZOOM_STEP : -CAMERA_CONSTANTS.ZOOM_STEP;
+      this.cameraManager.zoomBy(zoomStep);
+    };
+    this.scene.input.on('wheel', this.wheelHandler);
+
+    this.escapeHandler = () => {
       useGameStore.getState().selectUnit(null);
       this.scene.events.emit('unitSelected', null as any);
       useGameStore.getState().selectTile(null);
       this.terrainRenderer.updateSelectionHighlight(null);
-    });
+    };
+    this.scene.input.keyboard?.on('keydown-ESC', this.escapeHandler);
+
+    this.keydownHandler = (event: KeyboardEvent) => {
+      this.cameraManager.handleKeyboardInput(event);
+    };
+    this.scene.input.keyboard?.on('keydown', this.keydownHandler);
+  }
+
+  destroy(): void {
+    if (this.pointerDownHandler) {
+      this.scene.input.off('pointerdown', this.pointerDownHandler);
+    }
+    if (this.pointerMoveHandler) {
+      this.scene.input.off('pointermove', this.pointerMoveHandler);
+    }
+    if (this.pointerOutHandler) {
+      this.scene.input.off('pointerout', this.pointerOutHandler);
+    }
+    if (this.wheelHandler) {
+      this.scene.input.off('wheel', this.wheelHandler);
+    }
+    if (this.escapeHandler) {
+      this.scene.input.keyboard?.off('keydown-ESC', this.escapeHandler);
+    }
+    if (this.keydownHandler) {
+      this.scene.input.keyboard?.off('keydown', this.keydownHandler);
+    }
   }
 
   private handleLeftClick(pos: Position) {
