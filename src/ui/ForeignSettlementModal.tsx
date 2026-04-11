@@ -50,7 +50,7 @@ export const ForeignSettlementModal: React.FC = () => {
         </div>
 
         <button
-          onClick={() => useGameStore.getState().selectSettlement(null)}
+          onClick={() => { useGameStore.getState().selectSettlement(null); }}
           className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white font-black uppercase tracking-widest text-[10px] rounded transition-colors border border-white/5"
         >
           Close

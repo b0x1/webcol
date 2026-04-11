@@ -56,7 +56,7 @@ export class InputHandler {
     const unitsAtTile = state.players.flatMap((p) => p.units).filter((u) => isSame(u.position, pos));
     const settlementAtTile = state.players.flatMap((p) => p.settlements).find((c) => isSame(c.position, pos));
 
-    if (settlementAtTile && player && settlementAtTile.ownerId === player.id) {
+    if (settlementAtTile && settlementAtTile.ownerId === player?.id) {
        const availableUnitsInSettlement = settlementAtTile.units.filter(u => !settlementAtTile.workforce.has(u.id));
        unitsAtTile.push(...availableUnitsInSettlement);
     }

@@ -21,7 +21,7 @@ import { HowToPlayModal } from './ui/MainMenu/HowToPlayModal';
 import { GameSetupModal } from './ui/MainMenu/GameSetupModal';
 import { EndTurnConfirmationModal } from './ui/EndTurnConfirmationModal';
 
-function App() {
+function App(): JSX.Element {
   const gameRef = useRef<Phaser.Game | null>(null);
   const {
     selectUnit,
@@ -36,7 +36,7 @@ function App() {
   } = useUIStore();
 
   const currentPlayer = players.find(p => p.id === currentPlayerId);
-  const availableUnits = currentPlayer?.units.filter(u => u.movesRemaining > 0 && !u.isSkipping) || [];
+  const availableUnits = currentPlayer?.units.filter(u => u.movesRemaining > 0 && !u.isSkipping) ?? [];
 
   useEffect(() => {
     if (gameRef.current) return;
@@ -57,7 +57,7 @@ function App() {
     gameRef.current = game;
 
     game.events.once('ready', () => {
-      const worldScene = game.scene.getScene('WorldScene') as WorldScene;
+      const worldScene = game.scene.getScene('WorldScene') as WorldScene | undefined;
       if (worldScene) {
         worldScene.events.on('unitSelected', (unitId: string | null) => {
           selectUnit(unitId);
@@ -103,7 +103,7 @@ function App() {
               setShowEndTurnConfirm(false);
               endTurn();
             }}
-            onCancel={() => setShowEndTurnConfirm(false)}
+            onCancel={() => { setShowEndTurnConfirm(false); }}
           />
         )}
       </div>

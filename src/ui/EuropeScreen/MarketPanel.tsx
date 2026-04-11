@@ -36,7 +36,7 @@ export const MarketPanel: React.FC = () => {
                 <td className="p-3 text-right">
                   <div className="flex justify-end items-center gap-2">
                     <button
-                      onClick={() => sellGood(selectedUnit.id, good, cargo)}
+                      onClick={() => { sellGood(selectedUnit.id, good, cargo); }}
                       disabled={cargo === 0}
                       className={`px-3 py-1 text-xs font-bold rounded transition-colors cursor-pointer ${
                         cargo > 0 ? 'bg-green-600 hover:bg-green-500 text-white shadow-sm' : 'bg-slate-700 text-slate-500 cursor-not-allowed opacity-50'
@@ -52,7 +52,7 @@ export const MarketPanel: React.FC = () => {
                         placeholder="Qty"
                         value={buyAmounts[good] || ''}
                         onChange={(e) =>
-                          setBuyAmounts({ ...buyAmounts, [good]: parseInt(e.target.value) || 0 })
+                          { setBuyAmounts({ ...buyAmounts, [good]: parseInt(e.target.value) || 0 }); }
                         }
                       />
                       <button

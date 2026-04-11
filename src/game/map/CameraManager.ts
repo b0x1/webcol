@@ -4,23 +4,25 @@ import { eventBus } from '../state/EventBus';
 import type { Position } from '../entities/Position';
 
 export class CameraManager {
-  private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
+  private cursors: Phaser.Types.Input.Keyboard.CursorKeys | null = null;
   private zoomKeys: {
     plus: Phaser.Input.Keyboard.Key;
     minus: Phaser.Input.Keyboard.Key;
-  };
+  } | null = null;
   private readonly scrollSpeed = 30;
   private readonly zoomSpeed = 0.02;
 
   constructor(private scene: Phaser.Scene, private terrainRenderer: TerrainRenderer, private tileSize: number) {
-    this.cursors = scene.input.keyboard!.createCursorKeys();
-    this.zoomKeys = {
-      plus: scene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS),
-      minus: scene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS),
-    };
+    if (scene.input.keyboard) {
+      this.cursors = scene.input.keyboard.createCursorKeys();
+      this.zoomKeys = {
+        plus: scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS),
+        minus: scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS),
+      };
+    }
   }
 
-  setup(mapWidth: number, mapHeight: number) {
+  setup(mapWidth: number, mapHeight: number): void {
     this.scene.cameras.main.setBounds(
       0,
       0,
@@ -29,17 +31,21 @@ export class CameraManager {
     );
   }
 
-  update() {
+  update(): void {
     const cam = this.scene.cameras.main;
 
-    if (this.cursors.left.isDown) cam.scrollX -= this.scrollSpeed;
-    else if (this.cursors.right.isDown) cam.scrollX += this.scrollSpeed;
+    if (this.cursors) {
+      if (this.cursors.left.isDown) cam.scrollX -= this.scrollSpeed;
+      else if (this.cursors.right.isDown) cam.scrollX += this.scrollSpeed;
 
-    if (this.cursors.up.isDown) cam.scrollY -= this.scrollSpeed;
-    else if (this.cursors.down.isDown) cam.scrollY += this.scrollSpeed;
+      if (this.cursors.up.isDown) cam.scrollY -= this.scrollSpeed;
+      else if (this.cursors.down.isDown) cam.scrollY += this.scrollSpeed;
+    }
 
-    if (this.zoomKeys.plus.isDown) cam.zoom += this.zoomSpeed;
-    if (this.zoomKeys.minus.isDown) cam.zoom -= this.zoomSpeed;
+    if (this.zoomKeys) {
+      if (this.zoomKeys.plus.isDown) cam.zoom += this.zoomSpeed;
+      if (this.zoomKeys.minus.isDown) cam.zoom -= this.zoomSpeed;
+    }
 
     cam.zoom = Phaser.Math.Clamp(cam.zoom, 0.5, 2.0);
 
@@ -48,12 +54,12 @@ export class CameraManager {
     }
   }
 
-  centerOn(pos: Position) {
+  centerOn(pos: Position): void {
     const { x: wx, y: wy } = this.terrainRenderer.tileToWorld(pos);
     this.scene.cameras.main.centerOn(wx, wy);
   }
 
-  emitViewportUpdate() {
+  emitViewportUpdate(): void {
     const cam = this.scene.cameras.main;
     eventBus.emit('viewportUpdated', {
       x: cam.scrollX / this.tileSize,

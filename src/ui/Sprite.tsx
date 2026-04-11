@@ -10,7 +10,7 @@ interface SpriteProps {
 const manifestCache: Record<string, any> = {};
 
 export const Sprite: React.FC<SpriteProps> = ({ type, category, size = 64, className = '' }) => {
-  const [manifest, setManifest] = useState<any>(manifestCache[category]);
+  const [manifest, setManifest] = useState(manifestCache[category]);
 
   useEffect(() => {
     if (manifestCache[category]) {

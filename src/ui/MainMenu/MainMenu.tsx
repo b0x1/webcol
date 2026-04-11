@@ -19,13 +19,13 @@ export const MainMenu: React.FC = () => {
         <h1 className="text-8xl font-black text-white mb-16 drop-shadow-2xl uppercase tracking-tighter italic">
           WEB<span className="text-blue-500">COL</span>
         </h1>
-        <button className={buttonClass} onClick={() => setGameSetupModalOpen(true)}>
+        <button className={buttonClass} onClick={() => { setGameSetupModalOpen(true); }}>
           New Game
         </button>
-        <button className={buttonClass} onClick={() => setSaveModalOpen(true)}>
+        <button className={buttonClass} onClick={() => { setSaveModalOpen(true); }}>
           Load Game
         </button>
-        <button className={buttonClass} onClick={() => setHowToPlayModalOpen(true)}>
+        <button className={buttonClass} onClick={() => { setHowToPlayModalOpen(true); }}>
           How to Play
         </button>
       </div>

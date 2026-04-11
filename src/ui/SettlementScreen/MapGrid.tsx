@@ -49,8 +49,8 @@ export const MapGrid: React.FC<Props> = ({ settlementId }) => {
         return (
           <div
             key={toKey(tile.position)}
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={(e) => handleDrop(e, tile.position)}
+            onDragOver={(e) => { e.preventDefault(); }}
+            onDrop={(e) => { handleDrop(e, tile.position); }}
             className={`aspect-square relative flex items-center justify-center border border-white/5 overflow-hidden group hover:border-blue-500/50 transition-colors ${isSettlementTile ? 'bg-blue-900/40' : 'bg-slate-800'}`}
           >
             <div className="absolute inset-0 flex items-center justify-center opacity-80 pointer-events-none">
@@ -82,7 +82,7 @@ export const MapGrid: React.FC<Props> = ({ settlementId }) => {
                    <div
                     key={unit!.id}
                     draggable
-                    onDragStart={(e) => handleDragStart(e, unit!.id)}
+                    onDragStart={(e) => { handleDragStart(e, unit!.id); }}
                     className="w-10 h-10 bg-blue-600/40 rounded-full border border-white/20 shadow-sm relative overflow-hidden cursor-grab active:cursor-grabbing"
                     title={unit!.type}
                   >

@@ -69,7 +69,7 @@ export class ProductionSystem {
         }
       } else {
         // Tile-based
-        const parts = (assignment as string).split(',');
+        const parts = (assignment).split(',');
         if (parts.length === 2) {
           const tx = parseInt(parts[0]);
           const ty = parseInt(parts[1]);

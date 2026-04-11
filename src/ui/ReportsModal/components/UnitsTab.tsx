@@ -17,7 +17,7 @@ export const UnitsTab: React.FC<Props> = ({ displayedPlayers, onUnitClick }) => 
           <tr
             key={unit.id}
             className="border-b border-slate-700 hover:bg-slate-700/30 transition-colors cursor-pointer"
-            onClick={() => onUnitClick(unit.id, unit.position)}
+            onClick={() => { onUnitClick(unit.id, unit.position); }}
           >
             <td className="p-3">
               <Flag nation={player.nation} size={24} />
@@ -37,7 +37,7 @@ export const UnitsTab: React.FC<Props> = ({ displayedPlayers, onUnitClick }) => 
             <tr
               key={unit.id}
               className="border-b border-slate-700 italic text-slate-400 hover:bg-slate-700/30 transition-colors cursor-pointer"
-              onClick={() => onUnitClick(unit.id, unit.position)}
+              onClick={() => { onUnitClick(unit.id, unit.position); }}
             >
               <td className="p-3">
                 <Flag nation={player.nation} size={24} />

@@ -53,7 +53,7 @@ export class CombatSystem {
       defenderModifier *= 2.0;
     }
 
-    if (defenderSettlement && defenderSettlement.buildings.includes('STOCKADE')) {
+    if (defenderSettlement?.buildings.includes('STOCKADE')) {
       defenderModifier *= 1.5;
     }
 

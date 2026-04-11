@@ -181,7 +181,7 @@ export class GameSystem {
 
       for (let y = quadrantY; y < quadrantY + 10; y++) {
         for (let x = quadrantX; x < quadrantX + 10; x++) {
-          if (map[y] && map[y][x] && map[y][x].terrainType !== TerrainType.OCEAN && map[y][x].terrainType !== TerrainType.COAST) {
+          if (map[y]?.[x] && map[y][x].terrainType !== TerrainType.OCEAN && map[y][x].terrainType !== TerrainType.COAST) {
             aiStartX = x;
             aiStartY = y;
             aiFound = true;

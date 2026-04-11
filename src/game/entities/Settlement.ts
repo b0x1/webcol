@@ -1,4 +1,4 @@
-import type { BuildingType, GoodType, UnitType, JobType, Culture, Organization, Attitude } from './types';
+import type { BuildingType, GoodType, UnitType, Culture, Organization, Attitude } from './types';
 import type { Unit } from './Unit';
 import type { Position } from './Position';
 
@@ -13,7 +13,7 @@ export interface Settlement {
   buildings: BuildingType[];
   inventory: Map<GoodType, number>;
   productionQueue: (UnitType | BuildingType)[];
-  workforce: Map<string, JobType | string>; // JobType or TileID
+  workforce: Map<string, string>; // JobType or TileID (both are strings)
   units: Unit[];
   attitude: Attitude;
   goods: Map<GoodType, number>;

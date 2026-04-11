@@ -56,7 +56,7 @@ export const BuildingSlots: React.FC<Props> = ({ settlementId, ownedBuildings })
         return (
           <div
             key={b.type}
-            onDragOver={(e) => e.preventDefault()}
+            onDragOver={(e) => { e.preventDefault(); }}
             onDrop={(e) => associatedJob && handleDrop(e, associatedJob)}
             className="p-3 bg-slate-800/80 rounded-lg border border-slate-700 shadow-lg min-h-[120px] flex flex-col justify-between hover:border-blue-500/50 transition-colors"
           >
@@ -71,7 +71,7 @@ export const BuildingSlots: React.FC<Props> = ({ settlementId, ownedBuildings })
                   <div
                     key={unit!.id}
                     draggable
-                    onDragStart={(e) => handleDragStart(e, unit!.id)}
+                    onDragStart={(e) => { handleDragStart(e, unit!.id); }}
                     title={`${unit!.type}${unit!.specialty ? ` (Expert ${unit!.specialty})` : ''}`}
                     className="w-10 h-10 bg-blue-600/40 rounded border border-blue-400/30 shadow-sm flex items-center justify-center relative overflow-hidden cursor-grab active:cursor-grabbing"
                   >

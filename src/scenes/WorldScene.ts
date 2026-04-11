@@ -60,7 +60,7 @@ export class WorldScene extends Phaser.Scene {
       mapWidth,
       mapHeight,
       () => this.reachableTiles,
-      (id, pos) => this.handleMove(id, pos)
+      (id, pos) => { this.handleMove(id, pos); }
     );
 
     this.storeUnsubscribe = useGameStore.subscribe((state, prevState) => {

@@ -20,7 +20,7 @@ export const SettlementScreen: React.FC = () => {
       }
     };
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => { window.removeEventListener('keydown', handleKeyDown); };
   }, [isSettlementScreenOpen, setSettlementScreenOpen]);
 
   if (!isSettlementScreenOpen || !selectedSettlementId) return null;
@@ -37,13 +37,13 @@ export const SettlementScreen: React.FC = () => {
   const unitsAtSettlement = [
     ...settlement.units,
     ...settlementOwner.units.filter(u => isSame(u.position, settlement.position))
-  ].reduce((acc, unit) => {
+  ].reduce<typeof settlement.units>((acc, unit) => {
     // Avoid duplicates by ID
     if (!acc.find(u => u.id === unit.id)) {
       acc.push(unit);
     }
     return acc;
-  }, [] as typeof settlement.units);
+  }, []);
 
   const handleClose = () => {
     setSettlementScreenOpen(false);

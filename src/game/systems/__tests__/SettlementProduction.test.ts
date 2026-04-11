@@ -38,7 +38,7 @@ describe('Settlement Production and Building Logic', () => {
     for (let y = 0; y < 10; y++) {
       map[y] = [];
       for (let x = 0; x < 10; x++) {
-        map[y][x] = { id: `${x}-${y}`, position: { x, y }, terrainType: TerrainType.GRASSLAND, movementCost: 1, hasResource: null };
+        map[y][x] = { id: `${x.toString()}-${y.toString()}`, position: { x, y }, terrainType: TerrainType.GRASSLAND, movementCost: 1, hasResource: null };
       }
     }
 

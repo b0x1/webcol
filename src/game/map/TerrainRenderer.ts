@@ -61,7 +61,7 @@ export class TerrainRenderer {
     const height = tiles.length;
     const width = tiles[0]?.length || 0;
 
-    if (!this.tilemap || this.tilemap.width !== width || this.tilemap.height !== height) {
+    if (this.tilemap?.width !== width || this.tilemap.height !== height) {
       this.destroyTilemap();
       this.initializeIndexMaps();
 
