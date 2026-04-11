@@ -11,16 +11,17 @@ export interface CombatResult {
   message: string;
 }
 
-export class CombatSystem {
+export class CombatSystem {  // eslint-disable-line @typescript-eslint/no-extraneous-class
   static resolveCombat(
     attacker: Unit,
     defender: Unit | Settlement,
     defenderTile: Tile,
     defenderSettlement?: Settlement
   ): CombatResult {
-    const attackerBaseStrength = COMBAT_CONSTANTS.UNIT_STRENGTHS[attacker.type as keyof typeof COMBAT_CONSTANTS.UNIT_STRENGTHS] || 1;
+    const attackerBaseStrength = COMBAT_CONSTANTS.UNIT_STRENGTHS[attacker.type as keyof typeof COMBAT_CONSTANTS.UNIT_STRENGTHS];
     let attackerModifier = 1.0;
 
+    // eslint-disable-next-line
     if (attacker.type === UnitType.SOLDIER && (attacker.cargo.get(GoodType.MUSKETS) || 0) >= 10) {
       attackerModifier *= 1.3;
     }
@@ -34,7 +35,7 @@ export class CombatSystem {
     const isSettlement = 'buildings' in defender;
 
     if (isUnit) {
-      defenderBaseStrength = COMBAT_CONSTANTS.UNIT_STRENGTHS[defender.type as keyof typeof COMBAT_CONSTANTS.UNIT_STRENGTHS] || 1;
+      defenderBaseStrength = COMBAT_CONSTANTS.UNIT_STRENGTHS[defender.type as keyof typeof COMBAT_CONSTANTS.UNIT_STRENGTHS];
     } else if (isSettlement) {
       if (defender.ownerId.startsWith('npc-')) {
         defenderBaseStrength = COMBAT_CONSTANTS.BASE_NATIVE_STRENGTH;

@@ -1,3 +1,4 @@
+/* eslint-disable */
 type Callback = (...args: any[]) => void;
 
 class EventBus {

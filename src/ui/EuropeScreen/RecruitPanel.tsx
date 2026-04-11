@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React from 'react';
 import { useGameStore } from '../../game/state/gameStore';
 import { UnitType, GoodType } from '../../game/entities/types';

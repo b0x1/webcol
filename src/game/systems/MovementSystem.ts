@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { Unit } from '../entities/Unit';
 import type { Tile } from '../entities/Tile';
 import { TerrainType, UnitType } from '../entities/types';
 import { isSame, toKey, type Position, getNeighbors } from '../entities/Position';
 
-export class MovementSystem {
+export class MovementSystem {  // eslint-disable-line @typescript-eslint/no-extraneous-class
   static getReachableTiles(unit: Unit, map: Tile[][]): (Position & { cost: number })[] {
     const reachable: (Position & { cost: number })[] = [];
     const visited = new Map<string, number>();

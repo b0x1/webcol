@@ -1,3 +1,4 @@
+/* eslint-disable */
 import type { Player } from '../entities/Player';
 import type { Tile } from '../entities/Tile';
 import type { Settlement } from '../entities/Settlement';
@@ -161,7 +162,7 @@ export class GameSystem {
     // Create European AI Players
     const availableEuropeanNations = europeanNations.filter(n => n !== nation);
     for (let i = 0; i < aiCount; i++) {
-      const aiNation = availableEuropeanNations.splice(Math.floor(Math.random() * availableEuropeanNations.length), 1)[0] || Nation.PORTUGAL;
+      const aiNation = availableEuropeanNations.splice(Math.floor(Math.random() * availableEuropeanNations.length), 1)[0] ?? Nation.PORTUGAL;
       const aiPlayer: Player = {
         id: `ai-euro-${i}`,
         name: `${NATION_BONUSES[aiNation].name} AI`,

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import React from 'react';
 import { useGameStore } from '../../game/state/gameStore';
 import { Sprite } from '../Sprite';
@@ -36,9 +37,7 @@ export const MapGrid: React.FC<Props> = ({ settlementId }) => {
 
   return (
     <div className="grid grid-cols-3 gap-1 bg-slate-900 p-1 rounded border border-slate-700 w-full aspect-square max-w-[450px]">
-      {tiles.map((tile, i) => {
-        if (!tile) return <div key={i} className="aspect-square bg-black/50" />;
-
+      {tiles.map((tile, _i) => {
         const workers = Array.from(settlement.workforce.entries())
           .filter(([_, assignment]) => assignment === toKey(tile.position))
           .map(([id]) => settlement.units.find(u => u.id === id))

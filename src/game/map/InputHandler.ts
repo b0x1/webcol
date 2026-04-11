@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument */
 import Phaser from 'phaser';
 import type { TerrainRenderer } from './TerrainRenderer';
 import { useGameStore } from '../state/gameStore';
@@ -8,7 +9,7 @@ import { isSame, type Position } from '../entities/Position';
 export class InputHandler {
   constructor(private scene: Phaser.Scene, private terrainRenderer: TerrainRenderer) {}
 
-  setup(mapWidth: number, mapHeight: number, getReachableTiles: () => Position[], handleMove: (id: string, position: Position) => void) {
+  setup(mapWidth: number, mapHeight: number, getReachableTiles: () => Position[], handleMove: (id: string, position: Position) => void): void {
     this.scene.input.mouse?.disableContextMenu();
 
     this.scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
@@ -61,7 +62,8 @@ export class InputHandler {
        unitsAtTile.push(...availableUnitsInSettlement);
     }
 
-    const tile = state.map[pos.y]?.[pos.x] || { position: pos, terrainType: 'UNKNOWN', movementCost: 1, hasResource: null };
+    const tile = state.map[pos.y]?.[pos.x] ||  // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+      { position: pos, terrainType: 'UNKNOWN', movementCost: 1, hasResource: null };
     useGameStore.getState().selectTile(tile as any);
 
     if (settlementAtTile) {

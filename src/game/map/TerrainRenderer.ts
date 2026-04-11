@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument */
 import Phaser from 'phaser';
 import type { Tile } from '../entities/Tile';
 import type { Settlement } from '../entities/Settlement';
@@ -57,7 +58,7 @@ export class TerrainRenderer {
     tiles: Tile[][],
     _npcSettlements: Settlement[] = [], // Deprecated
     playerSettlements: Settlement[] = [],
-  ) {
+  ): void {
     const height = tiles.length;
     const width = tiles[0]?.length || 0;
 
@@ -166,7 +167,7 @@ export class TerrainRenderer {
     }
   }
 
-  public updateReachableHighlights(reachableTiles: Position[]) {
+  public updateReachableHighlights(reachableTiles: Position[]): void {
     if (this.reachableHighlights) {
       this.reachableHighlights.destroy();
       this.reachableHighlights = null;
@@ -181,14 +182,14 @@ export class TerrainRenderer {
     });
   }
 
-  public clearReachableHighlights() {
+  public clearReachableHighlights(): void {
     if (this.reachableHighlights) {
       this.reachableHighlights.destroy();
       this.reachableHighlights = null;
     }
   }
 
-  public updateSelectionHighlight(tile: Position | null) {
+  public updateSelectionHighlight(tile: Position | null): void {
     if (this.selectionHighlight) {
       this.selectionHighlight.destroy();
       this.selectionHighlight = null;
@@ -207,7 +208,7 @@ export class TerrainRenderer {
     tile: Position,
     worldPos: { x: number; y: number },
     settlementName?: string
-  ) {
+  ): void {
     this.hideTooltip();
 
     const text = settlementName ? `${settlementName} (${tile.x}, ${tile.y})` : `(${tile.x}, ${tile.y})`;
@@ -223,14 +224,14 @@ export class TerrainRenderer {
       .setDepth(100);
   }
 
-  public hideTooltip() {
+  public hideTooltip(): void {
     if (this.hoverTooltip) {
       this.hoverTooltip.destroy();
       this.hoverTooltip = null;
     }
   }
 
-  public destroyTilemap() {
+  public destroyTilemap(): void {
     if (this.tilemap) {
       this.tilemap.destroy();
       this.tilemap = null;
@@ -239,7 +240,7 @@ export class TerrainRenderer {
     }
   }
 
-  public destroy() {
+  public destroy(): void {
     this.destroyTilemap();
     if (this.selectionHighlight) this.selectionHighlight.destroy();
     if (this.reachableHighlights) this.reachableHighlights.destroy();

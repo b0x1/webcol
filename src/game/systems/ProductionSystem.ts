@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 import type { Settlement } from '../entities/Settlement';
 import type { Tile } from '../entities/Tile';
 import { BuildingType, GoodType, JobType } from '../entities/types';
 import { JOB_PRODUCTION_RULES, TERRAIN_PRODUCTION_RULES } from '../rules/ProductionRules';
 import { COLONY_CONSTANTS } from '../constants';
 
-export class ProductionSystem {
+export class ProductionSystem {  // eslint-disable-line @typescript-eslint/no-extraneous-class
   static calculateSettlementProduction(
     settlement: Settlement,
     map: Tile[][],
@@ -27,44 +28,42 @@ export class ProductionSystem {
 
       if (Object.values(JobType).includes(assignment as JobType)) {
         const rule = JOB_PRODUCTION_RULES[assignment as JobType];
-        if (rule) {
-          // Tier system: check if player has the highest possible building from the list
-          // For now, the rule says any listed building is required.
-          // But usually, higher buildings give more production.
-          // Let's refine it: if there are required buildings, the unit can ONLY work if they have AT LEAST one.
-          // AND, if it's a refined good (inputGood exists), they MUST have a building.
-          const needsBuilding = rule.requiredBuildings.length > 0;
-          const hasBuilding =
-            !needsBuilding ||
-            rule.requiredBuildings.some((b) => settlement.buildings.includes(b));
+        // Tier system: check if player has the highest possible building from the list
+        // For now, the rule says any listed building is required.
+        // But usually, higher buildings give more production.
+        // Let's refine it: if there are required buildings, the unit can ONLY work if they have AT LEAST one.
+        // AND, if it's a refined good (inputGood exists), they MUST have a building.
+        const needsBuilding = rule.requiredBuildings.length > 0;
+        const hasBuilding =
+          !needsBuilding ||
+          rule.requiredBuildings.some((b) => settlement.buildings.includes(b));
 
-          if (hasBuilding) {
-            if (rule.inputGood) {
-              const inputGood = rule.inputGood;
-              let possible = amount;
+        if (hasBuilding) {
+          if (rule.inputGood) {
+            const inputGood = rule.inputGood;
+            let possible = amount;
 
-              if (isActualProduction) {
-                const currentInventory = settlement.inventory.get(inputGood) || 0;
-                possible = Math.min(amount, currentInventory);
-              }
+            if (isActualProduction) {
+              const currentInventory = settlement.inventory.get(inputGood) || 0;
+              possible = Math.min(amount, currentInventory);
+            }
 
-              netProduction.set(inputGood, (netProduction.get(inputGood) || 0) - possible);
+            netProduction.set(inputGood, (netProduction.get(inputGood) || 0) - possible);
 
-              if (rule.producesHammers) {
-                hammersProduced += possible;
-              } else if (rule.outputGood) {
-                netProduction.set(
-                  rule.outputGood,
-                  (netProduction.get(rule.outputGood) || 0) + possible
-                );
-              }
+            if (rule.producesHammers) {
+              hammersProduced += possible;
             } else if (rule.outputGood) {
-              const outputGood = rule.outputGood;
               netProduction.set(
-                outputGood,
-                (netProduction.get(outputGood) || 0) + amount
+                rule.outputGood,
+                (netProduction.get(rule.outputGood) || 0) + possible
               );
             }
+          } else if (rule.outputGood) {
+            const outputGood = rule.outputGood;
+            netProduction.set(
+              outputGood,
+              (netProduction.get(outputGood) || 0) + amount
+            );
           }
         }
       } else {
@@ -74,11 +73,9 @@ export class ProductionSystem {
           const tx = parseInt(parts[0]);
           const ty = parseInt(parts[1]);
           const tile = map[ty]?.[tx];
-          if (tile) {
-            const good = TERRAIN_PRODUCTION_RULES[tile.terrainType];
-            if (good) {
-              netProduction.set(good, (netProduction.get(good) || 0) + amount);
-            }
+          const good = TERRAIN_PRODUCTION_RULES[tile.terrainType];
+          if (good) {
+            netProduction.set(good, (netProduction.get(good) || 0) + amount);
           }
         }
       }

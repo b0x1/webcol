@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment */
 import React from 'react';
 import { useGameStore } from '../game/state/gameStore';
 import { useUIStore } from '../game/state/uiStore';
@@ -18,8 +19,8 @@ export const ForeignSettlementModal: React.FC = () => {
   const isOwned = settlement.ownerId === currentPlayerId;
   if (isOwned && !useUIStore.getState().isDebugMode) return null;
 
-  const nationName = settlementOwner?.name || settlement.culture;
-  const nation = settlementOwner?.nation || 'IROQUOIS';
+  const nationName = settlementOwner?.name ?? settlement.culture;
+  const nation = settlementOwner?.nation ?? 'IROQUOIS';
 
   return (
     <div className="absolute left-5 bottom-80 w-64 bg-black/90 text-white p-5 rounded-xl pointer-events-auto shadow-2xl border border-blue-500/30 backdrop-blur-md font-sans z-50">

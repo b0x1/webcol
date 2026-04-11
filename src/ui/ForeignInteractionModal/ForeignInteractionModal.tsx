@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useGameStore } from '../../game/state/gameStore';
 import { useUIStore } from '../../game/state/uiStore';
-import { GoodType, Attitude, UnitType } from '../../game/entities/types';
+import { Attitude, UnitType } from '../../game/entities/types';
 
 export const ForeignInteractionModal: React.FC = () => {
   const {

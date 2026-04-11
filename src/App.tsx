@@ -21,7 +21,7 @@ import { HowToPlayModal } from './ui/MainMenu/HowToPlayModal';
 import { GameSetupModal } from './ui/MainMenu/GameSetupModal';
 import { EndTurnConfirmationModal } from './ui/EndTurnConfirmationModal';
 
-function App(): JSX.Element {
+function App(): React.ReactElement {
   const gameRef = useRef<Phaser.Game | null>(null);
   const {
     selectUnit,
@@ -57,15 +57,13 @@ function App(): JSX.Element {
     gameRef.current = game;
 
     game.events.once('ready', () => {
-      const worldScene = game.scene.getScene('WorldScene') as WorldScene | undefined;
-      if (worldScene) {
-        worldScene.events.on('unitSelected', (unitId: string | null) => {
-          selectUnit(unitId);
-        });
-        worldScene.events.on('settlementSelected', (settlementId: string | null) => {
-          selectSettlement(settlementId);
-        });
-      }
+      const worldScene = game.scene.getScene('WorldScene') as WorldScene;
+      worldScene.events.on('unitSelected', (unitId: string | null) => {
+        selectUnit(unitId);
+      });
+      worldScene.events.on('settlementSelected', (settlementId: string | null) => {
+        selectSettlement(settlementId);
+      });
     });
 
     return () => {
