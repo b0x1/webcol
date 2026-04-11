@@ -33,7 +33,7 @@ export const ReportsModal: React.FC = () => {
       }
     };
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => { window.removeEventListener('keydown', handleKeyDown); };
   }, [isReportsModalOpen, setReportsModalOpen]);
 
   if (!isReportsModalOpen) return null;
@@ -62,7 +62,7 @@ export const ReportsModal: React.FC = () => {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-3xl font-black uppercase tracking-tight">Reports</h2>
           <button
-            onClick={() => setReportsModalOpen(false)}
+            onClick={() => { setReportsModalOpen(false); }}
             className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded transition-colors cursor-pointer"
           >
             Close (Esc)
@@ -73,7 +73,7 @@ export const ReportsModal: React.FC = () => {
           {(['units', 'settlements', 'resources'] as ReportTab[]).map((tab) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab)}
+              onClick={() => { setActiveTab(tab); }}
               className={`flex-1 py-3 px-4 rounded-md font-bold uppercase text-sm tracking-widest transition-all cursor-pointer ${
                 activeTab === tab
                   ? 'bg-blue-600 text-white shadow-lg'
