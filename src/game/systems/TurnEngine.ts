@@ -8,18 +8,22 @@ import type { GameState } from '../state/gameStore';
 import { BUILDING_COSTS, COLONY_CONSTANTS, UNIT_BUILD_COSTS } from '../constants';
 import { createUnit } from '../entities/Unit';
 import { ProductionSystem } from './ProductionSystem';
-import { NamingSystem } from './NamingSystem';
+import { NamingSystem, type NamingStats } from './NamingSystem';
 
+/* eslint-disable-next-line @typescript-eslint/no-extraneous-class */
 export class TurnEngine {
+  /* eslint-disable-next-line @typescript-eslint/no-empty-function */
+  private constructor() {}
+
   static autoSave(state: GameState): void {
     SaveSystem.save(state, 'autosave');
     eventBus.emit('notification', 'Auto-saved');
   }
 
-  static runProduction(players: Player[], map: Tile[][], namingStats: any): { players: Player[]; namingStats: any } {
+  static runProduction(players: Player[], map: Tile[][], namingStats: NamingStats): { players: Player[]; namingStats: NamingStats } {
     let currentNamingStats = { ...namingStats };
     const updatedPlayers = players.map((player) => {
-      const newPlayerUnits = player.units.map((u) => ({ ...u, cargo: new Map(u.cargo) }));
+      const newPlayerUnits = player.units.map((u) => ({ ...u, cargo: new Map<GoodType, number>(u.cargo) }));
 
       const newSettlements = player.settlements.map((settlement) => {
         const newSettlement: Settlement = {
@@ -54,19 +58,19 @@ export class TurnEngine {
         );
 
         netProduction.forEach((amount, good) => {
-          newSettlement.inventory.set(good, Math.max(0, (newSettlement.inventory.get(good) || 0) + amount));
+          newSettlement.inventory.set(good, Math.max(0, (newSettlement.inventory.get(good) ?? 0) + amount));
         });
 
         newSettlement.hammers += hammersProduced;
 
         if (newSettlement.buildings.includes(BuildingType.PRINTING_PRESS)) {
-          const { name: unitName, updatedStats } = NamingSystem.getNextName(player.nation, 'unit', currentNamingStats);
-          currentNamingStats = updatedStats;
+          const namingResult = NamingSystem.getNextName(player.nation, 'unit', currentNamingStats);
+          currentNamingStats = namingResult.updatedStats;
 
           const newUnit = createUnit(
-            `unit-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+            `unit-${String(Date.now())}-${String(Math.floor(Math.random() * 1000))}`,
             newSettlement.ownerId,
-            unitName,
+            namingResult.name,
             UnitType.COLONIST,
             newSettlement.position.x,
             newSettlement.position.y,
@@ -82,15 +86,15 @@ export class TurnEngine {
             const isBuilding = Object.values(BuildingType).includes(currentItem as BuildingType);
             const isUnit = Object.values(UnitType).includes(currentItem as UnitType);
 
-            const cost = isBuilding
-              ? (BUILDING_COSTS[currentItem as string] || { hammers: 40, tools: 0 })
-              : (UNIT_BUILD_COSTS[currentItem as string] || { hammers: 40, tools: 0, muskets: 0 });
+            const cost: { hammers: number; tools?: number; muskets?: number } = isBuilding
+              ? (BUILDING_COSTS[currentItem as BuildingType] ?? { hammers: 40, tools: 0 })
+              : (UNIT_BUILD_COSTS[currentItem as UnitType] ?? { hammers: 40, tools: 0, muskets: 0 });
 
             // Check tools availability
-            const currentTools = newSettlement.inventory.get(GoodType.TOOLS) || 0;
-            const currentMuskets = newSettlement.inventory.get(GoodType.MUSKETS) || 0;
-            const toolsNeeded = cost.tools || 0;
-            const musketsNeeded = (cost as any).muskets || 0;
+            const currentTools = newSettlement.inventory.get(GoodType.TOOLS) ?? 0;
+            const currentMuskets = newSettlement.inventory.get(GoodType.MUSKETS) ?? 0;
+            const toolsNeeded = cost.tools ?? 0;
+            const musketsNeeded = cost.muskets ?? 0;
 
             if (currentTools >= toolsNeeded && currentMuskets >= musketsNeeded) {
               if (newSettlement.hammers >= cost.hammers) {
@@ -101,15 +105,15 @@ export class TurnEngine {
 
                 if (isBuilding) {
                   newSettlement.buildings.push(currentItem as BuildingType);
-                  eventBus.emit('notification', `${newSettlement.name} completed ${currentItem}!`);
+                  eventBus.emit('notification', `${newSettlement.name} completed ${(currentItem as BuildingType)}!`);
                 } else if (isUnit) {
-                  const { name: unitName, updatedStats } = NamingSystem.getNextName(player.nation, (currentItem as UnitType) === UnitType.SHIP ? 'ship' : 'unit', currentNamingStats);
-                  currentNamingStats = updatedStats;
+                  const namingResult = NamingSystem.getNextName(player.nation, (currentItem as UnitType) === UnitType.SHIP ? 'ship' : 'unit', currentNamingStats);
+                  currentNamingStats = namingResult.updatedStats;
 
                   const newUnit = createUnit(
-                    `unit-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                    `unit-${String(Date.now())}-${String(Math.floor(Math.random() * 1000))}`,
                     newSettlement.ownerId,
-                    unitName,
+                    namingResult.name,
                     currentItem as UnitType,
                     newSettlement.position.x,
                     newSettlement.position.y,
@@ -117,25 +121,25 @@ export class TurnEngine {
                   );
                   newSettlement.units.push(newUnit);
                   newPlayerUnits.push(newUnit);
-                  eventBus.emit('notification', `${newSettlement.name} completed ${currentItem}!`);
+                  eventBus.emit('notification', `${newSettlement.name} completed ${(currentItem as UnitType)}!`);
                 }
               }
             }
           }
 
           // 4. Population Growth & Food Consumption
-          const currentFood = newSettlement.inventory.get(GoodType.FOOD) || 0;
+          const currentFood = newSettlement.inventory.get(GoodType.FOOD) ?? 0;
           const netFood = currentFood;
 
           if (netFood >= COLONY_CONSTANTS.FOOD_GROWTH_THRESHOLD) {
               newSettlement.inventory.set(GoodType.FOOD, netFood - COLONY_CONSTANTS.FOOD_GROWTH_THRESHOLD);
-              const { name: colonistName, updatedStats } = NamingSystem.getNextName(player.nation, 'unit', currentNamingStats);
-              currentNamingStats = updatedStats;
+              const namingResult = NamingSystem.getNextName(player.nation, 'unit', currentNamingStats);
+              currentNamingStats = namingResult.updatedStats;
 
               const newColonist = createUnit(
-                `unit-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                `unit-${String(Date.now())}-${String(Math.floor(Math.random() * 1000))}`,
                 newSettlement.ownerId,
-                colonistName,
+                namingResult.name,
                 UnitType.COLONIST,
                 newSettlement.position.x,
                 newSettlement.position.y,

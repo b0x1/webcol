@@ -2,11 +2,15 @@ import type { Player } from '../entities/Player';
 import type { Unit } from '../entities/Unit';
 import type { Settlement } from '../entities/Settlement';
 import type { Tile } from '../entities/Tile';
-import { BuildingType, JobType, UnitType, TerrainType } from '../entities/types';
+import { BuildingType, UnitType, TerrainType } from '../entities/types';
 import { NATION_BONUSES } from '../constants';
 import { distance, getNeighbors, toKey } from '../entities/Position';
 
+/* eslint-disable-next-line @typescript-eslint/no-extraneous-class */
 export class SettlementSystem {
+  /* eslint-disable-next-line @typescript-eslint/no-empty-function */
+  private constructor() {}
+
   static createSettlement(
     player: Player,
     unit: Unit,
@@ -19,7 +23,7 @@ export class SettlementSystem {
     const randomNeighbor = neighbors[Math.floor(Math.random() * neighbors.length)];
 
     return {
-      id: `settlement-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      id: `settlement-${String(Date.now())}-${String(Math.floor(Math.random() * 1000))}`,
       ownerId: player.id,
       name,
       position: { ...unit.position },

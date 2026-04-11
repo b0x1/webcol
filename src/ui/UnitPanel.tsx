@@ -51,7 +51,7 @@ export const UnitPanel: React.FC = () => {
       }
     };
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => { window.removeEventListener('keydown', handleKeyDown); };
   }, [selectedUnitId, skipUnit, isMainMenuOpen, isAnyModalOpen, players, foundSettlement]);
 
   if (isMainMenuOpen) return null;
@@ -68,7 +68,7 @@ export const UnitPanel: React.FC = () => {
     ? allUnits.filter(u => isSame(u.position, selectedTile.position))
     : [];
 
-  if (selectedTile && settlementAtTile && player && settlementAtTile.ownerId === player.id) {
+  if (selectedTile && settlementAtTile && settlementAtTile.ownerId === player?.id) {
      const availableUnitsInSettlement = settlementAtTile.units.filter(u => !settlementAtTile.workforce.has(u.id));
      availableUnitsInSettlement.forEach(au => {
         if (!unitsAtTile.some(u => u.id === au.id)) {
@@ -77,7 +77,7 @@ export const UnitPanel: React.FC = () => {
      });
   }
 
-  if (!unit && selectedTile && (unitsAtTile.length > 1 || (settlementAtTile && (unitsAtTile.length > 0 || (player && settlementAtTile.ownerId === player.id))))) {
+  if (!unit && selectedTile && (unitsAtTile.length > 1 || (settlementAtTile && (unitsAtTile.length > 0 || (settlementAtTile.ownerId === player?.id))))) {
     return (
       <UnitSelector
         unitsAtTile={unitsAtTile}
@@ -112,10 +112,10 @@ export const UnitPanel: React.FC = () => {
         <div className="h-1.5 flex-1 bg-slate-700 rounded-full overflow-hidden">
           <div
             className="h-full bg-blue-500 transition-all duration-500"
-            style={{ width: `${(unit.movesRemaining / unit.maxMoves) * 100}%` }}
+            style={{ width: `${String((unit.movesRemaining / unit.maxMoves) * 100)}%` }}
           ></div>
         </div>
-        <span className="text-[10px] font-mono font-bold text-slate-400">{unit.movesRemaining}/{unit.maxMoves} MOVES</span>
+        <span className="text-[10px] font-mono font-bold text-slate-400">{String(unit.movesRemaining)}/{String(unit.maxMoves)} MOVES</span>
       </div>
 
       <div className="text-xs bg-slate-900/50 p-3 rounded-lg border border-white/5 mb-4">
@@ -139,7 +139,7 @@ export const UnitPanel: React.FC = () => {
           {(unit.type === UnitType.COLONIST || unit.type === UnitType.VILLAGER) && (
             <div className="relative group/tooltip">
               <button
-                onClick={() => canBuildSettlement && foundSettlement(unit.id)}
+                onClick={() => { if (canBuildSettlement) { foundSettlement(unit.id); } }}
                 disabled={!canBuildSettlement}
                 className={`w-full py-2.5 bg-green-600 text-white font-black uppercase tracking-widest text-xs rounded shadow-lg transition-all transform ${canBuildSettlement ? 'cursor-pointer hover:bg-green-500 active:scale-95' : 'opacity-50 cursor-not-allowed'}`}
               >
@@ -154,13 +154,13 @@ export const UnitPanel: React.FC = () => {
           )}
           <div className="flex gap-2">
             <button
-              onClick={() => skipUnit(unit.id)}
+              onClick={() => { skipUnit(unit.id); }}
               className="flex-1 py-2.5 cursor-pointer bg-red-700 hover:bg-red-600 text-white font-black uppercase tracking-widest text-[10px] rounded shadow-lg transition-all transform active:scale-95"
             >
               SKIP (Space)
             </button>
             <button
-              onClick={() => selectUnit(null)}
+              onClick={() => { selectUnit(null); }}
               className="flex-1 py-2.5 cursor-pointer bg-slate-700 hover:bg-slate-600 text-white font-black uppercase tracking-widest text-[10px] rounded shadow-lg transition-all transform active:scale-95"
             >
               Wait
@@ -170,7 +170,7 @@ export const UnitPanel: React.FC = () => {
       )}
       {isReadOnly && (
         <button
-          onClick={() => selectUnit(null)}
+          onClick={() => { selectUnit(null); }}
           className="w-full py-2.5 cursor-pointer bg-slate-700 hover:bg-slate-600 text-white font-black uppercase tracking-widest text-[10px] rounded shadow-lg transition-all transform active:scale-95"
         >
           Close
