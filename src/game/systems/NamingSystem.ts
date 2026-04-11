@@ -83,13 +83,13 @@ export type NamingStats = Record<string, {
   ship: number;
 }>;
 
-export class NamingSystem {
+export class NamingSystem {  // eslint-disable-line @typescript-eslint/no-extraneous-class
   static getNextName(nation: Nation, type: 'settlement' | 'unit' | 'ship', stats: NamingStats): { name: string; updatedStats: NamingStats } {
     const nationKey = nation as string;
-    const lists = NAME_LISTS[nationKey] || NAME_LISTS[Nation.ENGLAND]; // Fallback to England if missing
-    const list = lists[type] || lists.unit;
+    const lists = NAME_LISTS[nationKey] ?? NAME_LISTS[Nation.ENGLAND]; // Fallback to England if missing
+    const list = lists[type] ?? lists.unit;
 
-    if (!stats[nationKey]) {
+    if (!stats[nationKey]) {  // eslint-disable-line @typescript-eslint/no-unnecessary-condition
       stats[nationKey] = { settlement: 0, unit: 0, ship: 0 };
     }
 

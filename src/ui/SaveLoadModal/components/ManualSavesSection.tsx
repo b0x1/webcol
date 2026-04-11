@@ -38,7 +38,7 @@ export const ManualSavesSection: React.FC<Props> = ({ slots, saves, isMainMenuOp
             <div className="flex gap-2">
               {!isMainMenuOpen && (
                 <button
-                  onClick={() => onSave(slot)}
+                  onClick={() => { onSave(slot); }}
                   className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded transition-colors cursor-pointer text-xs"
                 >
                   {save ? 'Overwrite' : 'Save'}
@@ -47,19 +47,19 @@ export const ManualSavesSection: React.FC<Props> = ({ slots, saves, isMainMenuOp
               {save && (
                 <>
                   <button
-                    onClick={() => onDownload(slot)}
+                    onClick={() => { onDownload(slot); }}
                     className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded transition-colors cursor-pointer text-xs"
                   >
                     Download
                   </button>
                   <button
-                    onClick={() => onLoad(slot)}
+                    onClick={() => { onLoad(slot); }}
                     className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded transition-colors cursor-pointer text-xs"
                   >
                     Load
                   </button>
                   <button
-                    onClick={() => onDelete(slot)}
+                    onClick={() => { onDelete(slot); }}
                     className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded transition-colors cursor-pointer text-xs"
                   >
                     Delete

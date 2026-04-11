@@ -43,7 +43,7 @@ export const InventoryPanel: React.FC<Props> = ({ settlement, map }) => {
           <GoodBox
             key={good}
             good={good}
-            stock={settlement.inventory.get(good) || 0}
+            stock={settlement.inventory.get(good) ?? 0}
             net={netProduction.get(good)}
           />
         ))}
@@ -53,7 +53,7 @@ export const InventoryPanel: React.FC<Props> = ({ settlement, map }) => {
           <GoodBox
             key={good}
             good={good}
-            stock={settlement.inventory.get(good) || 0}
+            stock={settlement.inventory.get(good) ?? 0}
             net={netProduction.get(good)}
           />
         ))}

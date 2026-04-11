@@ -67,6 +67,12 @@ export default tseslint.config(
       // System classes are intentional static-method containers
       '@typescript-eslint/no-extraneous-class': 'warn',
 
+      '@typescript-eslint/restrict-template-expressions': ['error', {
+        allowNumber: true,
+        allowBoolean: false,
+        allowNullish: false,
+      }],
+
       '@typescript-eslint/prefer-for-of': 'error',
 
       // No console.log in src — matches AGENTS.md

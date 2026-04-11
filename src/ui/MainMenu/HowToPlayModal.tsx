@@ -12,7 +12,7 @@ export const HowToPlayModal: React.FC = () => {
         <div className="flex justify-between items-center mb-8 border-b border-slate-700 pb-4">
           <h2 className="text-3xl font-black uppercase tracking-tighter italic text-blue-400">How to Play</h2>
           <button
-            onClick={() => setHowToPlayModalOpen(false)}
+            onClick={() => { setHowToPlayModalOpen(false); }}
             className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded transition-colors cursor-pointer text-sm"
           >
             Close

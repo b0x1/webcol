@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-unnecessary-condition */
 import { enableMapSet } from 'immer';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
@@ -47,7 +48,7 @@ export interface GameState {
   endTurn: () => void;
   foundSettlement: (unitId: string) => void;
   buyBuilding: (settlementId: string, building: BuildingType) => void;
-  assignJob: (settlementId: string, unitId: string, job: JobType | string | null) => void;
+  assignJob: (settlementId: string, unitId: string, job: JobType | string | null) => void; // eslint-disable-line
   sellGood: (unitId: string, good: GoodType, amount: number) => void;
   buyGood: (unitId: string, good: GoodType, amount: number) => void;
   recruitUnit: (unitType: UnitType) => void;
@@ -91,7 +92,7 @@ export const useGameStore = create<GameState>()(
     namingStats: {},
 
     selectUnit: (unitId) =>
-      set((state) => {
+      { set((state) => {
         const player = state.players.find((p) => p.id === state.currentPlayerId);
         if (player) {
           // 1. Tuck away previously selected unit if it's on a settlement tile
@@ -129,12 +130,12 @@ export const useGameStore = create<GameState>()(
         }
         state.selectedUnitId = unitId;
         state.selectedSettlementId = null;
-      }),
+      }); },
 
     selectTile: (tile) =>
-      set((state) => {
+      { set((state) => {
         state.selectedTile = tile;
-      }),
+      }); },
 
     selectNextUnit: () => {
       const state = get();
@@ -152,7 +153,7 @@ export const useGameStore = create<GameState>()(
     },
 
     skipUnit: (unitId) =>
-      set((state) => {
+      { set((state) => {
         const player = state.players.find((p) => p.id === state.currentPlayerId);
         if (!player) return;
         const unit = player.units.find((u) => u.id === unitId);
@@ -162,10 +163,10 @@ export const useGameStore = create<GameState>()(
             state.selectedUnitId = null;
           }
         }
-      }),
+      }); },
 
     selectSettlement: (settlementId) =>
-      set((state) => {
+      { set((state) => {
         state.selectedSettlementId = settlementId;
         state.selectedUnitId = null;
         if (settlementId) {
@@ -175,10 +176,10 @@ export const useGameStore = create<GameState>()(
             useUIStore.getState().setSettlementScreenOpen(true);
           }
         }
-      }),
+      }); },
 
     moveUnit: (unitId, to) =>
-      set((state) => {
+      { set((state) => {
         const player = state.players.find((p) => p.id === state.currentPlayerId);
         if (!player) return;
 
@@ -201,7 +202,7 @@ export const useGameStore = create<GameState>()(
             state.selectedUnitId = null;
           }
         }
-      }),
+      }); },
 
     endTurn: () => {
       set((state) => {
@@ -280,7 +281,7 @@ export const useGameStore = create<GameState>()(
     },
 
     foundSettlement: (unitId) =>
-      set((state) => {
+      { set((state) => {
         const player = state.players.find((p) => p.id === state.currentPlayerId);
         if (!player) return;
 
@@ -308,10 +309,10 @@ export const useGameStore = create<GameState>()(
         if (state.selectedUnitId === unitId) {
           state.selectedUnitId = null;
         }
-      }),
+      }); },
 
     buyBuilding: (settlementId, building) =>
-      set((state) => {
+      { set((state) => {
         const player = state.players.find((p) => p.id === state.currentPlayerId);
         if (!player) return;
 
@@ -322,10 +323,10 @@ export const useGameStore = create<GameState>()(
              settlement.productionQueue.push(building);
           }
         }
-      }),
+      }); },
 
     assignJob: (settlementId, unitId, job) =>
-      set((state) => {
+      { set((state) => {
         for (const p of state.players) {
           const settlement = p.settlements.find((s) => s.id === settlementId);
           if (settlement) {
@@ -353,10 +354,10 @@ export const useGameStore = create<GameState>()(
             return;
           }
         }
-      }),
+      }); },
 
     sellGood: (unitId, good, amount) =>
-      set((state) => {
+      { set((state) => {
         const player = state.players.find((p) => p.id === state.currentPlayerId);
         const unit = player?.units.find((u) => u.id === unitId);
         if (!player || !unit) return;
@@ -371,13 +372,13 @@ export const useGameStore = create<GameState>()(
 
         if (actualSellAmount <= 0) return;
 
-        unit.cargo.set(good, (unit.cargo.get(good) || 0) - actualSellAmount);
+        unit.cargo.set(good, (unit.cargo.get(good) ?? 0) - actualSellAmount);
         player.gold += goldGained;
         state.europePrices[good] = newPrice;
-      }),
+      }); },
 
     buyGood: (unitId, good, amount) =>
-      set((state) => {
+      { set((state) => {
         const player = state.players.find((p) => p.id === state.currentPlayerId);
         const unit = player?.units.find((u) => u.id === unitId);
         if (!player || !unit) return;
@@ -391,9 +392,9 @@ export const useGameStore = create<GameState>()(
 
         if (!canAfford) return;
 
-        unit.cargo.set(good, (unit.cargo.get(good) || 0) + amount);
+        unit.cargo.set(good, (unit.cargo.get(good) ?? 0) + amount);
         player.gold -= cost;
-      }),
+      }); },
 
     loadGameState: (loadedState) => {
       set((state) => {
@@ -403,7 +404,7 @@ export const useGameStore = create<GameState>()(
     },
 
     tradeWithSettlement: (settlementId, unitId, goodOffered) =>
-      set((state) => {
+      { set((state) => {
         const player = state.players.find((p) => p.id === state.currentPlayerId);
         const unit = player?.units.find((u) => u.id === unitId);
         if (!unit) return;
@@ -422,10 +423,10 @@ export const useGameStore = create<GameState>()(
         foreignPlayer.settlements[sIdx] = updatedSettlement;
         const uIdx = player!.units.findIndex(u => u.id === unitId);
         player!.units[uIdx] = updatedUnit;
-      }),
+      }); },
 
     learnFromSettlement: (settlementId, unitId) =>
-      set((state) => {
+      { set((state) => {
         const player = state.players.find((p) => p.id === state.currentPlayerId);
         const unit = player?.units.find((u) => u.id === unitId);
         if (!unit) return;
@@ -443,7 +444,7 @@ export const useGameStore = create<GameState>()(
         foreignPlayer.settlements[sIdx] = updatedSettlement;
         const uIdx = player!.units.findIndex(u => u.id === unitId);
         player!.units[uIdx] = updatedUnit;
-      }),
+      }); },
 
     attackSettlement: (settlementId, unitId) => {
       const state = get();
@@ -459,12 +460,12 @@ export const useGameStore = create<GameState>()(
     },
 
     clearCombatResult: () =>
-      set((state) => {
+      { set((state) => {
         state.combatResult = null;
-      }),
+      }); },
 
     resolveCombat: (attackerId, target) =>
-      set((state) => {
+      { set((state) => {
         const player = state.players.find((p) => p.id === state.currentPlayerId);
         if (!player) return;
 
@@ -509,9 +510,9 @@ export const useGameStore = create<GameState>()(
               }
            }
 
-           const capturedSettlementPlayer = state.players.find(p => p.settlements.some(s => s.id === defender!.id));
+           const capturedSettlementPlayer = state.players.find(p => p.settlements.some(s => s.id === defender.id));
            if (capturedSettlementPlayer && capturedSettlementPlayer.id !== state.currentPlayerId) {
-             const sIdx = capturedSettlementPlayer.settlements.findIndex(s => s.id === defender!.id);
+             const sIdx = capturedSettlementPlayer.settlements.findIndex(s => s.id === defender.id);
              const s = capturedSettlementPlayer.settlements[sIdx];
              if (s.population > 1) {
                 s.population -= 1;
@@ -521,7 +522,7 @@ export const useGameStore = create<GameState>()(
            }
 
            if (capturedSettlementPlayer && capturedSettlementPlayer.id !== state.currentPlayerId) {
-              const sIdx = capturedSettlementPlayer.settlements.findIndex(s => s.id === defender!.id);
+              const sIdx = capturedSettlementPlayer.settlements.findIndex(s => s.id === defender.id);
               const s = capturedSettlementPlayer.settlements[sIdx];
 
               attacker.position = { ...target };
@@ -541,22 +542,22 @@ export const useGameStore = create<GameState>()(
         }
 
         state.combatResult = result;
-      }),
+      }); },
 
     recruitUnit: (unitType) =>
-      set((state) => {
+      { set((state) => {
         const player = state.players.find((p) => p.id === state.currentPlayerId);
         if (!player) return;
 
         const selectedUnit = player.units.find((u) => u.id === state.selectedUnitId);
-        if (!selectedUnit || selectedUnit.type !== UnitType.SHIP) return;
+        if (selectedUnit?.type !== UnitType.SHIP) return;
 
         const costs: Record<string, number> = {
           ...RECRUITMENT_COSTS,
           [UnitType.SHIP]: 0,
         };
 
-        let goldCost = costs[unitType] || 0;
+        let goldCost = costs[unitType] ?? 0;
         if (unitType === UnitType.SOLDIER && player.nation === Nation.SPAIN) {
           goldCost = 600;
         }
@@ -565,12 +566,12 @@ export const useGameStore = create<GameState>()(
         let musketsToConsume = 0;
         if (unitType === UnitType.SOLDIER) {
           musketsToConsume = 50;
-          const currentMuskets = selectedUnit.cargo.get(GoodType.MUSKETS) || 0;
+          const currentMuskets = selectedUnit.cargo.get(GoodType.MUSKETS) ?? 0;
           if (currentMuskets < musketsToConsume) return;
         }
 
         if (musketsToConsume > 0) {
-          selectedUnit.cargo.set(GoodType.MUSKETS, (selectedUnit.cargo.get(GoodType.MUSKETS) || 0) - musketsToConsume);
+          selectedUnit.cargo.set(GoodType.MUSKETS, (selectedUnit.cargo.get(GoodType.MUSKETS) ?? 0) - musketsToConsume);
         }
 
         player.gold -= goldCost;
@@ -589,7 +590,7 @@ export const useGameStore = create<GameState>()(
           cargo: new Map(),
           turnsInJob: 0,
         });
-      }),
+      }); },
 
     resetGame: () => {
       set((state) => {

@@ -22,7 +22,7 @@ export const UnitSelector: React.FC<Props> = ({ unitsAtTile, settlementAtTile, p
       <div className="space-y-2 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
         {settlementAtTile && (
           <button
-            onClick={() => onSelectSettlement(settlementAtTile.id)}
+            onClick={() => { onSelectSettlement(settlementAtTile.id); }}
             className={`w-full p-3 ${isOwnedSettlement ? 'bg-blue-900/40 hover:bg-blue-800/40 border-blue-500/30' : 'bg-slate-900/40 hover:bg-slate-800/40 border-slate-500/30'} border rounded-lg flex items-center gap-3 transition-all text-left group`}
           >
             <div className={`w-10 h-10 ${isOwnedSettlement ? 'bg-blue-900/60 border-blue-400/30 group-hover:border-blue-300/50' : 'bg-slate-900/60 border-slate-400/30 group-hover:border-slate-300/50'} rounded flex items-center justify-center border`}>
@@ -39,7 +39,7 @@ export const UnitSelector: React.FC<Props> = ({ unitsAtTile, settlementAtTile, p
         return (
           <button
             key={u.id}
-            onClick={() => onSelectUnit(u.id)}
+            onClick={() => { onSelectUnit(u.id); }}
             className="w-full p-3 bg-slate-900/50 hover:bg-slate-700/50 border border-white/5 rounded-lg flex items-center gap-3 transition-all text-left group"
           >
             <div className="w-10 h-10 bg-slate-800 rounded flex items-center justify-center border border-white/10 group-hover:border-blue-500/50">

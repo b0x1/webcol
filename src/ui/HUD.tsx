@@ -55,7 +55,7 @@ export const HUD: React.FC = () => {
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => { window.removeEventListener('keydown', handleKeyDown); };
   }, [isMainMenuOpen, isAnyModalOpen, hasShip, setSaveModalOpen, setEuropeScreenOpen, setReportsModalOpen]);
 
   if (isMainMenuOpen) return null;
@@ -65,7 +65,7 @@ export const HUD: React.FC = () => {
       <div className="flex items-center gap-5">
         <button
           className="hover:text-blue-400 transition-colors cursor-pointer font-bold uppercase tracking-tight"
-          onClick={() => setSaveModalOpen(true)}
+          onClick={() => { setSaveModalOpen(true); }}
         >
           <span className="text-yellow-400 font-black">L</span>OAD / SAVE GAME
         </button>
@@ -73,7 +73,7 @@ export const HUD: React.FC = () => {
           className={`transition-colors cursor-pointer font-bold uppercase tracking-tight px-3 py-1 rounded border ${
             isDebugMode ? 'bg-red-600 border-red-400 text-white shadow-[0_0_10px_rgba(220,38,38,0.5)]' : 'bg-slate-800/50 border-slate-600 text-slate-400 hover:text-white'
           }`}
-          onClick={() => toggleDebugMode()}
+          onClick={() => { toggleDebugMode(); }}
         >
           DEBUG: {isDebugMode ? 'ON' : 'OFF'}
         </button>
@@ -82,7 +82,7 @@ export const HUD: React.FC = () => {
       <div className="flex items-center gap-8 font-bold uppercase tracking-widest text-xs">
         <button
           className={`transition-colors py-1 px-3 rounded border border-transparent ${hasShip ? 'cursor-pointer hover:text-blue-400 hover:border-blue-400/30 bg-blue-600/10' : 'cursor-not-allowed opacity-30'}`}
-          onClick={() => setEuropeScreenOpen(true)}
+          onClick={() => { setEuropeScreenOpen(true); }}
           disabled={!hasShip}
         >
           SAIL TO <span className="text-yellow-400 font-black">E</span>UROPE
@@ -93,7 +93,7 @@ export const HUD: React.FC = () => {
       <div className="flex items-center gap-6">
         <button
           className="hover:text-blue-400 transition-colors cursor-pointer font-bold uppercase tracking-tight"
-          onClick={() => setReportsModalOpen(true)}
+          onClick={() => { setReportsModalOpen(true); }}
         >
           <span className="text-yellow-400 font-black">R</span>EPORTS
         </button>

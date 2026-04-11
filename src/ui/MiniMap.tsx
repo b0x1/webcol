@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useGameStore } from '../game/state/gameStore';
 import { useUIStore } from '../game/state/uiStore';

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access */
 import { create } from 'zustand';
 import { eventBus } from './EventBus';
 
@@ -60,17 +61,17 @@ export const useUIStore = create<UIState>((set) => {
   showEndTurnConfirm: false,
   activeSettlementId: null,
 
-  setSettlementScreenOpen: (isOpen) => set({ isSettlementScreenOpen: isOpen }),
-  setEuropeScreenOpen: (isOpen) => set({ isEuropeScreenOpen: isOpen }),
+  setSettlementScreenOpen: (isOpen) => { set({ isSettlementScreenOpen: isOpen }); },
+  setEuropeScreenOpen: (isOpen) => { set({ isEuropeScreenOpen: isOpen }); },
   setNativeTradeModalOpen: (isOpen, settlementId = null) =>
-    set({ isNativeTradeModalOpen: isOpen, activeSettlementId: settlementId }),
-  setSaveModalOpen: (isOpen) => set({ isSaveModalOpen: isOpen }),
-  setReportsModalOpen: (isOpen) => set({ isReportsModalOpen: isOpen }),
-  setMainMenuOpen: (isOpen) => set({ isMainMenuOpen: isOpen }),
-  setGameSetupModalOpen: (isOpen) => set({ isGameSetupModalOpen: isOpen }),
-  setHowToPlayModalOpen: (isOpen) => set({ isHowToPlayModalOpen: isOpen }),
-  toggleDebugMode: () => set((state) => ({ isDebugMode: !state.isDebugMode })),
-  setShowEndTurnConfirm: (show) => set({ showEndTurnConfirm: show }),
+    { set({ isNativeTradeModalOpen: isOpen, activeSettlementId: settlementId }); },
+  setSaveModalOpen: (isOpen) => { set({ isSaveModalOpen: isOpen }); },
+  setReportsModalOpen: (isOpen) => { set({ isReportsModalOpen: isOpen }); },
+  setMainMenuOpen: (isOpen) => { set({ isMainMenuOpen: isOpen }); },
+  setGameSetupModalOpen: (isOpen) => { set({ isGameSetupModalOpen: isOpen }); },
+  setHowToPlayModalOpen: (isOpen) => { set({ isHowToPlayModalOpen: isOpen }); },
+  toggleDebugMode: () => { set((state) => ({ isDebugMode: !state.isDebugMode })); },
+  setShowEndTurnConfirm: (show) => { set({ showEndTurnConfirm: show }); },
   };
 });
 

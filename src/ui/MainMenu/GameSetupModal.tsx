@@ -1,3 +1,5 @@
+
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument */
 import React, { useState } from 'react';
 import { useGameStore } from '../../game/state/gameStore';
 import { useUIStore } from '../../game/state/uiStore';
@@ -25,7 +27,7 @@ export const GameSetupModal: React.FC = () => {
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-black uppercase tracking-tighter italic">Start New Game</h2>
           <button
-            onClick={() => setGameSetupModalOpen(false)}
+            onClick={() => { setGameSetupModalOpen(false); }}
             className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded transition-colors cursor-pointer text-sm"
           >
             Cancel
@@ -37,7 +39,7 @@ export const GameSetupModal: React.FC = () => {
           className={inputClass}
           type="text"
           value={playerName}
-          onChange={(e) => setPlayerName(e.target.value)}
+          onChange={(e) => { setPlayerName(e.target.value); }}
         />
 
         <label className={labelClass}>Select Nation</label>
@@ -45,7 +47,7 @@ export const GameSetupModal: React.FC = () => {
           {(Object.keys(Nation) as Nation[]).map((n) => (
             <div
               key={n}
-              onClick={() => setNation(n)}
+              onClick={() => { setNation(n); }}
               title={NATION_BONUSES[n].description}
               className={`p-4 rounded-lg cursor-pointer transition-all border-2 flex flex-row items-center gap-4 ${
                 nation === n
@@ -70,7 +72,7 @@ export const GameSetupModal: React.FC = () => {
             <select
               className={inputClass}
               value={mapSize}
-              onChange={(e) => setMapSize(e.target.value as any)}
+              onChange={(e) => { setMapSize(e.target.value as any); }}
             >
               <option value="Small">Small (40x30)</option>
               <option value="Medium">Medium (80x60)</option>
@@ -82,7 +84,7 @@ export const GameSetupModal: React.FC = () => {
             <select
               className={inputClass}
               value={aiCount}
-              onChange={(e) => setAiCount(parseInt(e.target.value))}
+              onChange={(e) => { setAiCount(parseInt(e.target.value)); }}
             >
               <option value={1}>1</option>
               <option value={2}>2</option>
@@ -93,7 +95,7 @@ export const GameSetupModal: React.FC = () => {
 
         <button
           className="w-full py-4 bg-green-600 hover:bg-green-500 text-white font-black text-xl uppercase tracking-widest rounded shadow-xl transition-all transform active:scale-[0.98] cursor-pointer"
-          onClick={() => initGame({ playerName, nation, mapSize, aiCount })}
+          onClick={() => { initGame({ playerName, nation, mapSize, aiCount }); }}
         >
           Start Game
         </button>

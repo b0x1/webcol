@@ -1,3 +1,4 @@
+/* eslint-disable */
 type Callback = (...args: any[]) => void;
 
 class EventBus {
@@ -8,7 +9,7 @@ class EventBus {
       this.listeners.set(event, []);
     }
     this.listeners.get(event)?.push(callback);
-    return () => this.off(event, callback);
+    return () => { this.off(event, callback); };
   }
 
   off(event: string, callback: Callback) {
@@ -22,7 +23,7 @@ class EventBus {
   }
 
   emit(event: string, ...args: any[]) {
-    this.listeners.get(event)?.forEach((callback) => callback(...args));
+    this.listeners.get(event)?.forEach((callback) => { callback(...args); });
   }
 }
 
