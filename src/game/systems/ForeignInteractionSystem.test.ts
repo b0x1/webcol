@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { ForeignInteractionSystem } from '../ForeignInteractionSystem';
-import { createSettlement } from '../../entities/Settlement';
-import { createUnit } from '../../entities/Unit';
-import { Attitude, GoodType, UnitType } from '../../entities/types';
+import { ForeignInteractionSystem } from './ForeignInteractionSystem';
+import { createSettlement } from './../entities/Settlement';
+import { createUnit } from './../entities/Unit';
+import { Attitude, GoodType, UnitType } from './../entities/types';
 
 describe('ForeignInteractionSystem', () => {
   const getMockSettlement = () => {

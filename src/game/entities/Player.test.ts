@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { createPlayer } from '../Player';
-import { createUnit } from '../Unit';
-import { createSettlement } from '../Settlement';
-import { UnitType, Nation } from '../types';
+import { createPlayer } from './Player';
+import { createUnit } from './Unit';
+import { createSettlement } from './Settlement';
+import { UnitType, Nation } from './types';
 
 describe('Player', () => {
   it('should initialize with correct values', () => {

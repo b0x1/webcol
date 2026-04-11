@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { TerrainRenderer } from '../TerrainRenderer';
+import { TerrainRenderer } from './TerrainRenderer';
 
 // Mock Phaser completely for this test file
 vi.mock('phaser', () => ({

@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { CombatSystem } from '../CombatSystem';
-import { createUnit } from '../../entities/Unit';
-import { createSettlement } from '../../entities/Settlement';
-import { createTile } from '../../entities/Tile';
-import { UnitType, TerrainType, BuildingType, Attitude, GoodType } from '../../entities/types';
+import { CombatSystem } from './CombatSystem';
+import { createUnit } from './../entities/Unit';
+import { createSettlement } from './../entities/Settlement';
+import { createTile } from './../entities/Tile';
+import { UnitType, TerrainType, BuildingType, Attitude, GoodType } from './../entities/types';
 
 describe('CombatSystem', () => {
   let attacker: any;

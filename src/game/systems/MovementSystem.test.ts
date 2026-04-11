@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { MovementSystem } from '../MovementSystem';
-import { createUnit } from '../../entities/Unit';
-import { createTile } from '../../entities/Tile';
-import { TerrainType, UnitType } from '../../entities/types';
+import { MovementSystem } from './MovementSystem';
+import { createUnit } from './../entities/Unit';
+import { createTile } from './../entities/Tile';
+import { TerrainType, UnitType } from './../entities/types';
 
 describe('MovementSystem', () => {
   const createMap = (width: number, height: number, terrainType: TerrainType = TerrainType.PLAINS) => {

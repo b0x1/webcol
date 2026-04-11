@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { TurnEngine } from '../TurnEngine';
-import { createPlayer } from '../../entities/Player';
-import { createSettlement } from '../../entities/Settlement';
-import { createUnit } from '../../entities/Unit';
-import { GoodType, UnitType, JobType, Nation, BuildingType } from '../../entities/types';
-import { COLONY_CONSTANTS } from '../../constants';
+import { TurnEngine } from './TurnEngine';
+import { createPlayer } from './../entities/Player';
+import { createSettlement } from './../entities/Settlement';
+import { createUnit } from './../entities/Unit';
+import { GoodType, UnitType, JobType, Nation, BuildingType } from './../entities/types';
+import { COLONY_CONSTANTS } from './../constants';
 
 describe('TurnEngine Production', () => {
   it('should promote a colonist to an expert after 20 turns in a job', () => {

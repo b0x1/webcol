@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { useGameStore } from '../gameStore';
-import { createPlayer } from '../../entities/Player';
-import { createUnit } from '../../entities/Unit';
-import { createTile } from '../../entities/Tile';
-import { TerrainType, TurnPhase, UnitType, Nation } from '../../entities/types';
+import { useGameStore } from './gameStore';
+import { createPlayer } from './../entities/Player';
+import { createUnit } from './../entities/Unit';
+import { createTile } from './../entities/Tile';
+import { TerrainType, TurnPhase, UnitType, Nation } from './../entities/types';
 
 describe('gameStore', () => {
   beforeEach(() => {

@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { SaveSystem } from '../SaveSystem';
-import { createPlayer } from '../../entities/Player';
-import { createUnit } from '../../entities/Unit';
-import { createSettlement } from '../../entities/Settlement';
-import { createTile } from '../../entities/Tile';
-import { GoodType, UnitType, TerrainType, Nation, Attitude, JobType, TurnPhase } from '../../entities/types';
+import { SaveSystem } from './SaveSystem';
+import { createPlayer } from './../entities/Player';
+import { createUnit } from './../entities/Unit';
+import { createSettlement } from './../entities/Settlement';
+import { createTile } from './../entities/Tile';
+import { GoodType, UnitType, TerrainType, Nation, Attitude, JobType, TurnPhase } from './../entities/types';
 
 // Mock localStorage
 const localStorageMock = (() => {

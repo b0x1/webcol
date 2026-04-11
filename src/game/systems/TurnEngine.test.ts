@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { TurnEngine } from '../TurnEngine';
-import { AISystem } from '../AISystem';
-import { createPlayer } from '../../entities/Player';
-import { createTile } from '../../entities/Tile';
-import { createSettlement } from '../../entities/Settlement';
-import { createUnit } from '../../entities/Unit';
-import { TerrainType, GoodType, UnitType, JobType, Nation } from '../../entities/types';
+import { TurnEngine } from './TurnEngine';
+import { AISystem } from './AISystem';
+import { createPlayer } from './../entities/Player';
+import { createTile } from './../entities/Tile';
+import { createSettlement } from './../entities/Settlement';
+import { createUnit } from './../entities/Unit';
+import { TerrainType, GoodType, UnitType, JobType, Nation } from './../entities/types';
 
 describe('TurnEngine', () => {
   const createMap = (width: number, height: number): any[][] => {

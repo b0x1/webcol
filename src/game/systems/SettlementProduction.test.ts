@@ -1,10 +1,10 @@
 import { describe, it, expect} from 'vitest';
-import { TurnEngine } from '../TurnEngine';
-import { createPlayer } from '../../entities/Player';
-import { createSettlement } from '../../entities/Settlement';
-import { GoodType, JobType, BuildingType, UnitType, Nation, TerrainType } from '../../entities/types';
-import { createUnit } from '../../entities/Unit';
-import type { Tile } from '../../entities/Tile';
+import { TurnEngine } from './TurnEngine';
+import { createPlayer } from './../entities/Player';
+import { createSettlement } from './../entities/Settlement';
+import { GoodType, JobType, BuildingType, UnitType, Nation, TerrainType } from './../entities/types';
+import { createUnit } from './../entities/Unit';
+import type { Tile } from './../entities/Tile';
 
 describe('Settlement Production and Building Logic', () => {
   it('calculates job-based production correctly', () => {

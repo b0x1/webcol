@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { createSettlement } from '../Settlement';
-import { BuildingType, GoodType, UnitType, Culture, Organization } from '../types';
+import { createSettlement } from './Settlement';
+import { BuildingType, GoodType, UnitType, Culture, Organization } from './types';
 
 describe('Settlement', () => {
   it('should initialize with correct values', () => {

@@ -60,6 +60,9 @@ State refactor plan explicit. Say what clean and why.
 - `readonly` on data not mutate after create.
 - Explicit return type on all public methods and exports.
 - New file with logic → needs `.test.ts`. Scenes and pure components exempt. Utilities inside them not exempt.
+- Test files live next to source file. No `__tests__` folders.
+  - `src/game/systems/CombatSystem.ts` → `src/game/systems/CombatSystem.test.ts`
+  - Integration tests with no single source file → colocate in the most relevant layer folder.
 
 ---
 

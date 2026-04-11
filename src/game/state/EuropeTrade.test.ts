@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { useGameStore } from '../gameStore';
-import { createPlayer } from '../../entities/Player';
-import { createUnit } from '../../entities/Unit';
-import { GoodType, UnitType, Nation } from '../../entities/types';
+import { useGameStore } from './gameStore';
+import { createPlayer } from './../entities/Player';
+import { createUnit } from './../entities/Unit';
+import { GoodType, UnitType, Nation } from './../entities/types';
 
 describe('Europe Trade', () => {
   beforeEach(() => {

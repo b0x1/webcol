@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { createTile } from '../Tile';
-import { TerrainType, ResourceType } from '../types';
+import { createTile } from './Tile';
+import { TerrainType, ResourceType } from './types';
 
 describe('Tile', () => {
   it('should initialize with correct values', () => {
