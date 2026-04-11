@@ -1,6 +1,4 @@
-
-/* eslint-disable @typescript-eslint/no-confusing-void-expression */
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable @typescript-eslint/no-confusing-void-expression, @typescript-eslint/no-non-null-assertion */
 import React from 'react';
 import { BuildingType, JobType } from '../../game/entities/types';
 import { useGameStore } from '../../game/state/gameStore';

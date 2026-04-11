@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 import type { Player } from '../../../game/entities/Player';
 import { GoodType } from '../../../game/entities/types';

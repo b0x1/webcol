@@ -1,5 +1,3 @@
-
-
 import { createNoise2D } from 'simplex-noise';
 import { TerrainType, Attitude, GoodType, Nation } from '../entities/types';
 import type { Settlement } from '../entities/Settlement';

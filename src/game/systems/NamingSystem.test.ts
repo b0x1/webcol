@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { describe, it, expect } from 'vitest';
-import { NamingSystem, type NamingStats } from '../NamingSystem';
-import { Nation } from '../../entities/types';
+import { NamingSystem, type NamingStats } from './NamingSystem';
+import { Nation } from '../entities/types';
 
 describe('NamingSystem', () => {
   it('should get names for all nations', () => {

@@ -1,4 +1,3 @@
-/* eslint-disable */
 /* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unnecessary-condition, @typescript-eslint/prefer-optional-chain */
 import Phaser from 'phaser';
 import { TileMap } from '../game/map/TileMap';
@@ -30,7 +29,7 @@ export class WorldScene extends Phaser.Scene {
     super('WorldScene');
   }
 
-  preload() {
+  preload(): void {
     SpriteLoader.preload(this, 'terrain', 'terrain.avif', 'terrain.json');
     SpriteLoader.preload(this, 'units', 'units.avif', 'units.json');
     SpriteLoader.preload(this, 'resources', 'resources.avif', 'resources.json');
@@ -39,7 +38,7 @@ export class WorldScene extends Phaser.Scene {
 
   private reachableTiles: (Position & { cost: number })[] = [];
 
-  create() {
+  create(): void {
     ['terrain', 'units', 'resources', 'other'].forEach((key) => {
       SpriteLoader.register(this, key);
     });
@@ -166,7 +165,7 @@ export class WorldScene extends Phaser.Scene {
     });
   }
 
-  destroy() {
+  destroy(): void {
     if (this.storeUnsubscribe) this.storeUnsubscribe();
     if (this.gameLoadedUnsubscribe) this.gameLoadedUnsubscribe();
     if (this.cameraJumpUnsubscribe) this.cameraJumpUnsubscribe();
@@ -174,7 +173,7 @@ export class WorldScene extends Phaser.Scene {
     this.unitRenderer.destroy();
   }
 
-  update() {
+  update(): void {
     this.cameraManager.update();
   }
 }

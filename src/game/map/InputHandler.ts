@@ -1,4 +1,3 @@
-/* eslint-disable */
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument */
 import Phaser from 'phaser';
 import type { TerrainRenderer } from './TerrainRenderer';
@@ -63,7 +62,7 @@ export class InputHandler {
        unitsAtTile.push(...availableUnitsInSettlement);
     }
 
-    const tile = state.map[pos.y]?.[pos.x] || { position: pos, terrainType: 'UNKNOWN', movementCost: 1, hasResource: null };
+    const tile = state.map[pos.y]?.[pos.x];
     useGameStore.getState().selectTile(tile as any);
 
     if (settlementAtTile) {

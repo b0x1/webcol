@@ -1,4 +1,3 @@
-/* eslint-disable */
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-unnecessary-condition */
 import { enableMapSet } from 'immer';
 import { create } from 'zustand';
@@ -49,7 +48,7 @@ export interface GameState {
   endTurn: () => void;
   foundSettlement: (unitId: string) => void;
   buyBuilding: (settlementId: string, building: BuildingType) => void;
-  assignJob: (settlementId: string, unitId: string, job: JobType | string | null) => void;
+  assignJob: (settlementId: string, unitId: string, job: JobType | string | null) => void; // eslint-disable-line
   sellGood: (unitId: string, good: GoodType, amount: number) => void;
   buyGood: (unitId: string, good: GoodType, amount: number) => void;
   recruitUnit: (unitType: UnitType) => void;

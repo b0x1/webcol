@@ -1,5 +1,4 @@
-/* eslint-disable */
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-return, @typescript-eslint/unbound-method */
 import type { GameState } from '../state/gameStore';
 
 export interface SaveMeta {
@@ -18,7 +17,7 @@ export interface SaveData {
   map: any[][];
 }
 
-export class SaveSystem {
+export class SaveSystem {  // eslint-disable-line @typescript-eslint/no-extraneous-class
   private static readonly MANIFEST_KEY = 'webcol_saves';
   private static readonly SAVE_PREFIX = 'webcol_save_';
 
@@ -46,7 +45,7 @@ export class SaveSystem {
       const data = JSON.parse(serialized, this.reviver) as SaveData;
       return data;
     } catch (e) {
-      console.error('Failed to load save:', e);
+      console.error('Failed to load save:', e);  // eslint-disable-line no-console
       return null;
     }
   }
@@ -85,7 +84,7 @@ export class SaveSystem {
     const newMeta: SaveMeta = {
       slotName,
       timestamp: Date.now(),
-      playerName: humanPlayer?.name || 'Unknown',
+      playerName: humanPlayer?.name ?? 'Unknown',
       turn: state.turn,
     };
 

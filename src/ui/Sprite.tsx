@@ -1,4 +1,3 @@
-/* eslint-disable */
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument, @typescript-eslint/restrict-plus-operands, @typescript-eslint/no-floating-promises */
 import React, { useState, useEffect } from 'react';
 
@@ -32,7 +31,7 @@ export const Sprite: React.FC<SpriteProps> = ({ type, category, size = 64, class
 
   if (!coords) {
     if (manifest) {
-       console.warn(`Sprite type "${type}" not found in category "${category}"`);
+       console.warn(`Sprite type "${type}" not found in category "${category}"`);  // eslint-disable-line no-console
     }
     return null;
   }

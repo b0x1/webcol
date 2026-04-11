@@ -58,14 +58,12 @@ function App(): React.ReactElement {
 
     game.events.once('ready', () => {
       const worldScene = game.scene.getScene('WorldScene') as WorldScene;
-      if (worldScene) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-        worldScene.events.on('unitSelected', (unitId: string | null) => {
-          selectUnit(unitId);
-        });
-        worldScene.events.on('settlementSelected', (settlementId: string | null) => {
-          selectSettlement(settlementId);
-        });
-      }
+      worldScene.events.on('unitSelected', (unitId: string | null) => {
+        selectUnit(unitId);
+      });
+      worldScene.events.on('settlementSelected', (settlementId: string | null) => {
+        selectSettlement(settlementId);
+      });
     });
 
     return () => {

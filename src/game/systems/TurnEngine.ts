@@ -1,5 +1,4 @@
-/* eslint-disable */
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument, @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/prefer-nullish-coalescing, @typescript-eslint/no-unnecessary-condition */
 import type { Player } from '../entities/Player';
 import type { Tile } from '../entities/Tile';
 import type { Settlement } from '../entities/Settlement';
@@ -12,7 +11,7 @@ import { createUnit } from '../entities/Unit';
 import { ProductionSystem } from './ProductionSystem';
 import { NamingSystem } from './NamingSystem';
 
-export class TurnEngine {
+export class TurnEngine {  // eslint-disable-line @typescript-eslint/no-extraneous-class
   static autoSave(state: GameState): void {
     SaveSystem.save(state, 'autosave');
     eventBus.emit('notification', 'Auto-saved');
