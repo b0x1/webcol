@@ -1,15 +1,14 @@
 import React, { useEffect } from 'react';
-import { useGameStore } from '../../game/state/gameStore';
+import { useGameStore, selectCurrentPlayer, selectSelectedUnit } from '../../game/state/gameStore';
 import { useUIStore } from '../../game/state/uiStore';
 import { MarketPanel } from './MarketPanel';
 import { RecruitPanel } from './RecruitPanel';
 import { UnitType } from '../../game/entities/types';
 
 export const EuropeScreen: React.FC = () => {
-  const { players, currentPlayerId, selectedUnitId } = useGameStore();
   const { isEuropeScreenOpen, setEuropeScreenOpen } = useUIStore();
-  const player = players.find((p) => p.id === currentPlayerId);
-  const selectedUnit = player?.units.find((u) => u.id === selectedUnitId);
+  const player = useGameStore(selectCurrentPlayer);
+  const selectedUnit = useGameStore(selectSelectedUnit);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

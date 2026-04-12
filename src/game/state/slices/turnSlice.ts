@@ -6,6 +6,7 @@ import { eventBus } from '../EventBus';
 import { TurnEngine } from '../../systems/TurnEngine';
 import { AISystem } from '../../systems/AISystem';
 import { random, generateId } from '../utils';
+import { selectCurrentPlayer } from '../selectors';
 
 export interface TurnSlice {
   turn: number;
@@ -127,7 +128,7 @@ export const createTurnSlice: StateCreator<
     } else if (state.phase === TurnPhase.END_TURN) {
       get().endTurn();
     } else {  // MOVEMENT
-      const currentPlayer = state.players.find((p) => p.id === state.currentPlayerId);
+      const currentPlayer = selectCurrentPlayer(state);
       if (currentPlayer && !currentPlayer.isHuman) {
         get().endTurn();
       }

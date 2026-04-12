@@ -97,7 +97,7 @@ export class TurnEngine {
             const isBuilding = Object.values(BuildingType).includes(currentItem as BuildingType);
             const isUnit = Object.values(UnitType).includes(currentItem as UnitType);
 
-            const cost: { hammers: number; tools?: number | undefined; muskets?: number | undefined } = isBuilding
+            const cost: { hammers: number; tools?: number; muskets?: number } = isBuilding
               ? (BUILDING_COSTS[currentItem as BuildingType] ?? { hammers: 40, tools: 0 })
               : (UNIT_BUILD_COSTS[currentItem as UnitType] ?? { hammers: 40, tools: 0, muskets: 0 });
 

@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { useGameStore } from '../../game/state/gameStore';
+import { useGameStore, selectSelectedUnit } from '../../game/state/gameStore';
 import { GoodType } from '../../game/entities/types';
 
 export const MarketPanel: React.FC = () => {
-  const { europePrices, players, currentPlayerId, selectedUnitId, sellGood, buyGood } =
+  const { europePrices, sellGood, buyGood } =
     useGameStore();
-  const player = players.find((p) => p.id === currentPlayerId);
-  const selectedUnit = player?.units.find((u) => u.id === selectedUnitId);
+  const selectedUnit = useGameStore(selectSelectedUnit);
 
   const [buyAmounts, setBuyAmounts] = useState<Record<string, number>>({});
 

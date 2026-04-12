@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import Phaser from 'phaser';
-import { useGameStore } from './game/state/gameStore';
+import { useGameStore, selectAvailableUnits } from './game/state/gameStore';
 import { useUIStore } from './game/state/uiStore';
 import { eventBus } from './game/state/EventBus';
 import type { Tile } from './game/entities/Tile';
@@ -27,14 +27,13 @@ import { LazyRenderController } from './game/rendering/LazyRenderController';
 function App(): React.ReactElement {
   const gameRef = useRef<Phaser.Game | null>(null);
   const lazyRenderControllerRef = useRef<LazyRenderController | null>(null);
-  const { selectUnit, selectSettlement, endTurn, players, currentPlayerId } = useGameStore();
+  const { selectUnit, selectSettlement, endTurn } = useGameStore();
   const {
     showEndTurnConfirm,
     setShowEndTurnConfirm
   } = useUIStore();
 
-  const currentPlayer = players.find(p => p.id === currentPlayerId);
-  const availableUnits = currentPlayer?.units.filter(u => u.movesRemaining > 0 && !u.isSkipping) ?? [];
+  const availableUnits = useGameStore(selectAvailableUnits);
 
   useEffect(() => {
     if (gameRef.current) return;

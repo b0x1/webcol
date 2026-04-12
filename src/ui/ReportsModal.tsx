@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useGameStore } from '../game/state/gameStore';
+import { useGameStore, selectCurrentPlayer } from '../game/state/gameStore';
 import { useUIStore } from '../game/state/uiStore';
 import { eventBus } from '../game/state/EventBus';
 import type { Position } from '../game/entities/Position';
@@ -12,10 +12,8 @@ type ReportTab = 'units' | 'settlements' | 'resources';
 export const ReportsModal: React.FC = () => {
   const {
     players,
-    currentPlayerId,
     selectUnit,
     selectSettlement,
-    map,
   } = useGameStore();
   const {
     isReportsModalOpen,
@@ -36,9 +34,10 @@ export const ReportsModal: React.FC = () => {
     return () => { window.removeEventListener('keydown', handleKeyDown); };
   }, [isReportsModalOpen, setReportsModalOpen]);
 
+  const currentPlayer = useGameStore(selectCurrentPlayer);
+
   if (!isReportsModalOpen) return null;
 
-  const currentPlayer = players.find((p) => p.id === currentPlayerId);
   if (!currentPlayer) return null;
 
   const displayedPlayers = isDebugMode ? players : [currentPlayer];
@@ -102,7 +101,6 @@ export const ReportsModal: React.FC = () => {
             <ResourcesTab
               displayedPlayers={displayedPlayers}
               onSettlementClick={handleSettlementClick}
-              map={map}
             />
           )}
         </div>

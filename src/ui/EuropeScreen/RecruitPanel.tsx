@@ -1,11 +1,11 @@
 import React from 'react';
-import { useGameStore } from '../../game/state/gameStore';
+import { useGameStore, selectCurrentPlayer, selectSelectedUnit } from '../../game/state/gameStore';
 import { UnitType, GoodType } from '../../game/entities/types';
 
 export const RecruitPanel: React.FC = () => {
-  const { players, currentPlayerId, selectedUnitId, recruitUnit } = useGameStore();
-  const player = players.find((p) => p.id === currentPlayerId);
-  const selectedUnit = player?.units.find((u) => u.id === selectedUnitId);
+  const { recruitUnit } = useGameStore();
+  const player = useGameStore(selectCurrentPlayer);
+  const selectedUnit = useGameStore(selectSelectedUnit);
 
   const unitsToRecruit = [
     { type: UnitType.COLONIST, cost: 500, requirement: 'None' },

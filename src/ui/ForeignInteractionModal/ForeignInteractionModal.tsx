@@ -1,13 +1,10 @@
 import React, { useEffect } from 'react';
-import { useGameStore } from '../../game/state/gameStore';
+import { useGameStore, selectSettlementById, selectSelectedUnit } from '../../game/state/gameStore';
 import { useUIStore } from '../../game/state/uiStore';
 import { Attitude, UnitType } from '../../game/entities/types';
 
 export const ForeignInteractionModal: React.FC = () => {
   const {
-    players,
-    currentPlayerId,
-    selectedUnitId,
     tradeWithSettlement,
     learnFromSettlement,
   } = useGameStore();
@@ -29,11 +26,10 @@ export const ForeignInteractionModal: React.FC = () => {
     return () => { window.removeEventListener('keydown', handleKeyDown); };
   }, [isNativeTradeModalOpen, setNativeTradeModalOpen]);
 
-  if (!isNativeTradeModalOpen || !activeSettlementId) return null;
+  const settlement = useGameStore(state => selectSettlementById(state, activeSettlementId));
+  const unit = useGameStore(selectSelectedUnit);
 
-  const settlement = players.flatMap(p => p.settlements).find((s) => s.id === activeSettlementId);
-  const player = players.find((p) => p.id === currentPlayerId);
-  const unit = player?.units.find((u) => u.id === selectedUnitId);
+  if (!isNativeTradeModalOpen || !activeSettlementId) return null;
 
   if (!settlement || !unit) return null;
 

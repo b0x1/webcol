@@ -1,12 +1,10 @@
 import React, { useEffect } from 'react';
-import { useGameStore } from '../game/state/gameStore';
+import { useGameStore, selectCurrentPlayer } from '../game/state/gameStore';
 import { useUIStore } from '../game/state/uiStore';
 import { UnitType } from '../game/entities/types';
 
 export const HUD: React.FC = () => {
   const {
-    players,
-    currentPlayerId,
     turn,
   } = useGameStore();
 
@@ -35,7 +33,7 @@ export const HUD: React.FC = () => {
     isHowToPlayModalOpen ||
     isGameSetupModalOpen;
 
-  const currentPlayer = players.find((p) => p.id === currentPlayerId);
+  const currentPlayer = useGameStore(selectCurrentPlayer);
   const hasShip = currentPlayer?.units.some((u) => u.type === UnitType.SHIP);
 
   useEffect(() => {

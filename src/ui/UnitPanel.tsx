@@ -1,17 +1,16 @@
 
 import React, { useEffect } from 'react';
-import { useGameStore } from '../game/state/gameStore';
+import { useGameStore, selectCurrentPlayer, selectSelectedUnit, selectSettlementAtPosition, selectUnitsAtPosition } from '../game/state/gameStore';
+import { useShallow } from 'zustand/react/shallow';
 import { useUIStore } from '../game/state/uiStore';
 import { UnitType } from '../game/entities/types';
 import { UnitSelector } from './UnitPanel/components/UnitSelector';
-import { isSame, distance } from '../game/entities/Position';
+import { distance } from '../game/entities/Position';
 
 export const UnitPanel: React.FC = () => {
   const {
-    currentPlayerId,
     selectedUnitId,
     selectedTile,
-    players,
     skipUnit,
     selectUnit,
   } = useGameStore();
@@ -36,6 +35,13 @@ export const UnitPanel: React.FC = () => {
     isHowToPlayModalOpen ||
     isGameSetupModalOpen;
 
+  const unit = useGameStore(selectSelectedUnit);
+  const player = useGameStore(selectCurrentPlayer);
+  const settlementAtTile = useGameStore(state => selectSettlementAtPosition(state, selectedTile?.position ?? null));
+  const unitsAtTile = useGameStore(useShallow(state => selectedTile ? selectUnitsAtPosition(state, selectedTile.position) : []));
+  const unitOwner = useGameStore(state => state.players.find(p => p.id === unit?.ownerId));
+  const allSettlements = useGameStore(useShallow(state => state.players.flatMap(p => p.settlements)));
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isMainMenuOpen || isAnyModalOpen) return;
@@ -43,31 +49,18 @@ export const UnitPanel: React.FC = () => {
       if ((e.code === 'Space') && selectedUnitId) {
         e.preventDefault();
         skipUnit(selectedUnitId);
-      } else if (e.key.toLowerCase() === 'b' && selectedUnitId) {
-        const unit = players.flatMap((p) => p.units).find((u) => u.id === selectedUnitId);
-        if (unit && (unit.type === UnitType.COLONIST || unit.type === UnitType.VILLAGER)) {
+      } else if (e.key.toLowerCase() === 'b' && unit) {
+        if (unit.type === UnitType.COLONIST || unit.type === UnitType.VILLAGER) {
           e.preventDefault();
-          foundSettlement(selectedUnitId);
+          foundSettlement(unit.id);
         }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => { window.removeEventListener('keydown', handleKeyDown); };
-  }, [selectedUnitId, skipUnit, isMainMenuOpen, isAnyModalOpen, players, foundSettlement]);
+  }, [selectedUnitId, unit, skipUnit, isMainMenuOpen, isAnyModalOpen, foundSettlement]);
 
   if (isMainMenuOpen) return null;
-
-  const allUnits = players.flatMap((p) => p.units);
-  const unit = allUnits.find((u) => u.id === selectedUnitId);
-
-  const player = players.find(p => p.id === currentPlayerId);
-  const settlementAtTile = selectedTile
-    ? players.flatMap(p => p.settlements).find(s => isSame(s.position, selectedTile.position))
-    : null;
-
-  const unitsAtTile = selectedTile
-    ? allUnits.filter(u => isSame(u.position, selectedTile.position))
-    : [];
 
   if (selectedTile && settlementAtTile && settlementAtTile.ownerId === player?.id) {
      const availableUnitsInSettlement = settlementAtTile.units.filter(u => !settlementAtTile.workforce.has(u.id));
@@ -78,7 +71,7 @@ export const UnitPanel: React.FC = () => {
      });
   }
 
-  if (!unit && selectedTile && (unitsAtTile.length > 1 || (settlementAtTile && (unitsAtTile.length > 0 || (settlementAtTile.ownerId === player?.id))))) {
+  if (!unit && selectedTile && (unitsAtTile.length > 1 || (settlementAtTile && (unitsAtTile.length > 0 || settlementAtTile.ownerId === player?.id)))) {
     return (
       <UnitSelector
         unitsAtTile={unitsAtTile}
@@ -91,10 +84,7 @@ export const UnitPanel: React.FC = () => {
 
   if (!unit) return null;
 
-  const isReadOnly = unit.ownerId !== currentPlayerId;
-  const unitOwner = players.find(p => p.id === unit.ownerId);
-
-  const allSettlements = players.flatMap(p => p.settlements);
+  const isReadOnly = unit.ownerId !== player?.id;
 
   const isAdjacentToSettlement = allSettlements.some(s =>
     distance(s.position, unit.position) <= 1

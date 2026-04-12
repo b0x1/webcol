@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { useGameStore } from '../game/state/gameStore';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useGameStore, selectAvailableUnits } from '../game/state/gameStore';
 import { useUIStore } from '../game/state/uiStore';
 import { eventBus } from '../game/state/EventBus';
 import { MiniMapCanvas } from './MiniMap/components/MiniMapCanvas';
@@ -7,8 +7,6 @@ import { MiniMapCanvas } from './MiniMap/components/MiniMapCanvas';
 export const MiniMap: React.FC = () => {
   const {
     map,
-    players,
-    currentPlayerId,
     selectNextUnit,
     endTurn,
   } = useGameStore();
@@ -37,8 +35,7 @@ export const MiniMap: React.FC = () => {
 
   const [viewport, setViewport] = useState({ x: 0, y: 0, width: 0, height: 0 });
 
-  const currentPlayer = useMemo(() => players.find((p) => p.id === currentPlayerId), [players, currentPlayerId]);
-  const availableUnits = useMemo(() => currentPlayer?.units.filter((u) => u.movesRemaining > 0 && !u.isSkipping) ?? [], [currentPlayer]);
+  const availableUnits = useGameStore(selectAvailableUnits);
   const hasAvailableUnits = availableUnits.length > 0;
 
   const handleEndTurn = useCallback(() => {

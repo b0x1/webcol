@@ -34,6 +34,8 @@ if (typeof window !== 'undefined') {
   (window as any).useGameStore = useGameStore;
 }
 
+export * from './selectors';
+
 export const getReachableTilesForUnit = (
   unit: Unit,
   map: Tile[][]

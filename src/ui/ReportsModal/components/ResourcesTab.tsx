@@ -4,16 +4,14 @@ import { GoodType } from '../../../game/entities/types';
 import { Flag } from '../../Flag';
 import { ReportTable } from './ReportTable';
 import type { Position } from '../../../game/entities/Position';
-import type { Tile } from '../../../game/entities/Tile';
-import { getSettlementProduction } from '../../../game/state/gameStore';
+import { useGameStore, selectSettlementProduction } from '../../../game/state/gameStore';
 
 interface Props {
   displayedPlayers: Player[];
   onSettlementClick: (settlementId: string, pos: Position) => void;
-  map: Tile[][];
 }
 
-export const ResourcesTab: React.FC<Props> = ({ displayedPlayers, onSettlementClick, map }) => {
+export const ResourcesTab: React.FC<Props> = ({ displayedPlayers, onSettlementClick }) => {
   const goods = Object.values(GoodType);
   const headers = [
     { content: 'Flag', className: 'sticky left-0 bg-slate-800 z-10' },
@@ -28,7 +26,8 @@ export const ResourcesTab: React.FC<Props> = ({ displayedPlayers, onSettlementCl
     <ReportTable headers={headers}>
       {displayedPlayers.map((player) =>
         player.settlements.map((settlement) => {
-          const { netProduction } = getSettlementProduction(settlement, map);
+          const production = selectSettlementProduction(useGameStore.getState(), settlement.id);
+          const netProduction = production?.netProduction;
           return (
             <tr
               key={settlement.id}
@@ -43,7 +42,7 @@ export const ResourcesTab: React.FC<Props> = ({ displayedPlayers, onSettlementCl
               </td>
               {goods.map((good) => {
                 const stock = settlement.inventory.get(good) ?? 0;
-                const net = netProduction.get(good) ?? 0;
+                const net = netProduction?.get(good) ?? 0;
                 return (
                   <td key={good} className="p-3 font-mono">
                     <div className="flex items-center gap-2">
