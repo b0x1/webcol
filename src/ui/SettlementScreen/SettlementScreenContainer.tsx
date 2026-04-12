@@ -16,7 +16,7 @@ import { SettlementScreenView } from './SettlementScreenView';
 const EMPTY_UNITS: Unit[] = [];
 
 export const SettlementScreenContainer: React.FC = () => {
-  const { isSettlementScreenOpen, setSettlementScreenOpen } = useUIStore();
+  const { isSettlementScreenOpen, setSettlementScreenOpen, isDebugMode } = useUIStore();
   const selectedSettlementId = useStoreWithEqualityFn(useGameStore, (state) => state.selectedSettlementId);
   const selectSettlement = useStoreWithEqualityFn(useGameStore, (state) => state.selectSettlement);
   const player = useStoreWithEqualityFn(useGameStore, selectCurrentPlayer);
@@ -40,6 +40,15 @@ export const SettlementScreenContainer: React.FC = () => {
       settlement && map.length > 0 ? getSettlementProduction(settlement, map) : undefined,
     [settlement, map],
   );
+
+  useEffect(() => {
+    if (selectedSettlementId && !isSettlementScreenOpen) {
+      const isOwned = settlement?.ownerId === player?.id;
+      if (isOwned || isDebugMode) {
+        setSettlementScreenOpen(true);
+      }
+    }
+  }, [selectedSettlementId, isSettlementScreenOpen, settlement?.ownerId, player?.id, isDebugMode, setSettlementScreenOpen]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
