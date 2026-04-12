@@ -1,12 +1,28 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { useGameStore, selectCurrentPlayer, selectSettlementById, selectSettlementOwner, selectSettlementProduction, selectUnitsAtSettlement } from '../../game/state/gameStore';
 import { useUIStore } from '../../game/state/uiStore';
 import { useShallow } from 'zustand/react/shallow';
 import { SettlementScreenView } from './SettlementScreenView';
 
 export const SettlementScreenContainer: React.FC = () => {
-  const { selectedSettlementId, players, currentPlayerId, map, selectSettlement } = useGameStore();
   const { isSettlementScreenOpen, setSettlementScreenOpen } = useUIStore();
+  const {
+    selectedSettlementId,
+    selectSettlement,
+    player,
+    settlement,
+    settlementOwner,
+    production,
+    unitsAtSettlement
+  } = useGameStore(useShallow(state => ({
+    selectedSettlementId: state.selectedSettlementId,
+    selectSettlement: state.selectSettlement,
+    player: selectCurrentPlayer(state),
+    settlement: selectSettlementById(state, state.selectedSettlementId),
+    settlementOwner: selectSettlementOwner(state, state.selectedSettlementId),
+    production: state.selectedSettlementId ? selectSettlementProduction(state, state.selectedSettlementId) : undefined,
+    unitsAtSettlement: state.selectedSettlementId ? selectUnitsAtSettlement(state, state.selectedSettlementId) : []
+  })));
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -24,36 +40,20 @@ export const SettlementScreenContainer: React.FC = () => {
     selectSettlement(null);
   };
 
-  const data = useMemo(() => {
-    if (!isSettlementScreenOpen || !selectedSettlementId) return null;
+  if (!isSettlementScreenOpen || !selectedSettlementId || !player || !settlement || !settlementOwner || !production) return null;
 
-    const player = useGameStore(selectCurrentPlayer);
-    const settlement = useGameStore(state => selectSettlementById(state, selectedSettlementId));
-    const settlementOwner = useGameStore(state => selectSettlementOwner(state, selectedSettlementId));
-    const production = useGameStore(useShallow(state => selectedSettlementId ? selectSettlementProduction(state, selectedSettlementId) : undefined));
-    const unitsAtSettlement = useGameStore(useShallow(state => selectedSettlementId ? selectUnitsAtSettlement(state, selectedSettlementId) : []));
-  
-    if (!player || !settlement || !settlementOwner || !production || !unitsAtSettlement) return null;
-
-    const isReadOnly = settlement.ownerId !== player.id;
-    const { hammersProduced, netProduction } = production;
-  
-    return {
-      settlement,
-      player,
-      settlementOwner,
-      isReadOnly,
-      hammersProduced,
-      unitsAtSettlement,
-      netProduction
-    };
-  }, [isSettlementScreenOpen, selectedSettlementId, players, currentPlayerId, map]);
-
-  if (!data) return null;
+  const isReadOnly = settlement.ownerId !== player.id;
+  const { hammersProduced, netProduction } = production;
 
   return (
     <SettlementScreenView
-      {...data}
+      player={player}
+      settlement={settlement}
+      settlementOwner={settlementOwner}
+      isReadOnly={isReadOnly}
+      hammersProduced={hammersProduced}
+      unitsAtSettlement={unitsAtSettlement}
+      netProduction={netProduction}
       onClose={handleClose}
     />
   );

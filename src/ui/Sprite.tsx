@@ -4,8 +4,8 @@ import React, { useState, useEffect } from 'react';
 interface SpriteProps {
   type: string;
   category: 'terrain' | 'resources' | 'other' | 'flags' | 'units';
-  size?: number | undefined;
-  className?: string | undefined;
+  size?: number;
+  className?: string;
 }
 
 const manifestCache: Record<string, any> = {};
