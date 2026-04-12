@@ -2,7 +2,7 @@ import type { StateCreator } from 'zustand';
 import type { GameState } from '../types';
 import { UnitType, GoodType, Nation } from '../../entities/types';
 import type { Position } from '../../entities/Position';
-import { isSame } from '../../entities/Position';
+import { TraversalUtils } from '../../utils/TraversalUtils';
 import { UnitSystem } from '../../systems/UnitSystem';
 import { MovementSystem } from '../../systems/MovementSystem';
 import { EconomySystem } from '../../systems/EconomySystem';
@@ -56,7 +56,7 @@ export const createUnitSlice: StateCreator<
         unit.movesRemaining -= MovementSystem.getMovementCost(unit, targetTile);
 
         // Check if entering own settlement
-        const settlement = player.settlements.find(s => isSame(s.position, to));
+        const settlement = TraversalUtils.findSettlementAt([player], to);
         if (settlement) {
           if (!settlement.units.some(u => u.id === unit.id)) {
             settlement.units.push({ ...unit });

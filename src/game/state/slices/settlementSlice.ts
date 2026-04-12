@@ -4,6 +4,7 @@ import type { GameState } from '../types';
 import { BuildingType } from '../../entities/types';
 import { SettlementSystem } from '../../systems/SettlementSystem';
 import { NamingSystem } from '../../systems/NamingSystem';
+import { TraversalUtils } from '../../utils/TraversalUtils';
 import { random, generateId } from '../utils';
 import { selectCurrentPlayer, selectSettlementById, selectSettlementOwner } from '../selectors';
 
@@ -28,7 +29,7 @@ export const createSettlementSlice: StateCreator<
       if (unitIndex === -1) return;
       const unit = player.units[unitIndex];
 
-      const allSettlements = state.players.flatMap((p) => p.settlements);
+      const allSettlements = TraversalUtils.getAllSettlements(state.players);
 
       if (!SettlementSystem.canFoundSettlement(player, unit, state.map, allSettlements)) return;
 

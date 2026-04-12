@@ -5,59 +5,37 @@ import type { Settlement } from '../entities/Settlement';
 import type { Unit } from '../entities/Unit';
 import type { Position } from '../entities/Position';
 import { isSame } from '../entities/Position';
+import { TraversalUtils } from '../utils/TraversalUtils';
 
 /**
  * Returns the currently active player based on currentPlayerId.
  */
 export const selectCurrentPlayer = (state: GameState): Player | undefined =>
-  state.players.find((p) => p.id === state.currentPlayerId);
+  TraversalUtils.findPlayerById(state.players, state.currentPlayerId);
 
 /**
  * Finds a settlement by its ID across all players.
  */
-export const selectSettlementById = (state: GameState, id: string | null): Settlement | undefined => {
-  if (!id) return undefined;
-  for (const player of state.players) {
-    const settlement = player.settlements.find((s) => s.id === id);
-    if (settlement) return settlement;
-  }
-  return undefined;
-};
+export const selectSettlementById = (state: GameState, id: string | null): Settlement | undefined =>
+  TraversalUtils.findSettlementById(state.players, id);
 
 /**
  * Finds the player who owns the settlement with the given ID.
  */
-export const selectSettlementOwner = (state: GameState, settlementId: string | null): Player | undefined => {
-  if (!settlementId) return undefined;
-  return state.players.find((p) => p.settlements.some((s) => s.id === settlementId));
-};
+export const selectSettlementOwner = (state: GameState, settlementId: string | null): Player | undefined =>
+  TraversalUtils.findSettlementOwner(state.players, settlementId);
 
 /**
  * Finds a unit by its ID across all players (both in player.units and settlement.units).
  */
-export const selectUnitById = (state: GameState, id: string | null): Unit | undefined => {
-  if (!id) return undefined;
-  for (const player of state.players) {
-    const unit = player.units.find((u) => u.id === id);
-    if (unit) return unit;
-    for (const settlement of player.settlements) {
-      const sUnit = settlement.units.find((u) => u.id === id);
-      if (sUnit) return sUnit;
-    }
-  }
-  return undefined;
-};
+export const selectUnitById = (state: GameState, id: string | null): Unit | undefined =>
+  TraversalUtils.findUnitById(state.players, id);
 
 /**
  * Finds the player who owns the unit with the given ID.
  */
-export const selectUnitOwner = (state: GameState, unitId: string | null): Player | undefined => {
-  if (!unitId) return undefined;
-  return state.players.find((p) =>
-    p.units.some((u) => u.id === unitId) ||
-    p.settlements.some((s) => s.units.some((u) => u.id === unitId))
-  );
-};
+export const selectUnitOwner = (state: GameState, unitId: string | null): Player | undefined =>
+  TraversalUtils.findUnitOwner(state.players, unitId);
 
 /**
  * Returns the currently selected unit.
@@ -74,36 +52,14 @@ export const selectSelectedSettlement = (state: GameState): Settlement | undefin
 /**
  * Finds a settlement at a specific map position.
  */
-export const selectSettlementAtPosition = (state: GameState, pos: Position | null): Settlement | undefined => {
-  if (!pos) return undefined;
-  for (const player of state.players) {
-    const settlement = player.settlements.find((s) => isSame(s.position, pos));
-    if (settlement) return settlement;
-  }
-  return undefined;
-};
+export const selectSettlementAtPosition = (state: GameState, pos: Position | null): Settlement | undefined =>
+  TraversalUtils.findSettlementAt(state.players, pos);
 
 /**
  * Returns all units at a specific map position across all players.
  */
-export const selectUnitsAtPosition = (state: GameState, pos: Position): Unit[] => {
-  const units: Unit[] = [];
-  for (const player of state.players) {
-    for (const unit of player.units) {
-      if (isSame(unit.position, pos)) {
-        units.push(unit);
-      }
-    }
-    for (const settlement of player.settlements) {
-      for (const unit of settlement.units) {
-        if (isSame(unit.position, pos)) {
-          units.push(unit);
-        }
-      }
-    }
-  }
-  return units;
-};
+export const selectUnitsAtPosition = (state: GameState, pos: Position): Unit[] =>
+  TraversalUtils.findAllUnitsAt(state.players, pos);
 
 /**
  * Returns all units physically present at a settlement, combining those inside

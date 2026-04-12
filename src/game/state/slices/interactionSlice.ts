@@ -3,7 +3,7 @@ import type { StateCreator } from 'zustand';
 import type { GameState } from '../types';
 import type { CombatResult } from '../../systems/CombatSystem';
 import type { Position } from '../../entities/Position';
-import { isSame } from '../../entities/Position';
+import { TraversalUtils } from '../../utils/TraversalUtils';
 import type { GoodType } from '../../entities/types';
 import { ForeignInteractionSystem } from '../../systems/ForeignInteractionSystem';
 import { CombatSystem } from '../../systems/CombatSystem';
@@ -96,28 +96,13 @@ export const createInteractionSlice: StateCreator<
       const attacker = player.units.find((u) => u.id === attackerId);
       if (!attacker) return;
 
-      let defender: any;
-      let defenderSettlement: any;
+      const otherPlayers = state.players.filter(p => p.id !== state.currentPlayerId);
+      const defenderUnit = TraversalUtils.findUnitsAt(otherPlayers, target)[0];
+      const defenderSettlement = TraversalUtils.findSettlementAt(state.players, target);
 
-      for (const p of state.players) {
-        if (p.id !== state.currentPlayerId) {
-          const unit = p.units.find((u) => isSame(u.position, target));
-          if (unit) {
-            defender = unit;
-            break;
-          }
-        }
-      }
-
-      for (const p of state.players) {
-        const settlement = p.settlements.find((c) => isSame(c.position, target));
-        if (settlement) {
-          defenderSettlement = settlement;
-          if (!defender && p.id !== state.currentPlayerId) {
-            defender = settlement;
-          }
-          break;
-        }
+      let defender: any = defenderUnit;
+      if (!defender && defenderSettlement && defenderSettlement.ownerId !== state.currentPlayerId) {
+        defender = defenderSettlement;
       }
 
       if (!defender) return;

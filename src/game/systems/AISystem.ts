@@ -6,6 +6,7 @@ import { TerrainType, ResourceType, UnitType, Attitude } from '../entities/types
 import { NATION_BONUSES } from '../constants';
 import { distance, isSame, type Position } from '../entities/Position';
 import { NamingSystem, type NamingStats } from './NamingSystem';
+import { TraversalUtils } from '../utils/TraversalUtils';
 
 export interface AIUnitMovedEffect {
   readonly type: 'unitMoved';
@@ -71,7 +72,7 @@ export class AISystem {  // eslint-disable-line @typescript-eslint/no-extraneous
           const currentTile = row?.[unit.position.x];
           const nationData = NATION_BONUSES[player.nation];
           if (currentTile && (currentTile.terrainType === TerrainType.PLAINS || currentTile.terrainType === TerrainType.GRASSLAND || currentTile.terrainType === TerrainType.PRAIRIE)) {
-            const hasAdjacentSettlement = updatedPlayers.flatMap(p => p.settlements).some(
+            const hasAdjacentSettlement = TraversalUtils.getAllSettlements(updatedPlayers).some(
               (c) => distance(c.position, unit.position) <= 1,
             );
             if (!hasAdjacentSettlement) {
@@ -103,7 +104,7 @@ export class AISystem {  // eslint-disable-line @typescript-eslint/no-extraneous
         }
 
         if (!unitRemoved) {
-          const allSettlements = updatedPlayers.flatMap((p) => p.settlements);
+          const allSettlements = TraversalUtils.getAllSettlements(updatedPlayers);
           const target = this.findNearestTarget(unit, map, allSettlements);
           if (target) {
             const dx = Math.sign(target.x - unit.position.x);
