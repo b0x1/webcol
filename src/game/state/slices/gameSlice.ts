@@ -7,6 +7,7 @@ import type { Nation } from '../../entities/types';
 import { TurnPhase } from '../../entities/types';
 import { GameSystem } from '../../systems/GameSystem';
 import { eventBus } from '../EventBus';
+import { random, generateId } from '../utils';
 
 export interface GameSlice {
   players: Player[];
@@ -37,7 +38,11 @@ export const createGameSlice: StateCreator<
   },
 
   initGame: (params) => {
-    const { map, players, namingStats } = GameSystem.initGame(params);
+    const { map, players, namingStats } = GameSystem.initGame({
+      ...params,
+      random,
+      generateId,
+    });
     set((state) => {
       state.map = map;
       state.players = players;

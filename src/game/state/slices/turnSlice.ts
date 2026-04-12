@@ -5,6 +5,7 @@ import { SaveManager } from '../SaveManager';
 import { eventBus } from '../EventBus';
 import { TurnEngine } from '../../systems/TurnEngine';
 import { AISystem } from '../../systems/AISystem';
+import { random, generateId } from '../utils';
 
 export interface TurnSlice {
   turn: number;
@@ -98,6 +99,8 @@ export const createTurnSlice: StateCreator<
         state.players,
         state.map,
         state.namingStats,
+        random,
+        generateId,
       );
       set((s) => {
         s.players = updatedPlayers;
@@ -112,6 +115,8 @@ export const createTurnSlice: StateCreator<
         state.players,
         state.map,
         state.namingStats,
+        random,
+        generateId,
       );
       set((s) => {
         s.players = updatedPlayers;

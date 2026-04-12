@@ -30,11 +30,13 @@ describe('ForeignInteractionSystem', () => {
   it('should process trade correctly and shift attitude', () => {
     const mockSettlement = getMockSettlement();
     const mockUnit = getMockUnit();
+    const random = () => 0.5;
 
     const { updatedSettlement, updatedUnit, goodReceived } = ForeignInteractionSystem.trade(
       mockSettlement,
       mockUnit,
-      GoodType.TRADE_GOODS
+      GoodType.TRADE_GOODS,
+      random
     );
 
     expect(updatedUnit.cargo.has(GoodType.TRADE_GOODS)).toBe(false);

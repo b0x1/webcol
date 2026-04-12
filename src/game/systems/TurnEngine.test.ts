@@ -31,7 +31,7 @@ describe('TurnEngine', () => {
       settlement.workforce.set(unit.id, JobType.FARMER);
       player.settlements.push(settlement);
 
-      const { players: updatedPlayers } = TurnEngine.runProduction([player], [], {});
+      const { players: updatedPlayers } = TurnEngine.runProduction([player], [], {}, () => 0.5, (p) => `${p}-test`);
       const updatedSettlement = updatedPlayers[0].settlements[0];
 
       // Farmer produces 3 FOOD.
@@ -53,7 +53,7 @@ describe('TurnEngine', () => {
       const unit = createUnit('u1', 'p2', 'Test Unit', UnitType.SOLDIER, 0, 0, 1);
       ai.units.push(unit);
 
-      const { players: updatedPlayers, effects } = AISystem.runAITurn([human, ai], map, {});
+      const { players: updatedPlayers, effects } = AISystem.runAITurn([human, ai], map, {}, () => 0.5, (p) => `${p}-test`);
       const updatedUnit = updatedPlayers[1].units[0];
 
       // Unit should move from (0,0) towards (5,5)
@@ -74,7 +74,7 @@ describe('TurnEngine', () => {
       const unit = createUnit('u1', 'p1', 'Test Unit', UnitType.COLONIST, 2, 2, 1);
       ai.units.push(unit);
 
-      const { players: updatedPlayers } = AISystem.runAITurn([ai], map, {});
+      const { players: updatedPlayers } = AISystem.runAITurn([ai], map, {}, () => 0.5, (p) => `${p}-test`);
       const updatedAI = updatedPlayers[0];
 
       expect(updatedAI.settlements.length).toBe(1);
@@ -93,7 +93,7 @@ describe('TurnEngine', () => {
         const unit = createUnit('u1', 'p1', 'Test Unit', UnitType.COLONIST, 2, 2, 1);
         ai.units.push(unit);
 
-        const { players: updatedPlayers } = AISystem.runAITurn([ai], map, {});
+        const { players: updatedPlayers } = AISystem.runAITurn([ai], map, {}, () => 0.5, (p) => `${p}-test`);
         const updatedAI = updatedPlayers[0];
 
         expect(updatedAI.settlements.length).toBe(1); // Only the existing one

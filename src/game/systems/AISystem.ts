@@ -28,7 +28,13 @@ export class AISystem {  // eslint-disable-line @typescript-eslint/no-extraneous
     // Static utility class
   }
 
-  static runAITurn(players: Player[], map: Tile[][], namingStats: NamingStats): AISystemResult {
+  static runAITurn(
+    players: Player[],
+    map: Tile[][],
+    namingStats: NamingStats,
+    _random: () => number,
+    generateId: (prefix: string) => string
+  ): AISystemResult {
     let currentNamingStats = { ...namingStats };
     const effects: AIUnitMovedEffect[] = [];
 
@@ -73,7 +79,7 @@ export class AISystem {  // eslint-disable-line @typescript-eslint/no-extraneous
               currentNamingStats = updatedStats;
 
               const newSettlement: Settlement = {
-                id: `settlement-ai-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                id: generateId('settlement-ai'),
                 ownerId: player.id,
                 name: settlementName,
                 position: { ...unit.position },

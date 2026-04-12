@@ -18,18 +18,20 @@ export class SettlementSystem {
     unit: Unit,
     name: string,
     buildings: BuildingType[],
-    map: Tile[][]
+    map: Tile[][],
+    random: () => number,
+    generateId: (prefix: string) => string
   ): Settlement {
     const nationData = NATION_BONUSES[player.nation];
     const neighbors = getNeighbors(unit.position, map[0]?.length ?? 0, map.length);
-    const randomNeighbor = neighbors[Math.floor(Math.random() * (neighbors.length))] as { x: number; y: number } | undefined;
+    const randomNeighbor = neighbors[Math.floor(random() * (neighbors.length))] as { x: number; y: number } | undefined;
 
     if (!randomNeighbor) {
       throw new Error('No valid neighbors for settlement creation');
     }
 
     return {
-      id: `settlement-${String(Date.now())}-${String(Math.floor(Math.random() * 1000))}`,
+      id: generateId('settlement'),
       ownerId: player.id,
       name,
       position: { ...unit.position },

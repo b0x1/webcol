@@ -7,6 +7,7 @@ import { isSame } from '../../entities/Position';
 import type { GoodType } from '../../entities/types';
 import { ForeignInteractionSystem } from '../../systems/ForeignInteractionSystem';
 import { CombatSystem } from '../../systems/CombatSystem';
+import { random } from '../utils';
 
 export interface InteractionSlice {
   combatResult: CombatResult | null;
@@ -39,7 +40,8 @@ export const createInteractionSlice: StateCreator<
       const { updatedSettlement, updatedUnit } = ForeignInteractionSystem.trade(
         foreignPlayer.settlements[sIdx],
         unit,
-        goodOffered
+        goodOffered,
+        random
       );
 
       foreignPlayer.settlements[sIdx] = updatedSettlement;
@@ -124,7 +126,7 @@ export const createInteractionSlice: StateCreator<
       if (!defender) return;
 
       const defenderTile = state.map[target.y][target.x];
-      const result = CombatSystem.resolveCombat(attacker, defender, defenderTile, defenderSettlement);
+      const result = CombatSystem.resolveCombat(attacker, defender, defenderTile, defenderSettlement, random);
 
       if (result.winner === 'attacker') {
            const defenderPlayer = state.players.find(p => p.units.some(u => u.id === (defender).id));

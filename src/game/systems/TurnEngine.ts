@@ -24,7 +24,13 @@ export class TurnEngine {
     // Static utility class
   }
 
-  static runProduction(players: Player[], map: Tile[][], namingStats: NamingStats): TurnEngineResult {
+  static runProduction(
+    players: Player[],
+    map: Tile[][],
+    namingStats: NamingStats,
+    _random: () => number,
+    generateId: (prefix: string) => string
+  ): TurnEngineResult {
     let currentNamingStats = { ...namingStats };
     const effects: TurnNotificationEffect[] = [];
     const updatedPlayers = players.map((player) => {
@@ -73,7 +79,7 @@ export class TurnEngine {
           currentNamingStats = namingResult.updatedStats;
 
           const newUnit = createUnit(
-            `unit-${String(Date.now())}-${String(Math.floor(Math.random() * 1000))}`,
+            generateId('unit'),
             newSettlement.ownerId,
             namingResult.name,
             UnitType.COLONIST,
@@ -116,7 +122,7 @@ export class TurnEngine {
                   currentNamingStats = namingResult.updatedStats;
 
                   const newUnit = createUnit(
-                    `unit-${String(Date.now())}-${String(Math.floor(Math.random() * 1000))}`,
+                    generateId('unit'),
                     newSettlement.ownerId,
                     namingResult.name,
                     currentItem as UnitType,
@@ -142,7 +148,7 @@ export class TurnEngine {
               currentNamingStats = namingResult.updatedStats;
 
               const newColonist = createUnit(
-                `unit-${String(Date.now())}-${String(Math.floor(Math.random() * 1000))}`,
+                generateId('unit'),
                 newSettlement.ownerId,
                 namingResult.name,
                 UnitType.COLONIST,

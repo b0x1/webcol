@@ -15,7 +15,7 @@ describe('Settlement Production and Building Logic', () => {
     settlement.workforce.set(unit.id, JobType.LUMBERJACK);
     player.settlements.push(settlement);
 
-    const { players: updatedPlayers } = TurnEngine.runProduction([player], [], {});
+    const { players: updatedPlayers } = TurnEngine.runProduction([player], [], {}, () => 0.5, (p) => `${p}-test`);
     const updatedSettlement = updatedPlayers[0].settlements[0];
 
     // Lumberjack produces 3 LUMBER.
@@ -42,7 +42,7 @@ describe('Settlement Production and Building Logic', () => {
       }
     }
 
-    const { players: updatedPlayers } = TurnEngine.runProduction([player], map, {});
+    const { players: updatedPlayers } = TurnEngine.runProduction([player], map, {}, () => 0.5, (p) => `${p}-test`);
     const updatedSettlement = updatedPlayers[0].settlements[0];
 
     // 1 worker on Grassland produces 3 FOOD.
@@ -58,7 +58,7 @@ describe('Settlement Production and Building Logic', () => {
     settlement.buildings.push(BuildingType.IRON_WORKS);
     player.settlements.push(settlement);
 
-    const { players: updatedPlayers } = TurnEngine.runProduction([player], [], {});
+    const { players: updatedPlayers } = TurnEngine.runProduction([player], [], {}, () => 0.5, (p) => `${p}-test`);
     const updatedSettlement = updatedPlayers[0].settlements[0];
 
     // Lumber Mill gives +2 LUMBER. Iron Works gives +2 ORE.
@@ -73,13 +73,13 @@ describe('Settlement Production and Building Logic', () => {
     player.settlements.push(settlement);
 
     // No warehouse, cap is 200
-    let { players: updatedPlayers } = TurnEngine.runProduction([player], [], {});
+    let { players: updatedPlayers } = TurnEngine.runProduction([player], [], {}, () => 0.5, (p) => `${p}-test`);
     expect(updatedPlayers[0].settlements[0].inventory.get(GoodType.LUMBER)).toBe(200);
 
     // With warehouse, cap is 400
     settlement.buildings.push(BuildingType.WAREHOUSE);
     settlement.inventory.set(GoodType.LUMBER, 350);
-    ({ players: updatedPlayers } = TurnEngine.runProduction([player], [], {}));
+    ({ players: updatedPlayers } = TurnEngine.runProduction([player], [], {}, () => 0.5, (p) => `${p}-test`));
     expect(updatedPlayers[0].settlements[0].inventory.get(GoodType.LUMBER)).toBe(350);
   });
 
@@ -89,7 +89,7 @@ describe('Settlement Production and Building Logic', () => {
     settlement.buildings.push(BuildingType.PRINTING_PRESS);
     player.settlements.push(settlement);
 
-    const { players: updatedPlayers } = TurnEngine.runProduction([player], [], {});
+    const { players: updatedPlayers } = TurnEngine.runProduction([player], [], {}, () => 0.5, (p) => `${p}-test`);
     // Population is workforce size. Printing press adds a unit to player.units.
     expect(updatedPlayers[0].settlements[0].population).toBe(1);
     expect(updatedPlayers[0].units.length).toBe(1);

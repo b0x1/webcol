@@ -8,14 +8,15 @@ export class TerrainGenerator {
   private width: number;
   private height: number;
   private noise2D: (x: number, y: number) => number;
+  private random: () => number;
 
   constructor(width: number, height: number, seed = 'a-new-world') {
     this.width = width;
     this.height = height;
 
     // Simple pseudo-random seed to function with simplex-noise
-    const seedFn = this.createRandom(seed);
-    this.noise2D = createNoise2D(seedFn);
+    this.random = this.createRandom(seed);
+    this.noise2D = createNoise2D(this.random);
   }
 
   private createRandom(seed: string) {
@@ -68,7 +69,7 @@ export class TerrainGenerator {
     const count =
       MAP_CONSTANTS.NATIVE_SETTLEMENT_MIN_COUNT +
       Math.floor(
-        Math.random() *
+        this.random() *
           (MAP_CONSTANTS.NATIVE_SETTLEMENT_MAX_COUNT - MAP_CONSTANTS.NATIVE_SETTLEMENT_MIN_COUNT + 1),
       );
 
@@ -82,8 +83,8 @@ export class TerrainGenerator {
     let attempts = 0;
     while (settlements.length < count && attempts < 500) {
       attempts++;
-      const x = margin + Math.floor(Math.random() * (this.width - 2 * margin));
-      const y = margin + Math.floor(Math.random() * (this.height - 2 * margin));
+      const x = margin + Math.floor(this.random() * (this.width - 2 * margin));
+      const y = margin + Math.floor(this.random() * (this.height - 2 * margin));
 
       if (terrain[y][x] === TerrainType.OCEAN || terrain[y][x] === TerrainType.COAST) {
         continue;
@@ -97,9 +98,9 @@ export class TerrainGenerator {
 
       if (tooClose) continue;
 
-      const nationKey = nativeNations[Math.floor(Math.random() * nativeNations.length)];
+      const nationKey = nativeNations[Math.floor(this.random() * nativeNations.length)];
       const nationData = NATION_BONUSES[nationKey];
-      const id = `settlement-native-${settlements.length}-${Date.now()}`;
+      const id = `settlement-native-${settlements.length}-${Math.floor(this.random() * 1000000)}`;
       const name = `${nationData.name} Settlement`;
 
       const s: Settlement = {
@@ -107,7 +108,7 @@ export class TerrainGenerator {
         ownerId: nationKey, // Store nationKey directly as ownerId for now
         name,
         position: { x, y },
-        population: 3 + Math.floor(Math.random() * 5),
+        population: 3 + Math.floor(this.random() * 5),
         culture: 'NATIVE',
         organization: nationData.organization,
         buildings: [],
@@ -116,8 +117,8 @@ export class TerrainGenerator {
         workforce: new Map(),
         units: [],
         goods: new Map([
-          [GoodType.FOOD, 50 + Math.floor(Math.random() * 50)],
-          [GoodType.FURS, 20 + Math.floor(Math.random() * 30)],
+          [GoodType.FOOD, 50 + Math.floor(this.random() * 50)],
+          [GoodType.FURS, 20 + Math.floor(this.random() * 30)],
         ]),
         attitude: Attitude.FRIENDLY,
         hammers: 0,

@@ -14,12 +14,19 @@ export class GameSystem {
     // Static utility class
   }
 
-  static initGame(params: { playerName: string; nation: Nation; mapSize: 'Small' | 'Medium' | 'Large'; aiCount: number }): {
+  static initGame(params: {
+    playerName: string;
+    nation: Nation;
+    mapSize: 'Small' | 'Medium' | 'Large';
+    aiCount: number;
+    random: () => number;
+    generateId: (prefix: string) => string;
+  }): {
     map: Tile[][];
     players: Player[];
     namingStats: NamingStats;
   } {
-    const { playerName, nation, mapSize, aiCount } = params;
+    const { playerName, nation, mapSize, aiCount, random, generateId } = params;
     const dimensions = {
       Small: { width: 40, height: 30 },
       Medium: { width: 80, height: 60 },
@@ -39,13 +46,13 @@ export class GameSystem {
           movementCost: 1, // Default, will be overridden by MovementSystem
           hasResource: null,
         };
-        if (type === TerrainType.OCEAN && Math.random() < 0.05) {
+        if (type === TerrainType.OCEAN && random() < 0.05) {
           tile.hasResource = ResourceType.FISH;
-        } else if (type === TerrainType.FOREST && Math.random() < 0.1) {
+        } else if (type === TerrainType.FOREST && random() < 0.1) {
           tile.hasResource = ResourceType.FOREST;
-        } else if (type === TerrainType.PLAINS && Math.random() < 0.05) {
+        } else if (type === TerrainType.PLAINS && random() < 0.05) {
           tile.hasResource = ResourceType.ORE_DEPOSIT;
-        } else if (type === TerrainType.PLAINS && Math.random() < 0.1) {
+        } else if (type === TerrainType.PLAINS && random() < 0.1) {
           tile.hasResource = ResourceType.FERTILE_LAND;
         }
         return tile;
@@ -138,7 +145,7 @@ export class GameSystem {
       namingStats = settlementStats;
 
       const startSettlement: Settlement = {
-        id: `settlement-start-${Date.now()}`,
+        id: generateId('settlement-start'),
         ownerId: 'player-1',
         name: settlementName,
         position: { x: startX, y: startY },
@@ -166,7 +173,7 @@ export class GameSystem {
     // Create European AI Players
     const availableEuropeanNations = europeanNations.filter(n => n !== nation);
     for (let i = 0; i < aiCount; i++) {
-      const aiNation = availableEuropeanNations.splice(Math.floor(Math.random() * availableEuropeanNations.length), 1)[0] ?? Nation.PORTUGAL;
+      const aiNation = availableEuropeanNations.splice(Math.floor(random() * availableEuropeanNations.length), 1)[0] ?? Nation.PORTUGAL;
       const aiPlayer: Player = {
         id: `ai-euro-${i}`,
         name: `${NATION_BONUSES[aiNation].name} AI`,

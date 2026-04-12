@@ -17,7 +17,7 @@ describe('TurnEngine Production', () => {
     settlement.workforce.set(unit.id, JobType.FARMER);
     player.settlements.push(settlement);
 
-    const { players: updatedPlayers, effects } = TurnEngine.runProduction([player], [], {});
+    const { players: updatedPlayers, effects } = TurnEngine.runProduction([player], [], {}, () => 0.5, (p) => `${p}-test`);
     const updatedUnit = updatedPlayers[0].settlements[0].units[0];
 
     expect(updatedUnit.turnsInJob).toBe(COLONY_CONSTANTS.EXPERT_PROMOTION_TURNS);
@@ -39,7 +39,7 @@ describe('TurnEngine Production', () => {
     settlement.workforce.set(unit.id, JobType.BLACKSMITH);
     player.settlements.push(settlement);
 
-    const { players: updatedPlayers } = TurnEngine.runProduction([player], [], {});
+    const { players: updatedPlayers } = TurnEngine.runProduction([player], [], {}, () => 0.5, (p) => `${p}-test`);
     const updatedSettlement = updatedPlayers[0].settlements[0];
 
     // Production per worker is 3
@@ -62,7 +62,7 @@ describe('TurnEngine Production', () => {
     settlement.workforce.set(unit.id, JobType.CARPENTER);
     player.settlements.push(settlement);
 
-    const { players: updatedPlayers } = TurnEngine.runProduction([player], [], {});
+    const { players: updatedPlayers } = TurnEngine.runProduction([player], [], {}, () => 0.5, (p) => `${p}-test`);
     const updatedSettlement = updatedPlayers[0].settlements[0];
 
     // 38 + 3 = 41 hammers. 41 - 40 = 1 hammer remaining.
@@ -78,7 +78,7 @@ describe('TurnEngine Production', () => {
     settlement.inventory.set(GoodType.FOOD, 205);
     player.settlements.push(settlement);
 
-    const { players: updatedPlayers } = TurnEngine.runProduction([player], [], {});
+    const { players: updatedPlayers } = TurnEngine.runProduction([player], [], {}, () => 0.5, (p) => `${p}-test`);
     const updatedSettlement = updatedPlayers[0].settlements[0];
 
     expect(updatedSettlement.population).toBe(1); // Population is workforce size

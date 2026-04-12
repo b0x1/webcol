@@ -4,6 +4,7 @@ import type { GameState } from '../types';
 import { BuildingType } from '../../entities/types';
 import { SettlementSystem } from '../../systems/SettlementSystem';
 import { NamingSystem } from '../../systems/NamingSystem';
+import { random, generateId } from '../utils';
 
 export interface SettlementSlice {
   foundSettlement: (unitId: string) => void;
@@ -38,7 +39,9 @@ export const createSettlementSlice: StateCreator<
         unit,
         settlementName,
         [BuildingType.TOWN_HALL, BuildingType.CARPENTERS_SHOP, BuildingType.BLACKSMITHS_HOUSE],
-        state.map
+        state.map,
+        random,
+        generateId,
       );
 
       player.units.splice(unitIndex, 1);

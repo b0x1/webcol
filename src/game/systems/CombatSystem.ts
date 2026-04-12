@@ -21,7 +21,8 @@ export class CombatSystem {
     attacker: Unit,
     defender: Unit | Settlement,
     defenderTile: Tile,
-    defenderSettlement?: Settlement
+    defenderSettlement: Settlement | undefined,
+    random: () => number
   ): CombatResult {
     const attackerBaseStrength = COMBAT_CONSTANTS.UNIT_STRENGTHS[attacker.type];
     let attackerModifier = 1.0;
@@ -64,8 +65,8 @@ export class CombatSystem {
 
     const finalDefenderStrength = defenderBaseStrength * defenderModifier;
 
-    const attackerRoll = Math.random() * finalAttackerStrength;
-    const defenderRoll = Math.random() * finalDefenderStrength;
+    const attackerRoll = random() * finalAttackerStrength;
+    const defenderRoll = random() * finalDefenderStrength;
 
     const attackerWins = attackerRoll > defenderRoll;
 

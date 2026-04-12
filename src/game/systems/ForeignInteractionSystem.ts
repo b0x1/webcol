@@ -11,7 +11,8 @@ import { GoodType, Attitude, UnitType } from '../entities/types';
   static trade(
     settlement: Settlement,
     unit: Unit,
-    goodOffered: GoodType
+    goodOffered: GoodType,
+    random: () => number
   ): {
     updatedSettlement: Settlement;
     updatedUnit: Unit;
@@ -35,7 +36,7 @@ import { GoodType, Attitude, UnitType } from '../entities/types';
 
     // Foreigner gives a random good from their inventory
     const foreignGoods = Array.from(settlement.goods.keys()).filter(g => (settlement.goods.get(g) ?? 0) > 0);
-    const goodReceived = foreignGoods[Math.floor(Math.random() * foreignGoods.length)] ?? GoodType.FOOD;
+    const goodReceived = foreignGoods[Math.floor(random() * foreignGoods.length)] ?? GoodType.FOOD;
     const amountReceived = Math.min(20, settlement.goods.get(goodReceived) ?? 10);
 
     updatedUnitCargo.set(goodReceived, (updatedUnitCargo.get(goodReceived) ?? 0) + amountReceived);

@@ -26,76 +26,64 @@ describe('CombatSystem', () => {
   });
 
   it('calculates soldier with muskets bonus correctly', () => {
-    const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(1.0);
+    const random = vi.fn().mockReturnValue(1.0);
 
     attacker.cargo.set(GoodType.MUSKETS, 10);
-    const result = CombatSystem.resolveCombat(attacker, defenderUnit, flatTile);
+    const result = CombatSystem.resolveCombat(attacker, defenderUnit, flatTile, undefined, random);
 
     expect(result.winner).toBe('attacker');
-
-    randomSpy.mockRestore();
   });
 
   it('applies hills modifier to defender', () => {
-    const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    const random = vi.fn().mockReturnValue(0.5);
 
     const defenderSoldier = createUnit('u3', 'p2', 'Test Unit', UnitType.SOLDIER, 1, 1, 3);
-    const result = CombatSystem.resolveCombat(attacker, defenderSoldier, hillTile);
+    const result = CombatSystem.resolveCombat(attacker, defenderSoldier, hillTile, undefined, random);
 
     expect(result.winner).toBe('defender');
-
-    randomSpy.mockRestore();
   });
 
   it('applies mountains modifier to defender', () => {
-    const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    const random = vi.fn().mockReturnValue(0.5);
 
-    const result = CombatSystem.resolveCombat(attacker, defenderUnit, mountainTile);
+    const result = CombatSystem.resolveCombat(attacker, defenderUnit, mountainTile, undefined, random);
 
     expect(result.winner).toBe('attacker');
-
-    randomSpy.mockRestore();
   });
 
   it('applies stockade modifier in settlement', () => {
-    const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    const random = vi.fn().mockReturnValue(0.5);
 
     playerSettlement.buildings.push(BuildingType.STOCKADE);
 
-    const result = CombatSystem.resolveCombat(attacker, defenderUnit, flatTile, playerSettlement);
+    const result = CombatSystem.resolveCombat(attacker, defenderUnit, flatTile, playerSettlement, random);
     expect(result.winner).toBe('attacker');
 
     const attackerColonist = createUnit('u4', 'p1', 'Test Unit', UnitType.COLONIST, 0, 0, 3);
-    const result2 = CombatSystem.resolveCombat(attackerColonist, defenderUnit, flatTile, playerSettlement);
+    const result2 = CombatSystem.resolveCombat(attackerColonist, defenderUnit, flatTile, playerSettlement, random);
     expect(result2.winner).toBe('defender');
-
-    randomSpy.mockRestore();
   });
 
   it('applies hostile native modifier', () => {
-    const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    const random = vi.fn().mockReturnValue(0.5);
 
     npcSettlement.attitude = Attitude.HOSTILE;
-    const result = CombatSystem.resolveCombat(attacker, npcSettlement, flatTile);
+    const result = CombatSystem.resolveCombat(attacker, npcSettlement, flatTile, undefined, random);
     expect(result.winner).toBe('attacker');
 
     const attackerColonist = createUnit('u4', 'p1', 'Test Unit', UnitType.COLONIST, 0, 0, 3);
-    const result2 = CombatSystem.resolveCombat(attackerColonist, npcSettlement, flatTile);
+    const result2 = CombatSystem.resolveCombat(attackerColonist, npcSettlement, flatTile, undefined, random);
     expect(result2.winner).toBe('defender');
-
-    randomSpy.mockRestore();
   });
 
   it('handles ship combat', () => {
-    const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(1.0);
+    const random = vi.fn();
 
     const attackerShip = createUnit('s1', 'p1', 'Test Unit', UnitType.SHIP, 0, 0, 6);
     const defenderShip = createUnit('s2', 'p2', 'Test Unit', UnitType.SHIP, 1, 1, 6);
 
-    randomSpy.mockReturnValueOnce(1.0).mockReturnValueOnce(0.9);
-    const result = CombatSystem.resolveCombat(attackerShip, defenderShip, flatTile);
+    random.mockReturnValueOnce(1.0).mockReturnValueOnce(0.9);
+    const result = CombatSystem.resolveCombat(attackerShip, defenderShip, flatTile, undefined, random);
     expect(result.winner).toBe('attacker');
-
-    randomSpy.mockRestore();
   });
 });
