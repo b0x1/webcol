@@ -3,7 +3,6 @@ import type { GameState } from '../types';
 import { UnitSystem } from '../../systems/UnitSystem';
 import { eventBus } from '../EventBus';
 import { isSame } from '../../entities/Position';
-import { useUIStore } from '../uiStore';
 import { selectCurrentPlayer } from '../selectors';
 
 export interface SelectionSlice {
@@ -108,14 +107,6 @@ export const createSelectionSlice: StateCreator<
     set((state) => {
       state.selectedSettlementId = settlementId;
       state.selectedUnitId = null;
-      if (settlementId) {
-        // Only open the full SettlementScreen for owned settlements
-        const player = selectCurrentPlayer(state);
-        const isOwned = player?.settlements.some(s => s.id === settlementId);
-        if (isOwned || useUIStore.getState().isDebugMode) {
-          useUIStore.getState().setSettlementScreenOpen(true);
-        }
-      }
     });
   },
 });

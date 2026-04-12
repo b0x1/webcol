@@ -5,7 +5,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { SettlementScreenView } from './SettlementScreenView';
 
 export const SettlementScreenContainer: React.FC = () => {
-  const { isSettlementScreenOpen, setSettlementScreenOpen } = useUIStore();
+  const { isSettlementScreenOpen, setSettlementScreenOpen, isDebugMode } = useUIStore();
   const {
     selectedSettlementId,
     selectSettlement,
@@ -23,6 +23,15 @@ export const SettlementScreenContainer: React.FC = () => {
     production: state.selectedSettlementId ? selectSettlementProduction(state, state.selectedSettlementId) : undefined,
     unitsAtSettlement: state.selectedSettlementId ? selectUnitsAtSettlement(state, state.selectedSettlementId) : []
   })));
+
+  useEffect(() => {
+    if (selectedSettlementId && !isSettlementScreenOpen) {
+      const isOwned = settlement?.ownerId === player?.id;
+      if (isOwned || isDebugMode) {
+        setSettlementScreenOpen(true);
+      }
+    }
+  }, [selectedSettlementId, isSettlementScreenOpen, settlement?.ownerId, player?.id, isDebugMode, setSettlementScreenOpen]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

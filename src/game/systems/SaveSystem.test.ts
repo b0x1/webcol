@@ -14,7 +14,7 @@ import {
   TurnPhase,
   UnitType,
 } from '../entities/types';
-import type { GameState } from '../state/gameStore';
+import type { SaveData } from './SaveSystem';
 
 describe('SaveSystem serialization round-trip', () => {
   beforeEach(() => {
@@ -61,24 +61,24 @@ describe('SaveSystem serialization round-trip', () => {
         [GoodType.TOOLS]: 5,
         [GoodType.TRADE_GOODS]: 6,
         [GoodType.MUSKETS]: 8,
-      } satisfies GameState['europePrices'],
+      } satisfies Record<GoodType, number>,
       map: [[tile]],
-    };
+    } satisfies SaveData;
 
     const serialized = SaveSystem.serialize(mockState);
     const loadedState = SaveSystem.deserialize(serialized);
 
-    expect(loadedState).not.toBeNull();
-    expect(loadedState?.turn).toBe(mockState.turn);
-    expect(loadedState?.currentPlayerId).toBe(mockState.currentPlayerId);
-    expect(loadedState?.phase).toBe(mockState.phase);
-    expect(loadedState?.players?.[0]?.name).toBe('Player 1');
-    expect(loadedState?.players?.[0]?.gold).toBe(1000);
-    expect(loadedState?.players?.[0]?.units[0]?.cargo).toBeInstanceOf(Map);
-    expect(loadedState?.players?.[0]?.units[0]?.cargo.get(GoodType.FOOD)).toBe(50);
-    expect(loadedState?.players?.[0]?.settlements[0]?.inventory.get(GoodType.LUMBER)).toBe(100);
-    expect(loadedState?.players?.[0]?.settlements[0]?.workforce.get('u1')).toBe(JobType.FARMER);
-    expect(loadedState?.map?.[0]?.[0]?.terrainType).toBe(TerrainType.PLAINS);
-    expect(loadedState?.players?.[1]?.settlements[0]?.goods.get(GoodType.TRADE_GOODS)).toBe(20);
+    if (!loadedState) throw new Error('Failed to deserialize');
+    expect(loadedState.turn).toBe(mockState.turn);
+    expect(loadedState.currentPlayerId).toBe(mockState.currentPlayerId);
+    expect(loadedState.phase).toBe(mockState.phase);
+    expect(loadedState.players[0]?.name).toBe('Player 1');
+    expect(loadedState.players[0]?.gold).toBe(1000);
+    expect(loadedState.players[0]?.units[0]?.cargo).toBeInstanceOf(Map);
+    expect(loadedState.players[0]?.units[0]?.cargo.get(GoodType.FOOD)).toBe(50);
+    expect(loadedState.players[0]?.settlements[0]?.inventory.get(GoodType.LUMBER)).toBe(100);
+    expect(loadedState.players[0]?.settlements[0]?.workforce.get('u1')).toBe(JobType.FARMER);
+    expect(loadedState.map[0]?.[0]?.terrainType).toBe(TerrainType.PLAINS);
+    expect(loadedState.players[1]?.settlements[0]?.goods.get(GoodType.TRADE_GOODS)).toBe(20);
   });
 });

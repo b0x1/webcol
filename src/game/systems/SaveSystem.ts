@@ -1,12 +1,14 @@
-import type { GameState } from '../state/gameStore';
+import type { Player } from '../entities/Player';
+import type { Tile } from '../entities/Tile';
+import type { GoodType, TurnPhase } from '../entities/types';
 
 export interface SaveData {
-  players: GameState['players'];
+  players: Player[];
   currentPlayerId: string;
   turn: number;
-  phase: GameState['phase'];
-  europePrices: GameState['europePrices'];
-  map: GameState['map'];
+  phase: TurnPhase;
+  europePrices: Record<GoodType, number>;
+  map: Tile[][];
 }
 
 /* eslint-disable-next-line @typescript-eslint/no-extraneous-class */
@@ -16,7 +18,7 @@ export class SaveSystem {
   }
 
   static serialize(
-   state: Pick<GameState, 'players' | 'currentPlayerId' | 'turn' | 'phase' | 'europePrices' | 'map'>
+   state: SaveData
   ): string {
     const data: SaveData = {
       players: state.players,
@@ -30,7 +32,7 @@ export class SaveSystem {
     return JSON.stringify(data, (key, value) => this.replacer(key, value));
   }
 
-  static deserialize(serialized: string): Partial<GameState> | null {
+  static deserialize(serialized: string): SaveData | null {
     try {
       return JSON.parse(serialized, (key, value) => this.reviver(key, value)) as SaveData;
     } catch {
