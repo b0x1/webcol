@@ -4,8 +4,8 @@ import { Sprite } from './Sprite';
 
 interface ResourceIconProps {
   good: GoodType;
-  size?: number;
-  className?: string;
+  size?: number | undefined;
+  className?: string | undefined;
 }
 
 export const ResourceIcon: React.FC<ResourceIconProps> = ({ good, size = 32, className = '' }) => {

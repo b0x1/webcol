@@ -4,8 +4,8 @@ import { Sprite } from './Sprite';
 
 interface FlagProps {
   nation: Nation;
-  size?: number;
-  className?: string;
+  size?: number | undefined;
+  className?: string | undefined;
 }
 
 export const Flag: React.FC<FlagProps> = ({ nation, size = 32, className = '' }) => {

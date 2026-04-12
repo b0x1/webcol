@@ -5,7 +5,7 @@ import { ResourceIcon } from '../../ResourceIcon';
 interface GoodBoxProps {
   good: GoodType;
   stock: number;
-  net?: number;
+  net?: number | undefined;
 }
 
 export const GoodBox: React.FC<GoodBoxProps> = ({ good, stock, net = 0 }) => {

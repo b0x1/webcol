@@ -2,7 +2,7 @@ import React from 'react';
 
 export interface ReportTableHeader {
   content: React.ReactNode;
-  className?: string;
+  className?: string | undefined;
 }
 
 interface ReportTableProps {

@@ -11,7 +11,7 @@ export interface Unit {
   maxMoves: number;
   isSkipping: boolean;
   cargo: Map<GoodType, number>;
-  specialty?: JobType;
+  specialty?: JobType | undefined;
   turnsInJob: number;
 }
 

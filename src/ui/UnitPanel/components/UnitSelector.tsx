@@ -5,9 +5,9 @@ import { useGameStore } from '../../../game/state/gameStore';
 
 interface Props {
   unitsAtTile: Unit[];
-  settlementAtTile?: Settlement | null;
-  onSelectUnit: (unitId: string) => void;
-  onSelectSettlement: (settlementId: string) => void;
+  settlementAtTile?: Settlement | null | undefined;
+  onSelectUnit: (unitId: string | null) => void;
+  onSelectSettlement: (settlementId: string | null) => void;
 }
 
 export const UnitSelector: React.FC<Props> = ({ unitsAtTile, settlementAtTile, onSelectUnit, onSelectSettlement }) => {

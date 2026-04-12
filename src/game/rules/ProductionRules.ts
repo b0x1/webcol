@@ -2,9 +2,9 @@ import { BuildingType, GoodType, JobType, TerrainType } from '../entities/types'
 
 export interface ProductionRule {
   jobType: JobType;
-  inputGood?: GoodType;
-  outputGood?: GoodType;
-  producesHammers?: boolean;
+  inputGood?: GoodType | undefined;
+  outputGood?: GoodType | undefined;
+  producesHammers?: boolean | undefined;
   requiredBuildings: BuildingType[];
 }
 
