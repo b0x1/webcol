@@ -1,28 +1,45 @@
-import React, { useEffect } from 'react';
-import { useGameStore, selectCurrentPlayer, selectSettlementById, selectSettlementOwner, selectSettlementProduction, selectUnitsAtSettlement } from '../../game/state/gameStore';
+import React, { useEffect, useMemo } from 'react';
+import { useStoreWithEqualityFn } from 'zustand/traditional';
+import { shallow } from 'zustand/shallow';
+import {
+  useGameStore,
+  selectCurrentPlayer,
+  selectSettlementById,
+  selectSettlementOwner,
+  selectUnitsAtSettlement,
+  getSettlementProduction,
+} from '../../game/state/gameStore';
 import { useUIStore } from '../../game/state/uiStore';
-import { useShallow } from 'zustand/react/shallow';
+import type { Unit } from '../../game/entities/Unit';
 import { SettlementScreenView } from './SettlementScreenView';
+
+const EMPTY_UNITS: Unit[] = [];
 
 export const SettlementScreenContainer: React.FC = () => {
   const { isSettlementScreenOpen, setSettlementScreenOpen } = useUIStore();
-  const {
-    selectedSettlementId,
-    selectSettlement,
-    player,
-    settlement,
-    settlementOwner,
-    production,
-    unitsAtSettlement
-  } = useGameStore(useShallow(state => ({
-    selectedSettlementId: state.selectedSettlementId,
-    selectSettlement: state.selectSettlement,
-    player: selectCurrentPlayer(state),
-    settlement: selectSettlementById(state, state.selectedSettlementId),
-    settlementOwner: selectSettlementOwner(state, state.selectedSettlementId),
-    production: state.selectedSettlementId ? selectSettlementProduction(state, state.selectedSettlementId) : undefined,
-    unitsAtSettlement: state.selectedSettlementId ? selectUnitsAtSettlement(state, state.selectedSettlementId) : []
-  })));
+  const selectedSettlementId = useStoreWithEqualityFn(useGameStore, (state) => state.selectedSettlementId);
+  const selectSettlement = useStoreWithEqualityFn(useGameStore, (state) => state.selectSettlement);
+  const player = useStoreWithEqualityFn(useGameStore, selectCurrentPlayer);
+  const settlement = useStoreWithEqualityFn(useGameStore, (state) =>
+    selectSettlementById(state, state.selectedSettlementId),
+  );
+  const settlementOwner = useStoreWithEqualityFn(useGameStore, (state) =>
+    selectSettlementOwner(state, state.selectedSettlementId),
+  );
+  const map = useStoreWithEqualityFn(useGameStore, (state) => state.map);
+  const unitsAtSettlement = useStoreWithEqualityFn(
+    useGameStore,
+    (state) =>
+      state.selectedSettlementId
+        ? selectUnitsAtSettlement(state, state.selectedSettlementId)
+        : EMPTY_UNITS,
+    shallow,
+  );
+  const production = useMemo(
+    () =>
+      settlement && map.length > 0 ? getSettlementProduction(settlement, map) : undefined,
+    [settlement, map],
+  );
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

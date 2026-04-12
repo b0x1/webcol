@@ -1,11 +1,22 @@
 
-import React, { useEffect } from 'react';
-import { useGameStore, selectCurrentPlayer, selectSelectedUnit, selectSettlementAtPosition, selectUnitsAtPosition } from '../game/state/gameStore';
-import { useShallow } from 'zustand/react/shallow';
+import React, { useEffect, useMemo } from 'react';
+import { useStoreWithEqualityFn } from 'zustand/traditional';
+import { shallow } from 'zustand/shallow';
+import {
+  useGameStore,
+  selectCurrentPlayer,
+  selectSelectedUnit,
+  selectSettlementAtPosition,
+  selectUnitById,
+  selectUnitsAtPosition,
+} from '../game/state/gameStore';
 import { useUIStore } from '../game/state/uiStore';
 import { UnitType } from '../game/entities/types';
 import { UnitSelector } from './UnitPanel/components/UnitSelector';
 import { distance } from '../game/entities/Position';
+import type { Unit } from '../game/entities/Unit';
+
+const EMPTY_TILE_UNITS: readonly Unit[] = [];
 
 export const UnitPanel: React.FC = () => {
   const {
@@ -37,10 +48,26 @@ export const UnitPanel: React.FC = () => {
 
   const unit = useGameStore(selectSelectedUnit);
   const player = useGameStore(selectCurrentPlayer);
-  const settlementAtTile = useGameStore(state => selectSettlementAtPosition(state, selectedTile?.position ?? null));
-  const unitsAtTile = useGameStore(useShallow(state => selectedTile ? selectUnitsAtPosition(state, selectedTile.position) : []));
-  const unitOwner = useGameStore(state => state.players.find(p => p.id === unit?.ownerId));
-  const allSettlements = useGameStore(useShallow(state => state.players.flatMap(p => p.settlements)));
+  const settlementAtTile = useGameStore((state) =>
+    selectSettlementAtPosition(state, state.selectedTile?.position ?? null),
+  );
+  const unitsAtTile = useStoreWithEqualityFn(
+    useGameStore,
+    (state) => {
+      const tile = state.selectedTile;
+      return tile ? selectUnitsAtPosition(state, tile.position) : EMPTY_TILE_UNITS;
+    },
+    shallow,
+  );
+  const unitOwner = useGameStore((state) => {
+    const selected = selectUnitById(state, state.selectedUnitId);
+    return state.players.find((p) => p.id === selected?.ownerId);
+  });
+  const allSettlements = useStoreWithEqualityFn(
+    useGameStore,
+    (state) => state.players.flatMap((p) => p.settlements),
+    shallow,
+  );
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -60,21 +87,26 @@ export const UnitPanel: React.FC = () => {
     return () => { window.removeEventListener('keydown', handleKeyDown); };
   }, [selectedUnitId, unit, skipUnit, isMainMenuOpen, isAnyModalOpen, foundSettlement]);
 
+  const unitsForTileSelector = useMemo((): readonly Unit[] => {
+    if (!selectedTile || !settlementAtTile || settlementAtTile.ownerId !== player?.id) {
+      return unitsAtTile;
+    }
+    const availableUnitsInSettlement = settlementAtTile.units.filter((u) => !settlementAtTile.workforce.has(u.id));
+    const merged: Unit[] = [...unitsAtTile];
+    for (const au of availableUnitsInSettlement) {
+      if (!merged.some((u) => u.id === au.id)) {
+        merged.push(au);
+      }
+    }
+    return merged;
+  }, [selectedTile, settlementAtTile, player?.id, unitsAtTile]);
+
   if (isMainMenuOpen) return null;
 
-  if (selectedTile && settlementAtTile && settlementAtTile.ownerId === player?.id) {
-     const availableUnitsInSettlement = settlementAtTile.units.filter(u => !settlementAtTile.workforce.has(u.id));
-     availableUnitsInSettlement.forEach(au => {
-        if (!unitsAtTile.some(u => u.id === au.id)) {
-           unitsAtTile.push(au);
-        }
-     });
-  }
-
-  if (!unit && selectedTile && (unitsAtTile.length > 1 || (settlementAtTile && (unitsAtTile.length > 0 || settlementAtTile.ownerId === player?.id)))) {
+  if (!unit && selectedTile && (unitsForTileSelector.length > 1 || (settlementAtTile && (unitsForTileSelector.length > 0 || settlementAtTile.ownerId === player?.id)))) {
     return (
       <UnitSelector
-        unitsAtTile={unitsAtTile}
+        unitsAtTile={[...unitsForTileSelector]}
         settlementAtTile={settlementAtTile}
         onSelectUnit={selectUnit}
         onSelectSettlement={useGameStore.getState().selectSettlement}
