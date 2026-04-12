@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import Phaser from 'phaser';
-import { useGameStore, selectAvailableUnits } from './game/state/gameStore';
+import { useGameStore, selectAvailableUnitsCount } from './game/state/gameStore';
 import { useUIStore } from './game/state/uiStore';
 import { eventBus } from './game/state/EventBus';
 import type { Tile } from './game/entities/Tile';
@@ -33,7 +33,7 @@ function App(): React.ReactElement {
     setShowEndTurnConfirm
   } = useUIStore();
 
-  const availableUnits = useGameStore(selectAvailableUnits);
+  const availableUnitsCount = useGameStore(selectAvailableUnitsCount);
 
   useEffect(() => {
     if (gameRef.current) return;
@@ -126,7 +126,7 @@ function App(): React.ReactElement {
 
         {showEndTurnConfirm && (
           <EndTurnConfirmationModal
-            remainingUnits={availableUnits.length}
+            remainingUnits={availableUnitsCount}
             onConfirm={() => {
               setShowEndTurnConfirm(false);
               endTurn();

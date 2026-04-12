@@ -100,6 +100,13 @@ export const selectAvailableUnits = (state: GameState): Unit[] => {
 };
 
 /**
+ * Count of units the current player can still move this turn (moves left, not skipping).
+ * Prefer this in React selectors so getSnapshot returns a stable primitive.
+ */
+export const selectAvailableUnitsCount = (state: GameState): number =>
+  selectAvailableUnits(state).length;
+
+/**
  * Checks if a settlement is owned by the current player.
  */
 export const selectIsSettlementOwnedByCurrentPlayer = (state: GameState, settlementId: string | null): boolean => {

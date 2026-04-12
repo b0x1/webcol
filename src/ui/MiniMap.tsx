@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useStoreWithEqualityFn } from 'zustand/traditional';
+import { shallow } from 'zustand/shallow';
 import { useGameStore, selectAvailableUnits } from '../game/state/gameStore';
 import { useUIStore } from '../game/state/uiStore';
 import { eventBus } from '../game/state/EventBus';
@@ -35,7 +37,7 @@ export const MiniMap: React.FC = () => {
 
   const [viewport, setViewport] = useState({ x: 0, y: 0, width: 0, height: 0 });
 
-  const availableUnits = useGameStore(selectAvailableUnits);
+  const availableUnits = useStoreWithEqualityFn(useGameStore, selectAvailableUnits, shallow);
   const hasAvailableUnits = availableUnits.length > 0;
 
   const handleEndTurn = useCallback(() => {
