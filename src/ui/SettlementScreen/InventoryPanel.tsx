@@ -1,13 +1,11 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { GoodType } from '../../game/entities/types';
-import type { Tile } from '../../game/entities/Tile';
 import type { Settlement } from '../../game/entities/Settlement';
-import { getSettlementProduction } from '../../game/state/gameStore';
 import { GoodBox } from './components/GoodBox';
 
 interface Props {
   settlement: Settlement;
-  map: Tile[][];
+  netProduction: Map<GoodType, number>;
 }
 
 const RAW_MATERIALS = [
@@ -30,12 +28,7 @@ const FINISHED_GOODS = [
   GoodType.TRADE_GOODS,
 ];
 
-export const InventoryPanel: React.FC<Props> = ({ settlement, map }) => {
-  const { netProduction } = useMemo(
-    () => getSettlementProduction(settlement, map),
-    [settlement, map]
-  );
-
+export const InventoryPanel: React.FC<Props> = ({ settlement, netProduction }) => {
   return (
     <div className="flex flex-col gap-2 h-full">
       <div className="flex gap-1.5 h-1/2">
