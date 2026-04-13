@@ -153,7 +153,7 @@ export class AISystem {  // eslint-disable-line @typescript-eslint/no-extraneous
         const tile = row[x];
         if (!tile) continue;
         const isTargetType =
-          tile.terrainType === TerrainType.PLAINS || tile.hasResource === ResourceType.FOREST;
+          tile.terrainType === TerrainType.PLAINS || tile.hasResource === ResourceType.TIMBER;
         if (!isTargetType) continue;
 
         const pos = { x, y };

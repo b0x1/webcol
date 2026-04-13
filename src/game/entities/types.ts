@@ -17,7 +17,7 @@ export const GoodType = {
 export type GoodType = (typeof GoodType)[keyof typeof GoodType];
 
 export const ResourceType = {
-  FOREST: 'FOREST',
+  TIMBER: 'TIMBER',
   ORE_DEPOSIT: 'ORE_DEPOSIT',
   FISH: 'FISH',
   FERTILE_LAND: 'FERTILE_LAND',
