@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import * as Phaser from 'phaser';
 import { TileMap } from '../game/map/TileMap';
 import { TerrainRenderer } from '../game/map/TerrainRenderer';
 import { SpriteLoader } from '../game/utils/SpriteLoader';

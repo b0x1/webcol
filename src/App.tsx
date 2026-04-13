@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import Phaser from 'phaser';
+import * as Phaser from 'phaser';
 import { useGameStore, selectAvailableUnitsCount } from './game/state/gameStore';
 import { useUIStore } from './game/state/uiStore';
 import { eventBus } from './game/state/EventBus';

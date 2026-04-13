@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import * as Phaser from 'phaser';
 import type { TerrainRenderer } from './TerrainRenderer';
 import { eventBus } from '../state/EventBus';
 import type { Position } from '../entities/Position';
