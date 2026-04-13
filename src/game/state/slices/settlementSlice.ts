@@ -73,8 +73,8 @@ export const createSettlementSlice: StateCreator<
   assignJob: (settlementId, unitId, job) => {
     set((state) => {
       const settlement = selectSettlementById(state, settlementId);
-      const owner = selectSettlementOwner(state, settlementId);
       if (settlement) {
+        const owner = selectSettlementOwner(state, settlementId);
         if (job === null) {
           settlement.workforce.delete(unitId);
           // Move unit back to player units if it was in the settlement
