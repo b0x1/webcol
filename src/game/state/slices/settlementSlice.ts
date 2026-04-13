@@ -72,37 +72,33 @@ export const createSettlementSlice: StateCreator<
 
   assignJob: (settlementId, unitId, job) => {
     set((state) => {
-      for (const p of state.players) {
-        const settlement = p.settlements.find((s) => s.id === settlementId);
-        if (settlement) {
-          if (job === null) {
-            settlement.workforce.delete(unitId);
-            // Move unit back to player units if it was in the settlement
-            const uIdx = settlement.units.findIndex(u => u.id === unitId);
+      const settlement = selectSettlementById(state, settlementId);
+      if (settlement) {
+        const owner = selectSettlementOwner(state, settlementId);
+        if (job === null) {
+          settlement.workforce.delete(unitId);
+          // Move unit back to player units if it was in the settlement
+          const uIdx = settlement.units.findIndex(u => u.id === unitId);
+          if (uIdx !== -1) {
             const unit = settlement.units[uIdx];
-            if (unit) {
-              const player = state.players.find(pl => pl.id === settlement.ownerId);
-              if (player && !player.units.some(u => u.id === unitId)) {
-                player.units.push({ ...unit });
-              }
-              settlement.units.splice(uIdx, 1);
+            if (owner && !owner.units.some(u => u.id === unitId)) {
+              owner.units.push({ ...unit });
             }
-          } else {
-            // Check in settlement units or player units
-            let unit = settlement.units.find((u) => u.id === unitId);
-            if (!unit) {
-              const player = state.players.find(pl => pl.id === settlement.ownerId);
-              const pUnitIdx = player?.units.findIndex(u => u.id === unitId) ?? -1;
-              const pUnit = player?.units[pUnitIdx];
-              if (pUnit) {
-                unit = pUnit;
-                // Move to settlement units if assigned
-                settlement.units.push({ ...pUnit });
-              player.units.splice(pUnitIdx, 1);
+            settlement.units.splice(uIdx, 1);
+          }
+        } else {
+          // Check in settlement units or player units
+          let unit = settlement.units.find((u) => u.id === unitId);
+          if (!unit) {
+            const pUnitIdx = owner?.units.findIndex(u => u.id === unitId) ?? -1;
+            if (pUnitIdx !== -1) {
+              unit = owner!.units[pUnitIdx];
+              // Move to settlement units if assigned
+              settlement.units.push({ ...unit });
+              owner!.units.splice(pUnitIdx, 1);
               if (state.selectedUnitId === unitId) state.selectedUnitId = null;
-              }
             }
-
+          }
           if (unit) {
             settlement.workforce.set(unitId, job as any);
           }
