@@ -72,39 +72,39 @@ export const createSettlementSlice: StateCreator<
 
   assignJob: (settlementId, unitId, job) => {
     set((state) => {
-      const settlement = selectSettlementById(state, settlementId);
-      if (settlement) {
+        const settlement = selectSettlementById(state, settlementId);
         const owner = selectSettlementOwner(state, settlementId);
-        if (job === null) {
-          settlement.workforce.delete(unitId);
-          // Move unit back to player units if it was in the settlement
-          const uIdx = settlement.units.findIndex(u => u.id === unitId);
-          if (uIdx !== -1) {
+        if (settlement) {
+          if (job === null) {
+            settlement.workforce.delete(unitId);
+            // Move unit back to player units if it was in the settlement
+            const uIdx = settlement.units.findIndex(u => u.id === unitId);
             const unit = settlement.units[uIdx];
-            if (owner && !owner.units.some(u => u.id === unitId)) {
-              owner.units.push({ ...unit });
+            if (unit) {
+              if (owner && !owner.units.some(u => u.id === unitId)) {
+                owner.units.push({ ...unit });
+              }
+              settlement.units.splice(uIdx, 1);
             }
-            settlement.units.splice(uIdx, 1);
-          }
-        } else {
-          // Check in settlement units or player units
-          let unit = settlement.units.find((u) => u.id === unitId);
-          if (!unit) {
-            const pUnitIdx = owner?.units.findIndex(u => u.id === unitId) ?? -1;
-            if (pUnitIdx !== -1) {
-              unit = owner!.units[pUnitIdx];
-              // Move to settlement units if assigned
-              settlement.units.push({ ...unit });
-              owner!.units.splice(pUnitIdx, 1);
-              if (state.selectedUnitId === unitId) state.selectedUnitId = null;
+          } else {
+            // Check in settlement units or player units
+            const unit = settlement.units.find((u) => u.id === unitId);
+            if (!unit) {
+              const pUnitIdx = owner?.units.findIndex(u => u.id === unitId) ?? -1;
+              const pUnit = owner?.units[pUnitIdx];
+              if (pUnit) {
+                // Move to settlement units if assigned
+                settlement.units.push({ ...pUnit });
+                owner.units.splice(pUnitIdx, 1);
+                if (state.selectedUnitId === unitId) state.selectedUnitId = null;
+              }
+            }
+            if (unit) {
+              settlement.workforce.set(unitId, job as any);
             }
           }
-          if (unit) {
-            settlement.workforce.set(unitId, job as any);
-          }
+          settlement.population = settlement.workforce.size;
         }
-        settlement.population = settlement.workforce.size;
-      }
     });
   },
 });
