@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import * as Phaser from 'phaser';
 import { TerrainGenerator } from '../game/map/TerrainGenerator';
 import { TerrainRenderer } from '../game/map/TerrainRenderer';
 import { TerrainType } from '../game/entities/types';
