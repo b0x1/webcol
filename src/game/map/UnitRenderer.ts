@@ -2,7 +2,7 @@ import type Phaser from 'phaser';
 import type { Unit } from '../entities/Unit';
 import type { Player } from '../entities/Player';
 import type { TerrainRenderer } from './TerrainRenderer';
-import { isSame, toKey } from '../entities/Position';
+import { toKey } from '../entities/Position';
 
 export class UnitRenderer {
   public unitSprites: Phaser.GameObjects.Group;

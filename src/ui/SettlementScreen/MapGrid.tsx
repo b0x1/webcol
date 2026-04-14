@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { useGameStore } from '../../game/state/gameStore';
 import { Sprite } from '../Sprite';
 import { isSame, toKey, type Position } from '../../game/entities/Position';
+import type { Unit } from '../../game/entities/Unit';
 
 interface Props {
   settlementId: string;
@@ -20,12 +21,14 @@ export const MapGrid: React.FC<Props> = ({ settlementId }) => {
       groups.set(tileKey, list);
     });
     return groups;
-  }, [settlement?.workforce]);
+  }, [settlement]);
 
   const unitMap = useMemo(() => {
-    if (!settlement) return new Map<string, (typeof settlement.units)[0]>();
-    return new Map(settlement.units.map(u => [u.id, u]));
-  }, [settlement?.units]);
+    const map = new Map<string, Unit>();
+    if (!settlement) return map;
+    settlement.units.forEach(u => map.set(u.id, u));
+    return map;
+  }, [settlement]);
 
   if (!settlement) return null;
 
@@ -58,7 +61,9 @@ export const MapGrid: React.FC<Props> = ({ settlementId }) => {
 
         const tileKey = toKey(tile.position);
         const workerIds = workersByTile.get(tileKey) ?? [];
-        const workers = workerIds.map(id => unitMap.get(id)).filter(Boolean);
+        const workers = workerIds
+          .map(id => unitMap.get(id))
+          .filter((u): u is NonNullable<typeof u> => u !== undefined);
 
         const isSettlementTile = isSame(tile.position, settlement.position);
 
@@ -94,9 +99,7 @@ export const MapGrid: React.FC<Props> = ({ settlementId }) => {
             </div>
             {workers.length > 0 && (
               <div className="flex flex-wrap gap-0.5 justify-center p-1 z-20">
-                {workers.map(unit => {
-                  if (!unit) return null;
-                  return (
+                {workers.map(unit => (
                    <div
                     key={unit.id}
                     draggable
@@ -106,7 +109,7 @@ export const MapGrid: React.FC<Props> = ({ settlementId }) => {
                   >
                      <Sprite type={unit.type} category="units" size={40} />
                   </div>
-                );})}
+                ))}
               </div>
             )}
             {isSettlementTile && <div className="absolute inset-0 border-2 border-yellow-500/30 pointer-events-none" />}
