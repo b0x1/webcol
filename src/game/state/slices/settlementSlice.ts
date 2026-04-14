@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument */
 import type { StateCreator } from 'zustand';
 import type { GameState } from '../types';
-import { BuildingType } from '../../entities/types';
+import { BuildingType, type JobType } from '../../entities/types';
 import { SettlementSystem } from '../../systems/SettlementSystem';
 import { NamingSystem } from '../../systems/NamingSystem';
 import { TraversalUtils } from '../../utils/TraversalUtils';
@@ -108,7 +107,7 @@ export const createSettlementSlice: StateCreator<
                 unit.occupation = { kind: 'FIELD_WORK', tileX: x, tileY: y };
               }
             } else {
-              unit.occupation = job as any;
+              unit.occupation = job as JobType;
             }
           }
         }

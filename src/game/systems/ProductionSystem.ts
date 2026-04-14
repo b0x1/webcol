@@ -1,6 +1,6 @@
 import type { Settlement } from '../entities/Settlement';
 import type { Tile } from '../entities/Tile';
-import { BuildingType, GoodType, JobType } from '../entities/types';
+import { BuildingType, GoodType } from '../entities/types';
 import { JOB_PRODUCTION_RULES, TERRAIN_PRODUCTION_RULES } from '../rules/ProductionRules';
 import { COLONY_CONSTANTS } from '../constants';
 

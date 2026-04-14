@@ -81,19 +81,17 @@ export const MapGrid: React.FC<Props> = ({ settlementId }) => {
             </div>
             {workers.length > 0 && (
               <div className="flex flex-wrap gap-0.5 justify-center p-1 z-20">
-                {workers.map(unit => {
-                  if (!unit) return null;
-                  return (
-                   <div
+                {workers.map(unit => (
+                  <div
                     key={unit.id}
                     draggable
                     onDragStart={(e) => { handleDragStart(e, unit.id); }}
                     className="w-10 h-10 bg-blue-600/40 rounded-full border border-white/20 shadow-sm relative overflow-hidden cursor-grab active:cursor-grabbing"
                     title={unit.type}
                   >
-                     <Sprite type={unit.type} category="units" size={40} />
+                    <Sprite type={unit.type} category="units" size={40} />
                   </div>
-                );})}
+                ))}
               </div>
             )}
             {isSettlementTile && <div className="absolute inset-0 border-2 border-yellow-500/30 pointer-events-none" />}

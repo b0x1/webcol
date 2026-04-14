@@ -65,20 +65,17 @@ export const BuildingSlots: React.FC<Props> = ({ settlementId, ownedBuildings })
 
             <div className="flex gap-1 mt-auto pt-2 border-t border-slate-700/50 h-12">
               {workers.length > 0 ? (
-                workers.map(unit => {
-                  if (!unit) return null;
-                  return (
-                    <div
-                      key={unit.id}
-                      draggable
-                      onDragStart={(e) => { handleDragStart(e, unit.id); }}
-                      title={`${unit.type}${unit.expertise ? ` (Expert ${unit.expertise})` : ''}`}
-                      className="w-10 h-10 bg-blue-600/40 rounded border border-blue-400/30 shadow-sm flex items-center justify-center relative overflow-hidden cursor-grab active:cursor-grabbing"
-                    >
-                      <Sprite type={unit.type} category="units" size={40} />
-                    </div>
-                  );
-                })
+                workers.map(unit => (
+                  <div
+                    key={unit.id}
+                    draggable
+                    onDragStart={(e) => { handleDragStart(e, unit.id); }}
+                    title={`${unit.type}${unit.expertise ? ` (Expert ${unit.expertise})` : ''}`}
+                    className="w-10 h-10 bg-blue-600/40 rounded border border-blue-400/30 shadow-sm flex items-center justify-center relative overflow-hidden cursor-grab active:cursor-grabbing"
+                  >
+                    <Sprite type={unit.type} category="units" size={40} />
+                  </div>
+                ))
               ) : (
                 <div className="text-[8px] text-slate-600 uppercase font-bold tracking-tighter self-center">Empty</div>
               )}

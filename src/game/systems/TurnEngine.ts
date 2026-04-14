@@ -1,7 +1,7 @@
 import type { Player } from '../entities/Player';
 import type { Tile } from '../entities/Tile';
 import type { Settlement } from '../entities/Settlement';
-import { GoodType, UnitType, JobType, BuildingType } from '../entities/types';
+import { GoodType, UnitType, BuildingType } from '../entities/types';
 import { BUILDING_COSTS, COLONY_CONSTANTS, UNIT_BUILD_COSTS } from '../constants';
 import { createUnit } from '../entities/Unit';
 import { ProductionSystem } from './ProductionSystem';

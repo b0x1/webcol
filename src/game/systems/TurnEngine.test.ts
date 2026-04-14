@@ -5,7 +5,7 @@ import { createPlayer } from './../entities/Player';
 import { createTile } from './../entities/Tile';
 import { createSettlement } from './../entities/Settlement';
 import { createUnit } from './../entities/Unit';
-import { TerrainType, GoodType, UnitType, JobType, Nation } from './../entities/types';
+import { TerrainType, GoodType, UnitType, Nation } from './../entities/types';
 
 import type { Tile } from '../entities/Tile';
 
