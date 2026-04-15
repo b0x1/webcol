@@ -3,7 +3,6 @@ import type { Tile } from '../entities/Tile';
 import type { Settlement } from '../entities/Settlement';
 import { Nation, UnitType, TerrainType, Attitude, ResourceType } from '../entities/types';
 import { TerrainGenerator } from '../map/TerrainGenerator';
-import { RESOURCE_TERRAIN_RULES } from '../rules/ResourceRules';
 import { NATION_BONUSES } from '../constants';
 import type { Unit } from '../entities/Unit';
 import { NamingSystem, type NamingStats } from './NamingSystem';
@@ -47,23 +46,14 @@ export class GameSystem {
           movementCost: 1, // Default, will be overridden by MovementSystem
           hasResource: null,
         };
-        const possibleResources = (Object.keys(RESOURCE_TERRAIN_RULES) as ResourceType[]).filter(res =>
-          RESOURCE_TERRAIN_RULES[res].includes(type)
-        );
-
-        if (possibleResources.length > 0) {
-          // Check for each possible resource based on a probability
-          for (const res of possibleResources) {
-            let probability = 0.05;
-            if (res === ResourceType.TIMBER || res === ResourceType.FERTILE_LAND) {
-              probability = 0.1;
-            }
-
-            if (random() < probability) {
-              tile.hasResource = res;
-              break; // Only one resource per tile
-            }
-          }
+        if (type === TerrainType.OCEAN && random() < 0.05) {
+          tile.hasResource = ResourceType.FISH;
+        } else if (type === TerrainType.FOREST && random() < 0.1) {
+          tile.hasResource = ResourceType.TIMBER;
+        } else if (type === TerrainType.PLAINS && random() < 0.05) {
+          tile.hasResource = ResourceType.ORE_DEPOSIT;
+        } else if (type === TerrainType.PLAINS && random() < 0.1) {
+          tile.hasResource = ResourceType.FERTILE_LAND;
         }
         return tile;
       })

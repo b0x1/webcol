@@ -17,8 +17,8 @@ export interface AISystemResult {
   readonly effects: readonly AIUnitMovedEffect[];
 }
 
-/* eslint-disable-next-line @typescript-eslint/no-extraneous-class */
-export class AISystem {
+
+export class AISystem {  // eslint-disable-line @typescript-eslint/no-extraneous-class
   private constructor() {
     // Static utility class
   }
@@ -30,149 +30,7 @@ export class AISystem {
     _random: () => number,
     _generateId: (prefix: string) => string
   ): AISystemResult {
-<<<<<<< HEAD
     // Simplified dummy AISystem
     return { players, namingStats, effects: [] };
-||||||| 2f21516
-    let currentNamingStats = { ...namingStats };
-    const effects: AIUnitMovedEffect[] = [];
-
-    const updatedPlayers = players.map((p) => ({
-      ...p,
-      units: p.units.map(u => ({ ...u, cargo: new Map(u.cargo) })),
-      settlements: p.settlements.map(c => ({
-        ...c,
-        buildings: [...c.buildings],
-        productionQueue: [...c.productionQueue],
-        inventory: new Map(c.inventory),
-        workforce: new Map(c.workforce),
-        units: c.units.map(u => ({ ...u, cargo: new Map(u.cargo) })),
-        goods: new Map(c.goods),
-      }))
-    }));
-
-    for (const player of updatedPlayers) {
-      if (player.isHuman) continue;
-
-      let unitIndex = 0;
-      const playerUnits = player.units;
-      while (unitIndex < playerUnits.length) {
-        const unit = playerUnits[unitIndex];
-        if (!unit) {
-          unitIndex++;
-          continue;
-        }
-
-        if (unit.movesRemaining <= 0) {
-          unitIndex++;
-          continue;
-        }
-
-        let unitRemoved = false;
-
-        if (unit.type === UnitType.COLONIST || unit.type === UnitType.VILLAGER) {
-          const pos = unit.position;
-          const currentTile = map[pos.y]?.[pos.x];
-          const nationData = NATION_BONUSES[player.nation];
-          if (nationData && currentTile && (currentTile.terrainType === TerrainType.PLAINS || currentTile.terrainType === TerrainType.GRASSLAND || currentTile.terrainType === TerrainType.PRAIRIE)) {
-            const hasAdjacentSettlement = TraversalUtils.getAllSettlements(updatedPlayers).some(
-              (c) => distance(c.position, pos) <= 1,
-            );
-            if (!hasAdjacentSettlement) {
-              const { name: settlementName, updatedStats } = NamingSystem.getNextName(player.nation, 'settlement', currentNamingStats);
-              currentNamingStats = updatedStats;
-
-              const newSettlement: Settlement = {
-                id: generateId('settlement-ai'),
-                ownerId: player.id,
-                name: settlementName,
-                position: { ...pos },
-                population: 1,
-                culture: nationData.culture,
-                organization: nationData.organization,
-                buildings: [],
-                inventory: new Map(),
-                productionQueue: [],
-                workforce: new Map(),
-                units: [],
-                attitude: Attitude.NEUTRAL,
-                goods: new Map(),
-                hammers: 0,
-              };
-              player.settlements.push(newSettlement);
-              playerUnits.splice(unitIndex, 1);
-              unitRemoved = true;
-            }
-          }
-        }
-
-        if (!unitRemoved) {
-          const allSettlements = TraversalUtils.getAllSettlements(updatedPlayers);
-          const target = this.findNearestTarget(unit, map, allSettlements);
-          if (target) {
-            const dx = Math.sign(target.x - unit.position.x);
-            const dy = Math.sign(target.y - unit.position.y);
-
-            const nx = unit.position.x + dx;
-            const ny = unit.position.y + dy;
-
-            const targetTile = map[ny]?.[nx];
-            if (targetTile) {
-              if (unit.movesRemaining >= targetTile.movementCost) {
-                const fromX = unit.position.x;
-                const fromY = unit.position.y;
-                unit.position.x = nx;
-                unit.position.y = ny;
-                unit.movesRemaining -= targetTile.movementCost;
-                effects.push({ type: 'unitMoved', id: unit.id, fromX, fromY, toX: nx, toY: ny });
-              }
-            }
-          }
-          unitIndex++;
-        }
-      }
-    }
-
-    return { players: updatedPlayers, namingStats: currentNamingStats, effects };
-  }
-
-  private static findNearestTarget(
-    unit: Unit,
-    map: Tile[][],
-    allSettlements: Settlement[],
-  ): Position | null {
-    let nearest: Position | null = null;
-    let minDistance = Infinity;
-
-    for (let y = 0; y < map.length; y++) {
-      const row = map[y];
-      if (!row) continue;
-      for (let x = 0; x < row.length; x++) {
-        const tile = row[x];
-        if (!tile) continue;
-        const isTargetType =
-          tile.terrainType === TerrainType.PLAINS || tile.hasResource === ResourceType.FOREST;
-        if (!isTargetType) continue;
-
-        const pos = { x, y };
-        const isColonized = allSettlements.some((c) => isSame(c.position, pos));
-        if (isColonized) continue;
-
-        const dist = distance(pos, unit.position);
-        if (dist > 0 && dist < minDistance) {
-          minDistance = dist;
-          nearest = { x, y };
-        }
-      }
-    }
-    return nearest;
-=======
-    // AI is currently disabled/unused, returning players unchanged
-    return {
-      players: [...players],
-      namingStats: { ...namingStats },
-      effects: [],
-    };
->>>>>>> main
   }
 }

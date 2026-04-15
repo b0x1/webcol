@@ -1,21 +1,27 @@
 import { describe, it, expect } from 'vitest';
 import { TurnEngine } from './TurnEngine';
+import { AISystem } from './AISystem';
 import { createPlayer } from './../entities/Player';
+import { createTile } from './../entities/Tile';
 import { createSettlement } from './../entities/Settlement';
 import { createUnit } from './../entities/Unit';
-<<<<<<< HEAD
 import { TerrainType, GoodType, UnitType, Nation } from './../entities/types';
 
 import type { Tile } from '../entities/Tile';
-||||||| 2f21516
-import { TerrainType, GoodType, UnitType, JobType, Nation } from './../entities/types';
-
-import type { Tile } from '../entities/Tile';
-=======
-import { GoodType, UnitType, JobType, Nation } from './../entities/types';
->>>>>>> main
 
 describe('TurnEngine', () => {
+  const createMap = (width: number, height: number): Tile[][] => {
+    const map: Tile[][] = [];
+    for (let y = 0; y < height; y++) {
+      const row: Tile[] = [];
+      for (let x = 0; x < width; x++) {
+        row.push(createTile(`${x}-${y}`, x, y, TerrainType.GRASSLAND, 1));
+      }
+      map.push(row);
+    }
+    return map;
+  };
+
   describe('runProduction', () => {
     it('should calculate food based on workforce and population consumption', () => {
       const player = createPlayer('p1', 'Player 1', true, 0, Nation.FRANCE);
@@ -45,7 +51,6 @@ describe('TurnEngine', () => {
     });
   });
 
-<<<<<<< HEAD
   describe('runAITurn', () => {
     it('should be a dummy and do nothing', () => {
       const map = createMap(10, 10);
@@ -62,74 +67,4 @@ describe('TurnEngine', () => {
       expect(effects).toEqual([]);
     });
   });
-||||||| 2f21516
-  describe('runAITurn', () => {
-    it('should move AI unit toward nearest uncolonized target', () => {
-      const map = createMap(10, 10);
-      // All GRASSLAND by default
-      // Set (5,5) as PLAINS (target)
-      const tile = map[5]?.[5];
-      if (tile) tile.terrainType = TerrainType.PLAINS;
-
-      const human = createPlayer('p1', 'Human', true, 0, Nation.SPAIN);
-      const ai = createPlayer('p2', 'AI', false, 0, Nation.NORSEMEN);
-      const unit = createUnit('u1', 'p2', 'Test Unit', UnitType.SOLDIER, 0, 0, 1);
-      ai.units.push(unit);
-
-      const { players: updatedPlayers, effects } = AISystem.runAITurn([human, ai], map, {}, () => 0.5, (p) => `${p}-test`);
-      const updatedUnit = updatedPlayers[1]?.units[0];
-      if (!updatedUnit) throw new Error('Unit not found');
-
-      // Unit should move from (0,0) towards (5,5)
-      // One step diagonally towards (5,5) is (1,1)
-      expect(updatedUnit.position.x).toBe(1);
-      expect(updatedUnit.position.y).toBe(1);
-      expect(updatedUnit.movesRemaining).toBe(0);
-      expect(effects).toEqual([
-        { type: 'unitMoved', id: 'u1', fromX: 0, fromY: 0, toX: 1, toY: 1 },
-      ]);
-    });
-
-    it('should found a settlement if AI COLONIST is on PLAINS and no adjacent friendly settlement', () => {
-      const map = createMap(10, 10);
-      const tile = map[2]?.[2];
-      if (tile) tile.terrainType = TerrainType.PLAINS;
-
-      const ai = createPlayer('p1', 'AI', false, 0, Nation.PORTUGAL);
-      const unit = createUnit('u1', 'p1', 'Test Unit', UnitType.COLONIST, 2, 2, 1);
-      ai.units.push(unit);
-
-      const { players: updatedPlayers } = AISystem.runAITurn([ai], map, {}, () => 0.5, (p) => `${p}-test`);
-      const updatedAI = updatedPlayers[0];
-      if (!updatedAI) throw new Error('AI player not found');
-
-      expect(updatedAI.settlements.length).toBe(1);
-      expect(updatedAI.units.length).toBe(0);
-      expect(updatedAI.settlements[0]?.position.x).toBe(2);
-      expect(updatedAI.settlements[0]?.position.y).toBe(2);
-    });
-
-    it('should not found a settlement if there is an adjacent friendly settlement', () => {
-        const map = createMap(10, 10);
-        const tile = map[2]?.[2];
-        if (tile) tile.terrainType = TerrainType.PLAINS;
-
-        const ai = createPlayer('p1', 'AI', false, 0, Nation.NETHERLANDS);
-        const settlement = createSettlement('c1', 'p1', 'Col1', 3, 3, 1, 'EUROPEAN', 'STATE');
-        ai.settlements.push(settlement);
-        const unit = createUnit('u1', 'p1', 'Test Unit', UnitType.COLONIST, 2, 2, 1);
-        ai.units.push(unit);
-
-        const { players: updatedPlayers } = AISystem.runAITurn([ai], map, {}, () => 0.5, (p) => `${p}-test`);
-        const updatedAI = updatedPlayers[0];
-        if (!updatedAI) throw new Error('AI player not found');
-
-        expect(updatedAI.settlements.length).toBe(1); // Only the existing one
-        expect(updatedAI.units.length).toBe(1);
-        expect(updatedAI.units[0]?.position.x).toBe(2);
-        expect(updatedAI.units[0]?.position.y).toBe(2);
-      });
-  });
-=======
->>>>>>> main
 });
