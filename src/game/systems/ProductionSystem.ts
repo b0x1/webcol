@@ -1,6 +1,6 @@
 import type { Settlement } from '../entities/Settlement';
 import type { Tile } from '../entities/Tile';
-import { BuildingType, GoodType, JobType } from '../entities/types';
+import { BuildingType, GoodType } from '../entities/types';
 import { JOB_PRODUCTION_RULES, TERRAIN_PRODUCTION_RULES } from '../rules/ProductionRules';
 import { COLONY_CONSTANTS } from '../constants';
 
@@ -23,25 +23,17 @@ export class ProductionSystem {
     // Optimization: Pre-initialize with ALL_GOOD_TYPES to avoid repeated Object.values calls
     ALL_GOOD_TYPES.forEach((good) => netProduction.set(good, 0));
 
-    // Optimization: Index units by ID for O(1) lookup in the workforce loop
-    const unitMap = new Map(settlement.units.map(u => [u.id, u]));
-
     // 1. Workforce production
-    settlement.workforce.forEach((assignment, unitId) => {
-      const unit = unitMap.get(unitId);
+    settlement.units.forEach((unit) => {
       let amount = COLONY_CONSTANTS.PRODUCTION_PER_WORKER;
 
-      if (unit?.specialty === assignment) {
-        amount *= 2;
-      }
+      if (typeof unit.occupation === 'string') {
+        const job = unit.occupation;
+        if (unit.expertise === job) {
+          amount *= 2;
+        }
 
-      if (Object.values(JobType).includes(assignment as JobType)) {
-        const rule = JOB_PRODUCTION_RULES[assignment as JobType];
-        // Tier system: check if player has the highest possible building from the list
-        // For now, the rule says any listed building is required.
-        // But usually, higher buildings give more production.
-        // Let's refine it: if there are required buildings, the unit can ONLY work if they have AT LEAST one.
-        // AND, if it's a refined good (inputGood exists), they MUST have a building.
+        const rule = JOB_PRODUCTION_RULES[job];
         const needsBuilding = rule.requiredBuildings.length > 0;
         const hasBuilding =
           !needsBuilding ||
@@ -75,19 +67,17 @@ export class ProductionSystem {
             );
           }
         }
-      } else {
-        // Tile-based
-        const parts = (assignment).split(',');
-        const p0 = parts[0];
-        const p1 = parts[1];
-        if (p0 !== undefined && p1 !== undefined) {
-          const tx = parseInt(p0, 10);
-          const ty = parseInt(p1, 10);
-          const tile = map[ty]?.[tx];
-          const good = tile ? TERRAIN_PRODUCTION_RULES[tile.terrainType] : null;
-          if (good) {
-            netProduction.set(good, (netProduction.get(good) ?? 0) + amount);
-          }
+      } else if (unit.occupation.kind === 'FIELD_WORK') {
+        const { tileX, tileY } = unit.occupation;
+        const tile = map[tileY]?.[tileX];
+        const good = tile ? TERRAIN_PRODUCTION_RULES[tile.terrainType] : null;
+        if (good) {
+          // If specialized in something that matches the terrain good (e.g. LUMBERJACK for FOREST)
+          // Actually, JobType doesn't perfectly map to TerrainProduction but we can check.
+          // For now keep it simple or check against expertise if it matches the produced good.
+          // Note: JobType.FARMER is removed, but we might want to check for something else?
+          // Actually, original code didn't have specialty bonus for tile production.
+          netProduction.set(good, (netProduction.get(good) ?? 0) + amount);
         }
       }
     });
@@ -101,7 +91,8 @@ export class ProductionSystem {
     }
 
     // 3. Food consumption
-    const foodConsumption = settlement.workforce.size * COLONY_CONSTANTS.FOOD_CONSUMPTION_PER_CITIZEN;
+    // Population is defined as number of units in the settlement
+    const foodConsumption = settlement.units.length * COLONY_CONSTANTS.FOOD_CONSUMPTION_PER_CITIZEN;
     netProduction.set(GoodType.FOOD, (netProduction.get(GoodType.FOOD) ?? 0) - foodConsumption);
 
     return { netProduction, hammersProduced };

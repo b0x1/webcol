@@ -1,7 +1,7 @@
 import type { Player } from '../entities/Player';
 import type { Tile } from '../entities/Tile';
 import type { Settlement } from '../entities/Settlement';
-import { GoodType, UnitType, JobType, BuildingType } from '../entities/types';
+import { GoodType, UnitType, BuildingType } from '../entities/types';
 import { BUILDING_COSTS, COLONY_CONSTANTS, UNIT_BUILD_COSTS } from '../constants';
 import { createUnit } from '../entities/Unit';
 import { ProductionSystem } from './ProductionSystem';
@@ -42,21 +42,18 @@ export class TurnEngine {
           buildings: [...settlement.buildings],
           productionQueue: [...settlement.productionQueue],
           inventory: new Map(settlement.inventory),
-          workforce: new Map(settlement.workforce),
           units: settlement.units.map((u) => ({ ...u, cargo: new Map(u.cargo) })),
           goods: new Map(settlement.goods),
         };
+        newSettlement.population = newSettlement.units.length;
 
         // Increment turns in job and handle specialty promotion
-        newSettlement.workforce.forEach((assignment, unitId) => {
-          const unit = newSettlement.units.find((u) => u.id === unitId);
-          if (!unit) return;
-
+        newSettlement.units.forEach((unit) => {
           unit.turnsInJob += 1;
-          if (unit.turnsInJob >= COLONY_CONSTANTS.EXPERT_PROMOTION_TURNS && !unit.specialty) {
-            if (Object.values(JobType).includes(assignment as JobType)) {
-              unit.specialty = assignment as JobType;
-              effects.push({ type: 'notification', message: `${unit.type} has become an expert ${unit.specialty}!` });
+          if (unit.turnsInJob >= COLONY_CONSTANTS.EXPERT_PROMOTION_TURNS && !unit.expertise) {
+            if (typeof unit.occupation === 'string') {
+              unit.expertise = unit.occupation;
+              effects.push({ type: 'notification', message: `${unit.type} has become an expert ${unit.expertise}!` });
             }
           }
         });

@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument */
 import type { StateCreator } from 'zustand';
 import type { GameState } from '../types';
-import { BuildingType } from '../../entities/types';
+import { BuildingType, type JobType } from '../../entities/types';
 import { SettlementSystem } from '../../systems/SettlementSystem';
 import { NamingSystem } from '../../systems/NamingSystem';
 import { TraversalUtils } from '../../utils/TraversalUtils';
@@ -76,34 +75,43 @@ export const createSettlementSlice: StateCreator<
       if (settlement) {
         const owner = selectSettlementOwner(state, settlementId);
         if (job === null) {
-          settlement.workforce.delete(unitId);
-          // Move unit back to player units if it was in the settlement
+          // Setting job to null means move to RURE (outside workforce)
           const uIdx = settlement.units.findIndex(u => u.id === unitId);
           const unit = settlement.units[uIdx];
           if (unit) {
+            unit.occupation = { kind: 'RURE', state: 'MOVING' };
             if (owner && !owner.units.some(u => u.id === unitId)) {
               owner.units.push({ ...unit });
             }
             settlement.units.splice(uIdx, 1);
           }
         } else {
-          // Check in settlement units or player units
-          const unit = settlement.units.find((u) => u.id === unitId);
+          // Job can be a JobType string or a tile key "x,y"
+          let unit = settlement.units.find((u) => u.id === unitId);
           if (!unit) {
             const pUnitIdx = owner?.units.findIndex(u => u.id === unitId) ?? -1;
             const pUnit = owner?.units[pUnitIdx];
             if (pUnit) {
               // Move to settlement units if assigned
-              settlement.units.push({ ...pUnit });
+              unit = { ...pUnit };
+              settlement.units.push(unit);
               owner.units.splice(pUnitIdx, 1);
               if (state.selectedUnitId === unitId) state.selectedUnitId = null;
             }
           }
+
           if (unit) {
-            settlement.workforce.set(unitId, job as any);
+            if (job.includes(',')) {
+              const [x, y] = job.split(',').map(Number);
+              if (x !== undefined && y !== undefined) {
+                unit.occupation = { kind: 'FIELD_WORK', tileX: x, tileY: y };
+              }
+            } else {
+              unit.occupation = job as JobType;
+            }
           }
         }
-        settlement.population = settlement.workforce.size;
+        settlement.population = settlement.units.length;
       }
     });
   },

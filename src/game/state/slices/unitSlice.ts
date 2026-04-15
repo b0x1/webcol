@@ -156,6 +156,7 @@ export const createUnitSlice: StateCreator<
         maxMoves: 1,
         isSkipping: false,
         cargo: new Map(),
+        occupation: { kind: 'RURE', state: 'MOVING' },
         turnsInJob: 0,
       });
     });

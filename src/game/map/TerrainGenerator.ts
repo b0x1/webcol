@@ -118,7 +118,6 @@ export class TerrainGenerator {
         buildings: [],
         inventory: new Map(),
         productionQueue: [],
-        workforce: new Map(),
         units: [],
         goods: new Map([
           [GoodType.FOOD, 50 + Math.floor(this.random() * 50)],

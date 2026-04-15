@@ -47,6 +47,7 @@ export class GameSystem {
           movementCost: 1, // Default, will be overridden by MovementSystem
           hasResource: null,
         };
+
         const possibleResources = (Object.keys(RESOURCE_TERRAIN_RULES) as ResourceType[]).filter(res =>
           RESOURCE_TERRAIN_RULES[res].includes(type)
         );
@@ -172,7 +173,6 @@ export class GameSystem {
         buildings: [],
         inventory: new Map(),
         productionQueue: [],
-        workforce: new Map(),
         units: [],
         attitude: 'NEUTRAL',
         goods: new Map(),
@@ -291,6 +291,7 @@ export class GameSystem {
       maxMoves: moves,
       isSkipping: false,
       cargo: new Map(),
+      occupation: { kind: 'RURE', state: 'MOVING' },
       turnsInJob: 0,
     };
   }

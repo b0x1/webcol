@@ -51,11 +51,6 @@ export const JOB_PRODUCTION_RULES: Record<JobType, ProductionRule> = {
     outputGood: GoodType.CLOTH,
     requiredBuildings: [BuildingType.WEAVERS_SHOP],
   },
-  [JobType.FARMER]: {
-    jobType: JobType.FARMER,
-    outputGood: GoodType.FOOD,
-    requiredBuildings: [],
-  },
   [JobType.LUMBERJACK]: {
     jobType: JobType.LUMBERJACK,
     outputGood: GoodType.LUMBER,

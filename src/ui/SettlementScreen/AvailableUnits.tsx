@@ -14,8 +14,12 @@ export const AvailableUnits: React.FC<Props> = ({ settlementId, units }) => {
   const settlement = players.flatMap(p => p.settlements).find(s => s.id === settlementId);
   if (!settlement) return null;
 
-  const assignedUnitIds = Array.from(settlement.workforce.keys());
-  const availableUnits = units.filter(u => !assignedUnitIds.includes(u.id));
+  const availableUnits = units.filter(u => {
+    const occ = u.occupation;
+    if (typeof occ !== 'object') return false;
+    if (occ.kind === 'RURE') return true;
+    return occ.tileX === settlement.position.x && occ.tileY === settlement.position.y;
+  });
 
   const handleDragStart = (e: React.DragEvent, unitId: string) => {
     e.dataTransfer.setData('unitId', unitId);
@@ -50,7 +54,7 @@ export const AvailableUnits: React.FC<Props> = ({ settlementId, units }) => {
               </div>
               <div className="text-center w-full">
                 <div className="text-[10px] font-black uppercase tracking-widest text-blue-400 truncate w-full">{unit.type}</div>
-                {unit.specialty && <div className="text-[8px] text-yellow-500 font-black uppercase tracking-tighter truncate w-full">Expert {unit.specialty}</div>}
+                {unit.expertise && <div className="text-[8px] text-yellow-500 font-black uppercase tracking-tighter truncate w-full">Expert {unit.expertise}</div>}
                 <div className="text-[8px] text-slate-500 font-mono mt-0.5">ID: {unit.id.slice(0, 4)}</div>
               </div>
             </div>

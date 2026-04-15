@@ -135,8 +135,9 @@ export const createInteractionSlice: StateCreator<
           const sIdx = capturedSettlementPlayer.settlements.findIndex(s => s.id === defender.id);
            const s = capturedSettlementPlayer.settlements[sIdx];
            if (s) {
-             if (s.population > 1) {
-                s.population -= 1;
+             if (s.units.length > 1) {
+                s.units.pop();
+                s.population = s.units.length;
              }
 
              attacker.position = { ...target };

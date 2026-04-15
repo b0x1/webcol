@@ -17,8 +17,8 @@ export interface AISystemResult {
   readonly effects: readonly AIUnitMovedEffect[];
 }
 
-/* eslint-disable-next-line @typescript-eslint/no-extraneous-class */
-export class AISystem {
+
+export class AISystem {  // eslint-disable-line @typescript-eslint/no-extraneous-class
   private constructor() {
     // Static utility class
   }
@@ -30,11 +30,7 @@ export class AISystem {
     _random: () => number,
     _generateId: (prefix: string) => string
   ): AISystemResult {
-    // AI is currently disabled/unused, returning players unchanged
-    return {
-      players: [...players],
-      namingStats: { ...namingStats },
-      effects: [],
-    };
+    // Simplified dummy AISystem
+    return { players, namingStats, effects: [] };
   }
 }

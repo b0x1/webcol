@@ -71,7 +71,6 @@ export const BuildingType = {
 export type BuildingType = (typeof BuildingType)[keyof typeof BuildingType];
 
 export const JobType = {
-  FARMER: 'FARMER',
   LUMBERJACK: 'LUMBERJACK',
   MINER: 'MINER',
   TOBACCONIST: 'TOBACCONIST',
@@ -83,6 +82,26 @@ export const JobType = {
   ARMORER: 'ARMORER',
 } as const;
 export type JobType = (typeof JobType)[keyof typeof JobType];
+
+export const RureState = {
+  MOVING: 'MOVING',
+  SLEEPING: 'SLEEPING',
+  FORTIFIED: 'FORTIFIED',
+} as const;
+export type RureState = (typeof RureState)[keyof typeof RureState];
+
+export interface Rure {
+  kind: 'RURE';
+  state: RureState;
+}
+
+export interface FieldWork {
+  kind: 'FIELD_WORK';
+  tileX: number;
+  tileY: number;
+}
+
+export type Occupation = JobType | FieldWork | Rure;
 
 export const TurnPhase = {
   MOVEMENT: 'MOVEMENT',

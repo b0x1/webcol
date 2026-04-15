@@ -12,9 +12,9 @@ describe('TurnEngine Production', () => {
     const settlement = createSettlement('s1', 'p1', 'Settlement 1', 5, 5, 1, 'EUROPEAN', 'STATE');
     const unit = createUnit('u1', 'p1', 'Test Unit', UnitType.COLONIST, 5, 5, 1);
     unit.turnsInJob = COLONY_CONSTANTS.EXPERT_PROMOTION_TURNS - 1;
+    unit.occupation = JobType.LUMBERJACK;
 
     settlement.units.push(unit);
-    settlement.workforce.set(unit.id, JobType.FARMER);
     player.settlements.push(settlement);
 
     const { players: updatedPlayers, effects } = TurnEngine.runProduction([player], [], {}, () => 0.5, (p) => `${p}-test`);
@@ -22,10 +22,10 @@ describe('TurnEngine Production', () => {
     if (!updatedUnit) throw new Error('Unit not found');
 
     expect(updatedUnit.turnsInJob).toBe(COLONY_CONSTANTS.EXPERT_PROMOTION_TURNS);
-    expect(updatedUnit.specialty).toBe(JobType.FARMER);
+    expect(updatedUnit.expertise).toBe(JobType.LUMBERJACK);
     expect(effects).toContainEqual({
       type: 'notification',
-      message: `${unit.type} has become an expert ${JobType.FARMER}!`,
+      message: `${unit.type} has become an expert ${JobType.LUMBERJACK}!`,
     });
   });
 
@@ -33,11 +33,11 @@ describe('TurnEngine Production', () => {
     const player = createPlayer('p1', 'Player 1', true, 0, Nation.ENGLAND);
     const settlement = createSettlement('s1', 'p1', 'Settlement 1', 5, 5, 1, 'EUROPEAN', 'STATE');
     const unit = createUnit('u1', 'p1', 'Test Unit', UnitType.COLONIST, 5, 5, 1);
+    unit.occupation = JobType.BLACKSMITH;
 
     settlement.inventory.set(GoodType.ORE, 10);
     settlement.buildings.push(BuildingType.BLACKSMITHS_HOUSE);
     settlement.units.push(unit);
-    settlement.workforce.set(unit.id, JobType.BLACKSMITH);
     player.settlements.push(settlement);
 
     const { players: updatedPlayers } = TurnEngine.runProduction([player], [], {}, () => 0.5, (p) => `${p}-test`);
@@ -53,6 +53,7 @@ describe('TurnEngine Production', () => {
     const player = createPlayer('p1', 'Player 1', true, 0, Nation.ENGLAND);
     const settlement = createSettlement('s1', 'p1', 'Settlement 1', 5, 5, 1, 'EUROPEAN', 'STATE');
     const unit = createUnit('u1', 'p1', 'Test Unit', UnitType.COLONIST, 5, 5, 1);
+    unit.occupation = JobType.CARPENTER;
 
     // Warehouse costs 40 hammers, 0 tools
     settlement.productionQueue.push(BuildingType.WAREHOUSE);
@@ -61,7 +62,6 @@ describe('TurnEngine Production', () => {
     settlement.buildings.push(BuildingType.CARPENTERS_SHOP);
 
     settlement.units.push(unit);
-    settlement.workforce.set(unit.id, JobType.CARPENTER);
     player.settlements.push(settlement);
 
     const { players: updatedPlayers } = TurnEngine.runProduction([player], [], {}, () => 0.5, (p) => `${p}-test`);
@@ -86,7 +86,7 @@ describe('TurnEngine Production', () => {
     const updatedSettlement = updatedPlayer0?.settlements[0];
     if (!updatedSettlement) throw new Error('Settlement not found');
 
-    expect(updatedSettlement.population).toBe(1); // Population is workforce size
+    expect(updatedSettlement.population).toBe(0);
     expect(updatedSettlement.inventory.get(GoodType.FOOD)).toBe(5); // 205 - 200 (threshold)
     expect(updatedSettlement.units.length).toBe(0);
     expect(updatedPlayer0.units.length).toBe(1); // Born unit is outside

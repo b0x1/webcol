@@ -5,7 +5,7 @@ import type { Tile } from '../entities/Tile';
 import type { BuildingType} from '../entities/types';
 import { UnitType, TerrainType } from '../entities/types';
 import { NATION_BONUSES } from '../constants';
-import { distance, getNeighbors, toKey } from '../entities/Position';
+import { distance, getNeighbors } from '../entities/Position';
 
 /* eslint-disable-next-line @typescript-eslint/no-extraneous-class */
 export class SettlementSystem {
@@ -31,6 +31,15 @@ export class SettlementSystem {
       throw new Error('No valid neighbors for settlement creation');
     }
 
+    const foundingUnit = {
+      ...unit,
+      occupation: {
+        kind: 'FIELD_WORK',
+        tileX: randomNeighbor.x,
+        tileY: randomNeighbor.y,
+      } as const,
+    };
+
     return {
       id: generateId('settlement'),
       ownerId: player.id,
@@ -42,8 +51,7 @@ export class SettlementSystem {
       buildings: [...buildings],
       inventory: new Map(),
       productionQueue: [],
-      workforce: new Map([[unit.id, toKey(randomNeighbor)]]),
-      units: [{ ...unit }],
+      units: [foundingUnit],
       attitude: 'NEUTRAL',
       goods: new Map(),
       hammers: 0,

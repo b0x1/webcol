@@ -30,7 +30,7 @@ describe('SaveSystem serialization round-trip', () => {
     const settlement1 = createSettlement('c1', 'p1', 'Settlement 1', 10, 10, 2, 'EUROPEAN', 'STATE');
     settlement1.buildings.push(BuildingType.WAREHOUSE);
     settlement1.inventory.set(GoodType.LUMBER, 100);
-    settlement1.workforce.set('u1', JobType.FARMER);
+    settlement1.units.push({ ...unit1, occupation: JobType.LUMBERJACK });
     player1.settlements.push(settlement1);
 
     const tile = createTile('10-10', 10, 10, TerrainType.PLAINS, 1);
@@ -77,7 +77,7 @@ describe('SaveSystem serialization round-trip', () => {
     expect(loadedState.players[0]?.units[0]?.cargo).toBeInstanceOf(Map);
     expect(loadedState.players[0]?.units[0]?.cargo.get(GoodType.FOOD)).toBe(50);
     expect(loadedState.players[0]?.settlements[0]?.inventory.get(GoodType.LUMBER)).toBe(100);
-    expect(loadedState.players[0]?.settlements[0]?.workforce.get('u1')).toBe(JobType.FARMER);
+    expect(loadedState.players[0]?.settlements[0]?.units[0]?.occupation).toBe(JobType.LUMBERJACK);
     expect(loadedState.map[0]?.[0]?.terrainType).toBe(TerrainType.PLAINS);
     expect(loadedState.players[1]?.settlements[0]?.goods.get(GoodType.TRADE_GOODS)).toBe(20);
   });

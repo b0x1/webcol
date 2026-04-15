@@ -13,7 +13,6 @@ export interface Settlement {
   buildings: BuildingType[];
   inventory: Map<GoodType, number>;
   productionQueue: (UnitType | BuildingType)[];
-  workforce: Map<string, string>; // JobType or TileID (both are strings)
   units: Unit[];
   attitude: Attitude;
   goods: Map<GoodType, number>;
@@ -41,7 +40,6 @@ export function createSettlement(
     buildings: [],
     inventory: new Map(),
     productionQueue: [],
-    workforce: new Map(),
     units: [],
     attitude: 'NEUTRAL',
     goods: new Map(),

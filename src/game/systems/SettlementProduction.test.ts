@@ -11,8 +11,8 @@ describe('Settlement Production and Building Logic', () => {
     const player = createPlayer('p1', 'Player 1', true, 1000, Nation.SPAIN);
     const settlement = createSettlement('c1', 'p1', 'Settlement 1', 0, 0, 1, 'EUROPEAN', 'STATE');
     const unit = createUnit('u1', 'p1', 'Test Unit', UnitType.COLONIST, 0, 0, 1);
+    unit.occupation = JobType.LUMBERJACK;
     settlement.units.push(unit);
-    settlement.workforce.set(unit.id, JobType.LUMBERJACK);
     player.settlements.push(settlement);
 
     const { players: updatedPlayers } = TurnEngine.runProduction([player], [], {}, () => 0.5, (p) => `${p}-test`);
@@ -29,10 +29,10 @@ describe('Settlement Production and Building Logic', () => {
     const player = createPlayer('p1', 'Player 1', true, 1000, Nation.SPAIN);
     const settlement = createSettlement('c1', 'p1', 'Settlement 1', 5, 5, 1, 'EUROPEAN', 'STATE');
     const unit = createUnit('u1', 'p1', 'Test Unit', UnitType.COLONIST, 5, 5, 1);
+    // Assign to tile 6,5 (Grassland -> Food)
+    unit.occupation = { kind: 'FIELD_WORK', tileX: 6, tileY: 5 };
     settlement.units.push(unit);
 
-    // Assign to tile 6,5 (Grassland -> Food)
-    settlement.workforce.set(unit.id, '6,5');
     player.settlements.push(settlement);
 
     const map: Tile[][] = [];
@@ -89,15 +89,15 @@ describe('Settlement Production and Building Logic', () => {
 
   it('processes printing press population growth', () => {
     const player = createPlayer('p1', 'Player 1', true, 1000, Nation.ENGLAND);
-    const settlement = createSettlement('c1', 'p1', 'Settlement 1', 0, 0, 1, 'EUROPEAN', 'STATE');
+    const settlement = createSettlement('c1', 'p1', 'Settlement 1', 0, 0, 0, 'EUROPEAN', 'STATE');
     settlement.buildings.push(BuildingType.PRINTING_PRESS);
     player.settlements.push(settlement);
 
     const { players: updatedPlayers } = TurnEngine.runProduction([player], [], {}, () => 0.5, (p) => `${p}-test`);
-    // Population is workforce size. Printing press adds a unit to player.units.
+    // Population is units inside. Printing press adds a unit to player.units (outside).
     const updatedPlayer0 = updatedPlayers[0];
     if (!updatedPlayer0) throw new Error('Player not found');
-    expect(updatedPlayer0.settlements[0]?.population).toBe(1);
+    expect(updatedPlayer0.settlements[0]?.population).toBe(0);
     expect(updatedPlayer0.units.length).toBe(1);
   });
 });
