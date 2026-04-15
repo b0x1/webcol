@@ -7,15 +7,9 @@ interface Props {
   settlementId: string;
 }
 
-import { useShallow } from 'zustand/react/shallow';
-
 export const MapGrid: React.FC<Props> = ({ settlementId }) => {
-  const { map, players, assignJob } = useGameStore(useShallow(state => ({
-    map: state.map,
-    players: state.players,
-    assignJob: state.assignJob
-  })));
-  const settlement = players.flatMap(p => p.settlements).find(s => s.id === settlementId);
+  const { map, players, assignJob } = useGameStore();
+  const settlement = React.useMemo(() => players.flatMap(p => p.settlements).find(s => s.id === settlementId), [players, settlementId]);
 
   const workersByTile = React.useMemo(() => {
     const map = new Map<string, import('../../game/entities/Unit').Unit[]>();
