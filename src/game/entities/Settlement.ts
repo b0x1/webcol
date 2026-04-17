@@ -67,7 +67,7 @@ export function createSettlement(
 export function calculatePopulation(settlement: Settlement): number {
   return settlement.units.filter((u) => {
     const occ = u.occupation;
-    if (!occ || typeof occ !== 'object') return false; // Not expected for settlement units
-    return occ.kind !== 'RURE';
+    if (typeof occ === 'string') return true;
+    return occ.kind === 'FIELD_WORK';
   }).length;
 }

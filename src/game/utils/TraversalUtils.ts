@@ -129,7 +129,7 @@ export class TraversalUtils {
         for (const unit of settlement.units) {
           if (isSame(unit.position, pos)) {
             // Only include available units (RURE occupation)
-            if (unit.occupation && typeof unit.occupation === 'object' && unit.occupation.kind === 'RURE') {
+            if (typeof unit.occupation === 'object' && unit.occupation.kind === 'RURE') {
               units.push(unit);
             }
           }
