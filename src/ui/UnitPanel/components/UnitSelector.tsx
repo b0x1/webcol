@@ -37,7 +37,9 @@ export const UnitSelector: React.FC<Props> = ({ unitsAtTile, settlementAtTile, o
             </div>
             <div className="min-w-0">
               <div className={`text-xs font-black uppercase tracking-widest truncate ${isOwnedSettlement ? 'text-blue-200' : 'text-slate-200'}`}>{settlementAtTile.name}</div>
-              <div className={`text-[10px] ${isOwnedSettlement ? 'text-blue-400' : 'text-slate-400'} font-bold uppercase tracking-tight`}>Settlement</div>
+              <div className={`text-[10px] ${isOwnedSettlement ? 'text-blue-400' : 'text-slate-400'} font-bold uppercase tracking-tight`}>
+                {isOwnedSettlement ? 'Enter Settlement' : 'Settlement'}
+              </div>
             </div>
           </button>
         )}

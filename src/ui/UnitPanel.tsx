@@ -88,27 +88,39 @@ export const UnitPanel: React.FC = () => {
   }, [selectedUnitId, unit, skipUnit, isMainMenuOpen, isAnyModalOpen, foundSettlement]);
 
   const unitsForTileSelector = useMemo((): readonly Unit[] => {
-    if (!selectedTile || !settlementAtTile || settlementAtTile.ownerId !== player?.id) {
-      return unitsAtTile;
-    }
-    const availableUnitsInSettlement = settlementAtTile.units.filter((u) => {
-      const occ = u.occupation;
-      if (!occ || typeof occ !== 'object') return false; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-      if (occ.kind === 'RURE') return true;
-      return occ.tileX === settlementAtTile.position.x && occ.tileY === settlementAtTile.position.y;
-    });
-    const merged: Unit[] = [...unitsAtTile];
-    for (const au of availableUnitsInSettlement) {
-      if (!merged.some((u) => u.id === au.id)) {
-        merged.push(au);
+    if (!selectedTile) return EMPTY_TILE_UNITS;
+
+    // unitsAtTile comes from selectUnitsAtPosition which uses TraversalUtils.findAllUnitsAt
+    // which we already modified to only return "available" units in settlements.
+    return unitsAtTile;
+  }, [selectedTile, unitsAtTile]);
+
+  useEffect(() => {
+    if (unit || !selectedTile || isMainMenuOpen || isAnyModalOpen) return;
+
+    const availableUnits = unitsForTileSelector;
+    const hasSettlement = !!settlementAtTile;
+
+    // If exactly one unit and no settlement, auto-select it
+    if (availableUnits.length === 1 && !hasSettlement) {
+      const targetUnit = availableUnits[0];
+      if (targetUnit) {
+        selectUnit(targetUnit.id);
       }
     }
-    return merged;
-  }, [selectedTile, settlementAtTile, player?.id, unitsAtTile]);
+    // If only settlement and no units, auto-select it
+    else if (availableUnits.length === 0 && hasSettlement) {
+      useGameStore.getState().selectSettlement(settlementAtTile.id);
+    }
+  }, [unit, selectedTile, unitsForTileSelector, settlementAtTile, selectUnit, isMainMenuOpen, isAnyModalOpen]);
 
   if (isMainMenuOpen) return null;
 
-  if (!unit && selectedTile && (unitsForTileSelector.length > 1 || (settlementAtTile && (unitsForTileSelector.length > 0 || settlementAtTile.ownerId === player?.id)))) {
+  // Only show selector if there is ambiguity (more than one option)
+  const hasSettlement = !!settlementAtTile;
+  const hasAmbiguity = (unitsForTileSelector.length + (hasSettlement ? 1 : 0)) > 1;
+
+  if (!unit && selectedTile && hasAmbiguity) {
     return (
       <UnitSelector
         unitsAtTile={[...unitsForTileSelector]}

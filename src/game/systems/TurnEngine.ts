@@ -4,6 +4,7 @@ import type { Settlement } from '../entities/Settlement';
 import { GoodType, UnitType, BuildingType } from '../entities/types';
 import { BUILDING_COSTS, COLONY_CONSTANTS, UNIT_BUILD_COSTS } from '../constants';
 import { createUnit } from '../entities/Unit';
+import { calculatePopulation } from '../entities/Settlement';
 import { ProductionSystem } from './ProductionSystem';
 import { NamingSystem, type NamingStats } from './NamingSystem';
 
@@ -45,7 +46,7 @@ export class TurnEngine {
           units: settlement.units.map((u) => ({ ...u, cargo: new Map(u.cargo) })),
           goods: new Map(settlement.goods),
         };
-        newSettlement.population = newSettlement.units.length;
+        newSettlement.population = calculatePopulation(newSettlement);
 
         // Increment turns in job and handle specialty promotion
         newSettlement.units.forEach((unit) => {

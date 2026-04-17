@@ -63,7 +63,7 @@ export class WorldScene extends Phaser.Scene {
 
     this.storeUnsubscribe = useGameStore.subscribe((state, prevState) => {
 
-      if (!this.scene.isActive('WorldScene')) return;
+      if (!this.scene?.scene || !this.scene.isActive('WorldScene')) return;
 
       const playerSettlements = state.players.flatMap(p => p.settlements);
       const prevPlayerSettlements = prevState.players.flatMap(p => p.settlements);

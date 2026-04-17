@@ -4,6 +4,7 @@ import type { GameState } from '../types';
 import type { CombatResult } from '../../systems/CombatSystem';
 import type { Position } from '../../entities/Position';
 import { TraversalUtils } from '../../utils/TraversalUtils';
+import { calculatePopulation } from '../../entities/Settlement';
 import type { GoodType } from '../../entities/types';
 import { ForeignInteractionSystem } from '../../systems/ForeignInteractionSystem';
 import { CombatSystem } from '../../systems/CombatSystem';
@@ -137,7 +138,7 @@ export const createInteractionSlice: StateCreator<
            if (s) {
              if (s.units.length > 1) {
                 s.units.pop();
-                s.population = s.units.length;
+                s.population = calculatePopulation(s as any);
              }
 
              attacker.position = { ...target };
