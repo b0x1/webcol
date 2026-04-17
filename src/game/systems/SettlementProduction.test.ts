@@ -87,6 +87,21 @@ describe('Settlement Production and Building Logic', () => {
     expect(updatedPlayers[0]?.settlements[0]?.inventory.get(GoodType.LUMBER)).toBe(350);
   });
 
+  it('handles units with missing occupation gracefully', () => {
+    const player = createPlayer('p1', 'Player 1', true, 1000, Nation.SPAIN);
+    const settlement = createSettlement('c1', 'p1', 'Settlement 1', 0, 0, 1, 'EUROPEAN', 'STATE');
+    const unit = createUnit('u1', 'p1', 'Test Unit', UnitType.COLONIST, 0, 0, 1);
+    // @ts-expect-error - testing invalid state
+    unit.occupation = undefined;
+    settlement.units.push(unit);
+    player.settlements.push(settlement);
+
+    // Should not throw
+    expect(() => {
+      TurnEngine.runProduction([player], [], {}, () => 0.5, (p) => `${p}-test`);
+    }).not.toThrow();
+  });
+
   it('processes printing press population growth', () => {
     const player = createPlayer('p1', 'Player 1', true, 1000, Nation.ENGLAND);
     const settlement = createSettlement('c1', 'p1', 'Settlement 1', 0, 0, 0, 'EUROPEAN', 'STATE');

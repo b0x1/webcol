@@ -27,6 +27,8 @@ export class ProductionSystem {
     settlement.units.forEach((unit) => {
       let amount = COLONY_CONSTANTS.PRODUCTION_PER_WORKER;
 
+      if (!unit.occupation) return;
+
       if (typeof unit.occupation === 'string') {
         const job = unit.occupation;
         if (unit.expertise === job) {

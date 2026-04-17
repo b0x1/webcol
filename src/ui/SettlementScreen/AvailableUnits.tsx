@@ -16,7 +16,7 @@ export const AvailableUnits: React.FC<Props> = ({ settlementId, units }) => {
 
   const availableUnits = units.filter(u => {
     const occ = u.occupation;
-    if (typeof occ !== 'object') return false;
+    if (!occ || typeof occ !== 'object') return false;
     if (occ.kind === 'RURE') return true;
     return occ.tileX === settlement.position.x && occ.tileY === settlement.position.y;
   });

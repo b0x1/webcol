@@ -108,7 +108,7 @@ export class InputHandler {
     if (settlementAtTile && settlementAtTile.ownerId === player?.id) {
        const availableUnitsInSettlement = settlementAtTile.units.filter((u) => {
          const occ = u.occupation;
-         if (typeof occ !== 'object') return false;
+         if (!occ || typeof occ !== 'object') return false;
          if (occ.kind === 'RURE') return true;
          return occ.tileX === settlementAtTile.position.x && occ.tileY === settlementAtTile.position.y;
        });
