@@ -19,7 +19,7 @@ export interface GameState {
   namingStats: NamingStats;
 
   selectUnit: (unitId: string | null) => void;
-  selectTile: (tile: Tile | null) => void;
+  selectTile: (tile: Tile | null, options?: { skipAutoSelection?: boolean }) => void;
   selectNextUnit: () => void;
   skipUnit: (unitId: string) => void;
   selectSettlement: (settlementId: string | null) => void;
