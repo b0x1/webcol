@@ -3,14 +3,14 @@ import type { GameState } from '../types';
 import { UnitSystem } from '../../systems/UnitSystem';
 import { eventBus } from '../EventBus';
 import { isSame } from '../../entities/Position';
-import { selectCurrentPlayer } from '../selectors';
+import { selectCurrentPlayer, selectUnitsAtPosition, selectSettlementAtPosition } from '../selectors';
 
 export interface SelectionSlice {
   selectedUnitId: string | null;
   selectedSettlementId: string | null;
   selectedTile: import('../../entities/Tile').Tile | null;
   selectUnit: (unitId: string | null) => void;
-  selectTile: (tile: import('../../entities/Tile').Tile | null) => void;
+  selectTile: (tile: import('../../entities/Tile').Tile | null, options?: { skipAutoSelection?: boolean }) => void;
   selectNextUnit: () => void;
   skipUnit: (unitId: string) => void;
   selectSettlement: (settlementId: string | null) => void;
@@ -77,9 +77,30 @@ export const createSelectionSlice: StateCreator<
     });
   },
 
-  selectTile: (tile) => {
+  selectTile: (tile, options) => {
     set((state) => {
       state.selectedTile = tile;
+      if (!tile || options?.skipAutoSelection) return;
+
+      const player = selectCurrentPlayer(state);
+      if (!player) return;
+
+      const unitsAtTile = selectUnitsAtPosition(state, tile.position);
+      const settlementAtTile = selectSettlementAtPosition(state, tile.position);
+      const hasOwnedSettlement = settlementAtTile?.ownerId === player.id;
+
+      const selectableOptionsCount = unitsAtTile.length + (hasOwnedSettlement ? 1 : 0);
+
+      if (selectableOptionsCount === 1) {
+        const firstUnit = unitsAtTile[0];
+        if (firstUnit?.id && unitsAtTile.length === 1) {
+          state.selectedUnitId = firstUnit.id;
+          state.selectedSettlementId = null;
+        } else if (hasOwnedSettlement) {
+          state.selectedSettlementId = settlementAtTile.id;
+          state.selectedUnitId = null;
+        }
+      }
     });
   },
 

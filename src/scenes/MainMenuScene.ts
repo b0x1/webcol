@@ -60,20 +60,33 @@ export class MainMenuScene extends Phaser.Scene {
 
     // Title removed - handled by React UI MainMenu.tsx
 
-    this.scale.on('resize', (gameSize: Phaser.Structs.Size) => {
-      this.cameras.main.setViewport(0, 0, gameSize.width, gameSize.height);
+    const onResize = (gameSize: Phaser.Structs.Size) => {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      if (this.cameras.main) {
+        this.cameras.main.setViewport(0, 0, gameSize.width, gameSize.height);
+      }
       overlay.clear();
       overlay.fillStyle(0x000000, 0.6);
       overlay.fillRect(0, 0, gameSize.width, gameSize.height);
-    });
+    };
+    this.scale.on('resize', onResize);
+
+    const onGameStarted = () => {
+      this.scene.start('WorldScene');
+    };
+
+    const onReturnToMainMenu = () => {
+      this.scene.start('MainMenuScene');
+    };
 
     // Event listeners for scene transitions
-    eventBus.on('gameStarted', () => {
-      this.scene.start('WorldScene');
-    });
+    eventBus.on('gameStarted', onGameStarted);
+    eventBus.on('returnToMainMenu', onReturnToMainMenu);
 
-    eventBus.on('returnToMainMenu', () => {
-      this.scene.start('MainMenuScene');
+    this.events.once('shutdown', () => {
+      this.scale.off('resize', onResize);
+      eventBus.off('gameStarted', onGameStarted);
+      eventBus.off('returnToMainMenu', onReturnToMainMenu);
     });
   }
 }

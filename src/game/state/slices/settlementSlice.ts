@@ -2,6 +2,7 @@ import type { StateCreator } from 'zustand';
 import type { GameState } from '../types';
 import { BuildingType, type JobType } from '../../entities/types';
 import { SettlementSystem } from '../../systems/SettlementSystem';
+import { calculatePopulation } from '../../entities/Settlement';
 import { NamingSystem } from '../../systems/NamingSystem';
 import { TraversalUtils } from '../../utils/TraversalUtils';
 import { random, generateId } from '../utils';
@@ -111,7 +112,7 @@ export const createSettlementSlice: StateCreator<
             }
           }
         }
-        settlement.population = settlement.units.length;
+        settlement.population = calculatePopulation(settlement);
       }
     });
   },

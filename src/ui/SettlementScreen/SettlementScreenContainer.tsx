@@ -63,6 +63,12 @@ export const SettlementScreenContainer: React.FC = () => {
 
   const handleClose = () => {
     setSettlementScreenOpen(false);
+    const state = useGameStore.getState();
+    const currentTile = state.selectedTile;
+    if (currentTile) {
+      // Re-select tile but skip auto-selection to avoid re-entering settlement
+      state.selectTile(currentTile, { skipAutoSelection: true });
+    }
     selectSettlement(null);
   };
 

@@ -119,6 +119,7 @@ export class TraversalUtils {
 
   /**
    * Finds all units at a specific position, including those inside settlements.
+   * Only returns "available units" (those not working in a building or field) for settlements.
    */
   static findAllUnitsAt(players: Player[], pos: Position | null): Unit[] {
     if (!pos) return [];
@@ -127,7 +128,11 @@ export class TraversalUtils {
       for (const settlement of player.settlements) {
         for (const unit of settlement.units) {
           if (isSame(unit.position, pos)) {
-            units.push(unit);
+            // Only include available units (RURE occupation)
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            if (typeof unit.occupation === 'object' && unit.occupation?.kind === 'RURE') {
+              units.push(unit);
+            }
           }
         }
       }
