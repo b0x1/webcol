@@ -136,28 +136,12 @@ export const createInteractionSlice: StateCreator<
         const capturedSettlementPlayer = selectSettlementOwner(state, defender.id);
         if (capturedSettlementPlayer && capturedSettlementPlayer.id !== state.currentPlayerId) {
           const sIdx = capturedSettlementPlayer.settlements.findIndex(s => s.id === defender.id);
-<<<<<<< HEAD
           const s = capturedSettlementPlayer.settlements[sIdx];
           if (s) {
             if (s.units.length > 1) {
               s.units.pop();
-              s.population = s.units.length;
+              s.population = calculatePopulation(s);
             }
-||||||| cbc26eb
-           const s = capturedSettlementPlayer.settlements[sIdx];
-           if (s) {
-             if (s.units.length > 1) {
-                s.units.pop();
-                s.population = s.units.length;
-             }
-=======
-           const s = capturedSettlementPlayer.settlements[sIdx];
-           if (s) {
-             if (s.units.length > 1) {
-                s.units.pop();
-                s.population = calculatePopulation(s as any);
-             }
->>>>>>> main
 
             attacker.position = { ...target };
             attacker.movesRemaining = 0;

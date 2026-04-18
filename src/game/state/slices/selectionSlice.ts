@@ -2,16 +2,8 @@ import type { StateCreator } from 'zustand';
 import type { GameState } from '../types';
 import { UnitSystem } from '../../systems/UnitSystem';
 import { eventBus } from '../EventBus';
-<<<<<<< HEAD
-import { selectCurrentPlayer } from '../selectors';
-import { TraversalUtils } from '../../utils/TraversalUtils';
-||||||| cbc26eb
-import { isSame } from '../../entities/Position';
-import { selectCurrentPlayer } from '../selectors';
-=======
-import { isSame } from '../../entities/Position';
-import { selectCurrentPlayer, selectUnitsAtPosition, selectSettlementAtPosition } from '../selectors';
->>>>>>> main
+import { selectCurrentPlayer, selectUnitsAtPosition, selectSettlementAtPosition } from "../selectors";
+import { TraversalUtils } from "../../utils/TraversalUtils";
 
 export interface SelectionSlice {
   selectedUnitId: string | null;

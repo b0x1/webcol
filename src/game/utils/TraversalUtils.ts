@@ -128,9 +128,7 @@ export class TraversalUtils {
       for (const settlement of player.settlements) {
         for (const unit of settlement.units) {
           if (isSame(unit.position, pos)) {
-            // Only include available units (RURE occupation)
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            if (typeof unit.occupation === 'object' && unit.occupation?.kind === 'RURE') {
+            if (this.isUnitAvailable(unit, settlement.position)) {
               units.push(unit);
             }
           }

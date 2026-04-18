@@ -15,7 +15,6 @@ import { UnitType } from '../game/entities/types';
 import { UnitSelector } from './UnitPanel/components/UnitSelector';
 import { distance } from '../game/entities/Position';
 import type { Unit } from '../game/entities/Unit';
-import { TraversalUtils } from '../game/utils/TraversalUtils';
 
 const EMPTY_TILE_UNITS: readonly Unit[] = [];
 
@@ -89,47 +88,12 @@ export const UnitPanel: React.FC = () => {
   }, [selectedUnitId, unit, skipUnit, isMainMenuOpen, isAnyModalOpen, foundSettlement]);
 
   const unitsForTileSelector = useMemo((): readonly Unit[] => {
-<<<<<<< HEAD
-    if (!selectedTile || !settlementAtTile || settlementAtTile.ownerId !== player?.id) {
-      return unitsAtTile;
-    }
-    const availableUnitsInSettlement = settlementAtTile.units.filter((u) =>
-      TraversalUtils.isUnitAvailable(u, settlementAtTile.position)
-    );
-    const merged: Unit[] = [...unitsAtTile];
-    for (const au of availableUnitsInSettlement) {
-      if (!merged.some((u) => u.id === au.id)) {
-        merged.push(au);
-      }
-    }
-    return merged;
-  }, [selectedTile, settlementAtTile, player?.id, unitsAtTile]);
-||||||| cbc26eb
-    if (!selectedTile || !settlementAtTile || settlementAtTile.ownerId !== player?.id) {
-      return unitsAtTile;
-    }
-    const availableUnitsInSettlement = settlementAtTile.units.filter((u) => {
-      const occ = u.occupation;
-      if (!occ || typeof occ !== 'object') return false; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-      if (occ.kind === 'RURE') return true;
-      return occ.tileX === settlementAtTile.position.x && occ.tileY === settlementAtTile.position.y;
-    });
-    const merged: Unit[] = [...unitsAtTile];
-    for (const au of availableUnitsInSettlement) {
-      if (!merged.some((u) => u.id === au.id)) {
-        merged.push(au);
-      }
-    }
-    return merged;
-  }, [selectedTile, settlementAtTile, player?.id, unitsAtTile]);
-=======
     if (!selectedTile) return EMPTY_TILE_UNITS;
 
     // unitsAtTile comes from selectUnitsAtPosition which uses TraversalUtils.findAllUnitsAt
     // which we already modified to only return "available" units in settlements.
     return unitsAtTile;
   }, [selectedTile, unitsAtTile]);
->>>>>>> main
 
   if (isMainMenuOpen) return null;
 
