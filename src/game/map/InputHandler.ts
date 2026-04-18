@@ -5,6 +5,7 @@ import { eventBus } from '../state/EventBus';
 import { useGameStore } from '../state/gameStore';
 import { UnitType, Attitude } from '../entities/types';
 import { isSame, type Position } from '../entities/Position';
+import { TraversalUtils } from '../utils/TraversalUtils';
 import { CAMERA_CONSTANTS } from '../constants';
 
 export class InputHandler {
@@ -43,7 +44,7 @@ export class InputHandler {
       const pos = this.terrainRenderer.worldToTile(worldPoint);
 
       if (pos.x >= 0 && pos.x < mapWidth && pos.y >= 0 && pos.y < mapHeight) {
-        const settlement = useGameStore.getState().players.flatMap(p => p.settlements).find((s) => isSame(s.position, pos));
+        const settlement = TraversalUtils.findSettlementAt(useGameStore.getState().players, pos);
         this.terrainRenderer.showTooltip(pos, worldPoint, settlement?.name);
       } else {
         this.terrainRenderer.hideTooltip();
@@ -99,19 +100,17 @@ export class InputHandler {
 
   private handleLeftClick(pos: Position) {
     const state = useGameStore.getState();
-    const player = state.players.find(p => p.id === state.currentPlayerId);
+    const players = state.players;
+    const player = TraversalUtils.findPlayerById(players, state.currentPlayerId);
 
     // Units on map + available units in own settlement
-    const unitsAtTile = state.players.flatMap((p) => p.units).filter((u) => isSame(u.position, pos));
-    const settlementAtTile = state.players.flatMap((p) => p.settlements).find((c) => isSame(c.position, pos));
+    const unitsAtTile = TraversalUtils.findUnitsAt(players, pos);
+    const settlementAtTile = TraversalUtils.findSettlementAt(players, pos);
 
     if (settlementAtTile && settlementAtTile.ownerId === player?.id) {
-       const availableUnitsInSettlement = settlementAtTile.units.filter((u) => {
-         const occ = u.occupation;
-         if (!occ || typeof occ !== 'object') return false; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-         if (occ.kind === 'RURE') return true;
-         return occ.tileX === settlementAtTile.position.x && occ.tileY === settlementAtTile.position.y;
-       });
+       const availableUnitsInSettlement = settlementAtTile.units.filter((u) =>
+         TraversalUtils.isUnitAvailable(u, settlementAtTile.position)
+       );
        unitsAtTile.push(...availableUnitsInSettlement);
     }
 
@@ -146,18 +145,12 @@ export class InputHandler {
     const state = useGameStore.getState();
     if (!state.selectedUnitId) return;
 
-    const selectedUnit = state.players.flatMap((p) => p.units).find((u) => u.id === state.selectedUnitId);
+    const selectedUnit = TraversalUtils.findUnitById(state.players, state.selectedUnitId);
     if (!selectedUnit) return;
 
-    const foreignUnitAtTile = state.players
-      .filter((p) => p.id !== state.currentPlayerId)
-      .flatMap((p) => p.units)
-      .find((u) => isSame(u.position, pos));
-
-    const foreignSettlementAtTile = state.players
-      .filter((p) => p.id !== state.currentPlayerId)
-      .flatMap((p) => p.settlements)
-      .find((c) => isSame(c.position, pos));
+    const otherPlayers = state.players.filter((p) => p.id !== state.currentPlayerId);
+    const foreignUnitAtTile = TraversalUtils.findUnitsAt(otherPlayers, pos)[0];
+    const foreignSettlementAtTile = TraversalUtils.findSettlementAt(otherPlayers, pos);
 
     if (selectedUnit.type === UnitType.SOLDIER && foreignUnitAtTile ) {
       eventBus.emit('combatRequested', pos);

@@ -2,6 +2,7 @@ import React from 'react';
 import type { Unit } from '../../game/entities/Unit';
 import { useGameStore } from '../../game/state/gameStore';
 import { Sprite } from '../Sprite';
+import { TraversalUtils } from '../../game/utils/TraversalUtils';
 
 interface Props {
   settlementId: string;
@@ -14,12 +15,7 @@ export const AvailableUnits: React.FC<Props> = ({ settlementId, units }) => {
   const settlement = players.flatMap(p => p.settlements).find(s => s.id === settlementId);
   if (!settlement) return null;
 
-  const availableUnits = units.filter(u => {
-    const occ = u.occupation;
-    if (!occ || typeof occ !== 'object') return false; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-    if (occ.kind === 'RURE') return true;
-    return occ.tileX === settlement.position.x && occ.tileY === settlement.position.y;
-  });
+  const availableUnits = units.filter(u => TraversalUtils.isUnitAvailable(u, settlement.position));
 
   const handleDragStart = (e: React.DragEvent, unitId: string) => {
     e.dataTransfer.setData('unitId', unitId);

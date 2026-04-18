@@ -134,4 +134,30 @@ export class TraversalUtils {
     }
     return units;
   }
+
+  /**
+   * Determines if a unit is available for selection or movement.
+   * A unit is available if it is in the 'RURE' state (outside) or working at the
+   * settlement's center tile.
+   */
+  static isUnitAvailable(unit: Unit, settlementPosition?: Position): boolean {
+    const occ = unit.occupation;
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!occ) return false;
+
+    if (typeof occ !== 'object') {
+      return false;
+    }
+
+    if (occ.kind === 'RURE') {
+      return true;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (occ.kind === 'FIELD_WORK' && settlementPosition) {
+      return occ.tileX === settlementPosition.x && occ.tileY === settlementPosition.y;
+    }
+    return false;
+  }
 }

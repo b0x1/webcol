@@ -3,6 +3,8 @@ import type { Unit } from '../entities/Unit';
 import type { Tile } from '../entities/Tile';
 import { MovementSystem } from './MovementSystem';
 import { distance, isSame } from '../entities/Position';
+import type { Settlement } from '../entities/Settlement';
+import { TraversalUtils } from '../utils/TraversalUtils';
 
 /* eslint-disable-next-line @typescript-eslint/no-extraneous-class */
 export class UnitSystem {
@@ -47,5 +49,42 @@ export class UnitSystem {
     if (!targetTile) return false;
     const cost = MovementSystem.getMovementCost(unit, targetTile);
     return unit.movesRemaining >= cost;
+  }
+
+  /**
+   * Transitions a unit into a settlement if it's at the settlement's position.
+   */
+  static enterSettlement(unit: Unit, player: Player, settlement: Settlement): boolean {
+    if (!isSame(unit.position, settlement.position)) return false;
+
+    const unitIndex = player.units.findIndex(u => u.id === unit.id);
+    if (unitIndex === -1) return false;
+
+    if (!settlement.units.some(u => u.id === unit.id)) {
+      settlement.units.push({ ...unit });
+    }
+    player.units.splice(unitIndex, 1);
+    return true;
+  }
+
+  /**
+   * Transitions an available unit out of a settlement into the player's active units.
+   */
+  static exitSettlement(unitId: string, player: Player): Unit | undefined {
+    for (const s of player.settlements) {
+      const uIdx = s.units.findIndex(u => u.id === unitId);
+      if (uIdx !== -1) {
+        const unit = s.units[uIdx];
+        if (unit && TraversalUtils.isUnitAvailable(unit, s.position)) {
+          if (!player.units.some(u => u.id === unitId)) {
+            player.units.push({ ...unit });
+          }
+          s.units.splice(uIdx, 1);
+          return unit;
+        }
+        break;
+      }
+    }
+    return undefined;
   }
 }

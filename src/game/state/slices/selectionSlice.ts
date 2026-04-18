@@ -2,8 +2,8 @@ import type { StateCreator } from 'zustand';
 import type { GameState } from '../types';
 import { UnitSystem } from '../../systems/UnitSystem';
 import { eventBus } from '../EventBus';
-import { isSame } from '../../entities/Position';
 import { selectCurrentPlayer } from '../selectors';
+import { TraversalUtils } from '../../utils/TraversalUtils';
 
 export interface SelectionSlice {
   selectedUnitId: string | null;
@@ -36,12 +36,9 @@ export const createSelectionSlice: StateCreator<
           if (prevUnitIdx !== -1) {
             const prevUnit = player.units[prevUnitIdx];
             if (prevUnit) {
-              const settlement = player.settlements.find(s => isSame(s.position, prevUnit.position));
+              const settlement = TraversalUtils.findSettlementAt([player], prevUnit.position);
               if (settlement) {
-                if (!settlement.units.some(u => u.id === prevUnit.id)) {
-                  settlement.units.push({ ...prevUnit });
-                }
-                player.units.splice(prevUnitIdx, 1);
+                UnitSystem.enterSettlement(prevUnit, player, settlement);
               }
             }
           }
@@ -49,27 +46,7 @@ export const createSelectionSlice: StateCreator<
 
         // 2. If the new unit is in a settlement, move it to player.units
         if (unitId) {
-          for (const s of player.settlements) {
-            const uIdx = s.units.findIndex(u => u.id === unitId);
-            if (uIdx !== -1) {
-              const unit = s.units[uIdx];
-              if (unit) {
-                // Only move out if it's NOT in the workforce (available)
-                // available is FIELD_WORK at the settlement tile or RURE
-                const occ = unit.occupation;
-                const isAvailable = occ && typeof occ === 'object' && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-                  (occ.kind === 'RURE' || (occ.tileX === s.position.x && occ.tileY === s.position.y));
-
-                if (isAvailable) {
-                  if (!player.units.some(u => u.id === unitId)) {
-                    player.units.push({ ...unit });
-                  }
-                  s.units.splice(uIdx, 1);
-                }
-              }
-              break;
-            }
-          }
+          UnitSystem.exitSettlement(unitId, player);
         }
       }
       state.selectedUnitId = unitId;
