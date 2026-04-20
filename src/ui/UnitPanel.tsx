@@ -13,6 +13,7 @@ import {
 import { useUIStore } from '../game/state/uiStore';
 import { UnitType } from '../game/entities/types';
 import { UnitSelector } from './UnitPanel/components/UnitSelector';
+import { ResourceIcon } from './ResourceIcon';
 import { distance } from '../game/entities/Position';
 import type { Unit } from '../game/entities/Unit';
 
@@ -145,8 +146,11 @@ export const UnitPanel: React.FC = () => {
         ) : (
           <ul className="space-y-1">
             {Array.from(unit.cargo.entries()).map(([good, amount]) => (
-              <li key={good} className="flex justify-between items-center border-b border-white/5 pb-1 last:border-0">
-                <span className="capitalize text-slate-300 font-medium">{good.toLowerCase()}</span>
+              <li key={good} className="flex justify-between items-center border-b border-white/5 pb-1 last:border-0 gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <ResourceIcon good={good} size={16} className="shrink-0" />
+                  <span className="capitalize text-slate-300 font-medium truncate">{good.replace('_', ' ').toLowerCase()}</span>
+                </div>
                 <span className="font-mono font-bold text-blue-300">{amount}</span>
               </li>
             ))}

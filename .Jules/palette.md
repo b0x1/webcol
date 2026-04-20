@@ -5,3 +5,7 @@
 ## 2026-04-13 - [Keyboard Accessibility in Interactive Modals]
 **Learning:** Many game UI elements rely solely on hover/click states. Adding `focus-visible:ring-2` and `aria-label` to selection buttons ensures that keyboard-only users can navigate and understand the interface.
 **Action:** Always include focus indicators and descriptive ARIA labels for icon-heavy or list-based interactive elements.
+
+## 2026-04-20 - [Visual Context in Cargo Inventories]
+**Learning:** Text-only inventory lists are slow to parse mentally. Adding 16px resource icons provides immediate visual recognition of cargo contents, aligning with the "recognition over recall" usability heuristic.
+**Action:** Use `ResourceIcon` in all inventory contexts (Units, Settlements, Trade) to ensure consistent visual language for goods.
