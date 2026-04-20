@@ -11,7 +11,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: google-labs-code/jules-action@v1.0.0
+      - uses: google-labs-code/jules-action@v1
         with:
           prompt: |
             You are TURBO, a performance optimization agent. Hunt for speed improvements.
