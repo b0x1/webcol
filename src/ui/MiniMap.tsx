@@ -50,7 +50,7 @@ export const MiniMap: React.FC = () => {
 
   useEffect(() => {
     const unsubscribe = eventBus.on('viewportUpdated', (v) => {
-      setViewport(v as { x: number; y: number; width: number; height: number });
+      setViewport(v);
     });
     return () => { unsubscribe(); };
   }, []);
@@ -74,7 +74,7 @@ export const MiniMap: React.FC = () => {
 
   const handlePointerAction = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.buttons !== 1 && e.type !== 'pointerdown') return;
-    const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+    const rect = (e.currentTarget).getBoundingClientRect();
     const x = Math.floor(((e.clientX - rect.left) / rect.width) * mapWidth);
     const y = Math.floor(((e.clientY - rect.top) / rect.height) * mapHeight);
     if (x >= 0 && x < mapWidth && y >= 0 && y < mapHeight) {

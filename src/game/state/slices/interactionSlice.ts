@@ -43,17 +43,17 @@ export const createInteractionSlice: StateCreator<
       if (!settlement) return;
 
       const { updatedSettlement, updatedUnit } = ForeignInteractionSystem.trade(
-        settlement as unknown as Settlement,
-        unit as unknown as Unit,
+        settlement,
+        unit,
         goodOffered,
         random
       );
 
-      foreignPlayer.settlements[sIdx] = updatedSettlement as unknown as Settlement;
+      foreignPlayer.settlements[sIdx] = updatedSettlement;
       const uIdx = player.units.findIndex(u => u.id === unitId);
       const playerUnit = player.units[uIdx];
       if (playerUnit) {
-        player.units[uIdx] = updatedUnit as unknown as Unit;
+        player.units[uIdx] = updatedUnit;
       }
     });
   },
@@ -72,15 +72,15 @@ export const createInteractionSlice: StateCreator<
       if (!settlement) return;
 
       const { updatedSettlement, updatedUnit } = ForeignInteractionSystem.learn(
-        settlement as unknown as Settlement,
-        unit as unknown as Unit
+        settlement,
+        unit
       );
 
-      foreignPlayer.settlements[sIdx] = updatedSettlement as unknown as Settlement;
+      foreignPlayer.settlements[sIdx] = updatedSettlement;
       const uIdx = player.units.findIndex(u => u.id === unitId);
       const playerUnit = player.units[uIdx];
       if (playerUnit) {
-        player.units[uIdx] = updatedUnit as unknown as Unit;
+        player.units[uIdx] = updatedUnit;
       }
     });
   },
