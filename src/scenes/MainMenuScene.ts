@@ -29,7 +29,7 @@ export class MainMenuScene extends Phaser.Scene {
     const width = Math.ceil(this.cameras.main.width / MAP_CONSTANTS.TILE_SIZE) + 1;
     const height = Math.ceil(this.cameras.main.height / MAP_CONSTANTS.TILE_SIZE) + 1;
 
-    this.terrainRenderer = new TerrainRenderer(this as unknown as Phaser.Scene, MAP_CONSTANTS.TILE_SIZE);
+    this.terrainRenderer = new TerrainRenderer(this, MAP_CONSTANTS.TILE_SIZE);
 
     const generator = new TerrainGenerator(width, height, `menu-bg-${Date.now()}`);
     const terrainData = generator.generate();

@@ -40,7 +40,7 @@ export class WorldScene extends Phaser.Scene {
       SpriteLoader.register(this, key);
     });
 
-    this.terrainRenderer = new TerrainRenderer(this as unknown as Phaser.Scene, this.TILE_SIZE);
+    this.terrainRenderer = new TerrainRenderer(this, this.TILE_SIZE);
     this.unitRenderer = new UnitRenderer(this, this.terrainRenderer, this.TILE_SIZE);
     this.cameraManager = new CameraManager(this, this.terrainRenderer, this.TILE_SIZE);
     this.inputHandler = new InputHandler(this, this.terrainRenderer, this.cameraManager);

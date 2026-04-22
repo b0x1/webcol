@@ -9,7 +9,6 @@ import { EconomySystem } from '../../systems/EconomySystem';
 import { NamingSystem } from '../../systems/NamingSystem';
 import { RECRUITMENT_COSTS } from '../../constants';
 import { selectCurrentPlayer } from '../selectors';
-import type { Unit } from '../../entities/Unit';
 
 export interface UnitSlice {
   europePrices: Record<GoodType, number>;
@@ -51,16 +50,16 @@ export const createUnitSlice: StateCreator<
       const unit = player.units[unitIndex];
       if (!unit) return;
 
-      if (UnitSystem.canMoveTo(unit as unknown as Unit, to.x, to.y, state.map)) {
+      if (UnitSystem.canMoveTo(unit, to.x, to.y, state.map)) {
         const targetTile = state.map[to.y]?.[to.x];
         if (!targetTile) return;
         unit.position = { ...to };
-        unit.movesRemaining -= MovementSystem.getMovementCost(unit as unknown as Unit, targetTile);
+        unit.movesRemaining -= MovementSystem.getMovementCost(unit, targetTile);
 
         // Check if entering own settlement
         const settlement = TraversalUtils.findSettlementAt([player], to);
         if (settlement) {
-          UnitSystem.enterSettlement(unit as unknown as Unit, player, settlement);
+          UnitSystem.enterSettlement(unit, player, settlement);
           state.selectedUnitId = null;
         }
       }
@@ -76,7 +75,7 @@ export const createUnitSlice: StateCreator<
       const price = state.europePrices[good];
       const { goldGained, newPrice, actualSellAmount } = EconomySystem.sellGood(
         player,
-        unit as unknown as Unit,
+        unit,
         good,
         amount,
         price
