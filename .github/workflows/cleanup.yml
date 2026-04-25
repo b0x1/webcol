@@ -1,19 +1,21 @@
-name: Performance Improver Agent
+name: Codebase Cleanup
 
 on:
   schedule:
-    - cron: '0 4 * * 6'
+    - cron: '0 2 * * 5'
   workflow_dispatch:
 
 jobs:
-  optimize:
+  cleanup:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+
     steps:
       - name: Checkout
         uses: actions/checkout@v6
       - uses: ./.github/actions/jules-invoke
         with:
-          prompt_file: ./.github/prompts/performance-improver.md
+          prompt_file: .github/prompts/cleanup.md
           jules_api_key: ${{ secrets.JULES_API_KEY }}
+          include_commit_log: true
