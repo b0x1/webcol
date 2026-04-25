@@ -34,10 +34,31 @@ export class SaveSystem {
 
   static deserialize(serialized: string): SaveData | null {
     try {
-      return JSON.parse(serialized, (key, value) => this.reviver(key, value)) as SaveData;
+      const parsed = JSON.parse(serialized, (key, value) => this.reviver(key, value)) as unknown;
+      if (this.isValidSaveData(parsed)) {
+        return parsed;
+      }
+      return null;
     } catch {
       return null;
     }
+  }
+
+  private static isValidSaveData(data: unknown): data is SaveData {
+    if (typeof data !== 'object' || data === null) {
+      return false;
+    }
+
+    const candidate = data as Record<string, unknown>;
+    return (
+      Array.isArray(candidate.players) &&
+      typeof candidate.currentPlayerId === 'string' &&
+      typeof candidate.turn === 'number' &&
+      typeof candidate.phase === 'string' &&
+      candidate.europePrices !== null &&
+      typeof candidate.europePrices === 'object' &&
+      Array.isArray(candidate.map)
+    );
   }
 
   private static replacer(_key: string, value: unknown): unknown {
