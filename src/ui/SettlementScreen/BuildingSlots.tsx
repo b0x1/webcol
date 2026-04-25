@@ -28,8 +28,11 @@ interface Props {
 }
 
 export const BuildingSlots: React.FC<Props> = ({ settlementId, ownedBuildings }) => {
-  const { assignJob, players } = useGameStore();
-  const settlement = players.flatMap(p => p.settlements).find(s => s.id === settlementId);
+  const { assignJob } = useGameStore();
+  // ⚡ Turbo: Use targeted selector to avoid re-renders when other players or unrelated settlement data changes
+  const settlement = useGameStore(state =>
+    state.players.flatMap(p => p.settlements).find(s => s.id === settlementId)
+  );
 
   if (!settlement) return null;
 
