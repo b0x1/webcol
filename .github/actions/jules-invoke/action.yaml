@@ -10,62 +10,6 @@ inputs:
   prompt:
     description: 'The prompt to pass to Jules'
     required: false
-<<<<<<< HEAD
-    type: string
-  prompt_file:
-    description: 'Path to a markdown file containing the prompt'
-    required: false
-    type: string
-  include_last_commit:
-    description: 'Whether to pass content of the last commit'
-    type: boolean
-    default: false
-  include_commit_log:
-    description: 'Whether to pass commit history'
-    type: boolean
-    default: false
-  starting_branch:
-    description: 'The branch for Jules to start from'
-    required: false
-    type: string
-    default: 'main'
-  jules_api_key:
-    description: 'The Jules API key to use for authentication'
-    required: true
-    type: string
-
-runs:
-  using: "composite"
-  steps:
-    - uses: actions/checkout@v6
-      with:
-        fetch-depth: 30
-
-    - name: Create initial prompt
-      env:
-        USER_PROMPT: ${{ inputs.prompt }}
-        PROMPT_FILE: ${{ inputs.prompt_file }}
-      shell: bash
-      run: |
-        if [ -n "$PROMPT_FILE" ]; then
-          cat "$PROMPT_FILE" > prompt.txt
-        else
-          echo "$USER_PROMPT" > prompt.txt
-        fi
-
-    - name: Save last commit content
-      if: ${{ inputs.include_last_commit }}
-      shell: bash
-      run: |
-        echo -e '\n\nContent of the latest commit (in the format of `git show`):' >> prompt.txt
-        echo '```' >> prompt.txt
-        git show >> prompt.txt
-        echo '```' >> prompt.txt
-
-    - name: Save git log
-      if: ${{ inputs.include_commit_log }}
-||||||| faee6f8
-=======
   prompt_file:
     description: 'Path to a markdown file containing the prompt'
     required: false
@@ -113,7 +57,6 @@ runs:
 
     - name: Save git log
       if: ${{ inputs.include_commit_log == 'true' }}
->>>>>>> main
       shell: bash
       run: |
         echo -e '\n\nLog of the last 20 commits (in the format of `git log --stat`):' >> prompt.txt
