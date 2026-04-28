@@ -1,7 +1,8 @@
 import React from 'react';
+import type { Unit } from '../../game/entities/Unit';
 import type { JobType } from '../../game/entities/types';
 import { BuildingType } from '../../game/entities/types';
-import { useGameStore } from '../../game/state/gameStore';
+import { useGameStore, selectSettlementById } from '../../game/state/gameStore';
 import { JOB_PRODUCTION_RULES } from '../../game/rules/ProductionRules';
 import { Sprite } from '../Sprite';
 
@@ -22,14 +23,46 @@ const BUILDINGS_LIST = [
   { type: BuildingType.ARMORY, name: 'Armory', bonus: 'Tools -> Muskets' },
 ];
 
+/**
+ * Pre-calculated mapping of building types to their primary associated job.
+ * Prevents O(N*M) lookups during render cycles.
+ */
+const BUILDING_TO_JOB = (() => {
+  const mapping: Partial<Record<BuildingType, JobType>> = {};
+  Object.values(JOB_PRODUCTION_RULES).forEach(rule => {
+    rule.requiredBuildings.forEach(b => {
+      // We take the first job that matches, matching current find() behavior
+      if (!(b in mapping)) {
+        mapping[b] = rule.jobType;
+      }
+    });
+  });
+  return mapping;
+})();
+
 interface Props {
   settlementId: string;
   ownedBuildings: BuildingType[];
 }
 
 export const BuildingSlots: React.FC<Props> = ({ settlementId, ownedBuildings }) => {
-  const { assignJob, players } = useGameStore();
-  const settlement = players.flatMap(p => p.settlements).find(s => s.id === settlementId);
+  const assignJob = useGameStore(state => state.assignJob);
+  const settlement = useGameStore(state => selectSettlementById(state, settlementId));
+  const units = settlement?.units;
+
+  const workersByJob = React.useMemo(() => {
+    const map = new Map<string, Unit[]>();
+    if (!units) return map;
+
+    units.forEach(unit => {
+      if (typeof unit.occupation === 'string') {
+        const list = map.get(unit.occupation) ?? [];
+        list.push(unit);
+        map.set(unit.occupation, list);
+      }
+    });
+    return map;
+  }, [units]);
 
   if (!settlement) return null;
 
@@ -48,8 +81,8 @@ export const BuildingSlots: React.FC<Props> = ({ settlementId, ownedBuildings })
   return (
     <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
       {BUILDINGS_LIST.filter(b => ownedBuildings.includes(b.type)).map((b) => {
-        const associatedJob = Object.values(JOB_PRODUCTION_RULES).find(rule => rule.requiredBuildings.includes(b.type))?.jobType;
-        const workers = settlement.units.filter((u) => u.occupation === associatedJob);
+        const associatedJob = BUILDING_TO_JOB[b.type];
+        const workers = associatedJob ? (workersByJob.get(associatedJob) ?? []) : [];
 
         return (
           <div
