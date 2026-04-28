@@ -9,3 +9,7 @@
 ## 2026-04-20 - [Visual Context in Cargo Inventories]
 **Learning:** Text-only inventory lists are slow to parse mentally. Adding 16px resource icons provides immediate visual recognition of cargo contents, aligning with the "recognition over recall" usability heuristic.
 **Action:** Use `ResourceIcon` in all inventory contexts (Units, Settlements, Trade) to ensure consistent visual language for goods.
+
+## 2026-04-27 - [Consistent Modal Dismissal and Keyboard Support]
+**Learning:** Forcing users to reach for the mouse to dismiss or confirm a disruptive modal (like an "End Turn" warning) breaks game flow. However, global keyboard listeners must respect the focused element; overriding `Enter` when a different button is focused creates deceptive and destructive interactions.
+**Action:** Use `Escape` for dismissal, but rely on standard browser behavior for `Enter` by using `autoFocus` on the preferred (safest) button. Implement ARIA attributes (`role="alertdialog"`) for all confirmation modals.
