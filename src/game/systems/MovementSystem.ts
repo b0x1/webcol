@@ -13,6 +13,7 @@ export class MovementSystem {
     const reachable: (Position & { cost: number })[] = [];
     const visited = new Map<string, number>();
     const queue: (Position & { cost: number })[] = [];
+    let head = 0;
 
     queue.push({ ...unit.position, cost: 0 });
     visited.set(toKey(unit.position), 0);
@@ -20,8 +21,9 @@ export class MovementSystem {
     const height = map.length;
     const width = map[0]?.length ?? 0;
 
-    while (queue.length > 0) {
-      const current = queue.shift();
+    // ⚡ Turbo: Use index-based queue to avoid O(N) shift() operations
+    while (head < queue.length) {
+      const current = queue[head++];
       if (!current) continue;
 
       // Add to reachable if it's not the starting tile

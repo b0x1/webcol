@@ -38,7 +38,10 @@ export const SettlementScreenContainer: React.FC = () => {
   const production = useMemo(
     () =>
       settlement && map.length > 0 ? getSettlementProduction(settlement, map) : undefined,
-    [settlement, map],
+    // ⚡ Turbo: Depend only on settlement.units and settlement.buildings as those are the only factors affecting production
+    // This avoids redundant calculations when settlement inventory or hammers change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [settlement?.units, settlement?.buildings, map],
   );
 
   useEffect(() => {

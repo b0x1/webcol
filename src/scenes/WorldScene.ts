@@ -62,11 +62,14 @@ export class WorldScene extends Phaser.Scene {
     );
 
     this.storeUnsubscribe = useGameStore.subscribe((state, prevState) => {
-
       if (!this.scene.isActive('WorldScene')) return;
 
       const playerSettlements = state.players.flatMap(p => p.settlements);
       const prevPlayerSettlements = prevState.players.flatMap(p => p.settlements);
+      const playerUnits = state.players.flatMap(p => p.units);
+      const prevPlayerUnits = prevState.players.flatMap(p => p.units);
+
+      // ⚡ Turbo: Skip expensive terrain rendering if nothing relevant changed
       if (
         state.map !== prevState.map ||
         playerSettlements.length !== prevPlayerSettlements.length ||
@@ -75,15 +78,28 @@ export class WorldScene extends Phaser.Scene {
         this.terrainRenderer.renderTileMap(state.map, [], playerSettlements);
       }
 
-      this.unitRenderer.render(state.players, state.selectedUnitId);
+      // ⚡ Turbo: Skip expensive unit rendering if no units or selections changed
+      if (
+        state.players !== prevState.players ||
+        state.selectedUnitId !== prevState.selectedUnitId
+      ) {
+        this.unitRenderer.render(state.players, state.selectedUnitId);
+      }
 
-      const selectedUnit = state.players.flatMap((p) => p.units).find((u) => u.id === state.selectedUnitId);
-      if (selectedUnit) {
-        this.reachableTiles = getReachableTilesForUnit(selectedUnit, state.map);
-        this.terrainRenderer.updateReachableHighlights(this.reachableTiles);
-      } else {
-        this.reachableTiles = [];
-        this.terrainRenderer.clearReachableHighlights();
+      // ⚡ Turbo: Skip pathfinding if selected unit or map hasn't changed
+      if (
+        state.selectedUnitId !== prevState.selectedUnitId ||
+        playerUnits.find(u => u.id === state.selectedUnitId) !== prevPlayerUnits.find(u => u.id === state.selectedUnitId) ||
+        state.map !== prevState.map
+      ) {
+        const selectedUnit = playerUnits.find((u) => u.id === state.selectedUnitId);
+        if (selectedUnit) {
+          this.reachableTiles = getReachableTilesForUnit(selectedUnit, state.map);
+          this.terrainRenderer.updateReachableHighlights(this.reachableTiles);
+        } else {
+          this.reachableTiles = [];
+          this.terrainRenderer.clearReachableHighlights();
+        }
       }
     });
 

@@ -8,8 +8,11 @@ interface Props {
 }
 
 export const MapGrid: React.FC<Props> = ({ settlementId }) => {
-  const { map, players, assignJob } = useGameStore();
-  const settlement = React.useMemo(() => players.flatMap(p => p.settlements).find(s => s.id === settlementId), [players, settlementId]);
+  const { map, assignJob } = useGameStore();
+  // ⚡ Turbo: Use targeted selector to avoid re-renders when other players or unrelated settlement data changes
+  const settlement = useGameStore(state =>
+    state.players.flatMap(p => p.settlements).find(s => s.id === settlementId)
+  );
 
   const workersByTile = React.useMemo(() => {
     const map = new Map<string, import('../../game/entities/Unit').Unit[]>();
