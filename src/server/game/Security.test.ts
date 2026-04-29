@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { EconomySystem } from './EconomySystem';
-import { LocalGameServer } from '@server/game/LocalGameServer';
-import { GoodType, Nation, UnitType } from '../entities/types';
-import { createInitialAuthoritativeGameState } from '@server/game/createInitialAuthoritativeGameState';
+import { EconomySystem } from '@shared/game/systems/EconomySystem';
+import { LocalGameServer } from './LocalGameServer';
+import { GoodType, Nation, UnitType } from '@shared/game/entities/types';
+import type { BuildingType } from '@shared/game/entities/types';
+import type { Player } from '@shared/game/entities/Player';
+import type { Unit } from '@shared/game/entities/Unit';
+import { createInitialAuthoritativeGameState } from './createInitialAuthoritativeGameState';
 
 describe('Security Vulnerabilities', () => {
   describe('EconomySystem Gold Exploit', () => {
@@ -13,8 +16,6 @@ describe('Security Vulnerabilities', () => {
 
       const result = EconomySystem.buyGood(initialGold, GoodType.FOOD, amount, price);
 
-      // Current behavior: result.cost = -5000, canAfford = true
-      // Expected secure behavior: should either throw or return canAfford: false for invalid amounts
       expect(result.cost).toBeGreaterThanOrEqual(0);
       expect(result.canAfford).toBe(false);
     });
@@ -22,10 +23,9 @@ describe('Security Vulnerabilities', () => {
     it('prevents selling negative amounts of goods (logic error)', () => {
       const amount = -1000;
       const price = 5;
-      // Mock unit with some cargo
-      const unit = { cargo: new Map([[GoodType.FOOD, 100]]) } as any;
+      const unit = { cargo: new Map([[GoodType.FOOD, 100]]) } as unknown as Unit;
 
-      const result = EconomySystem.sellGood({} as any, unit, GoodType.FOOD, amount, price);
+      const result = EconomySystem.sellGood({} as unknown as Player, unit, GoodType.FOOD, amount, price);
 
       expect(result.actualSellAmount).toBeGreaterThanOrEqual(0);
       expect(result.goldGained).toBeGreaterThanOrEqual(0);
@@ -37,8 +37,7 @@ describe('Security Vulnerabilities', () => {
       const server = new LocalGameServer();
       const state = createInitialAuthoritativeGameState();
 
-      // Setup a minimal state with a player and a settlement
-      const player = {
+      const player: Player = {
         id: 'player-1',
         name: 'Test',
         isHuman: true,
@@ -62,33 +61,34 @@ describe('Security Vulnerabilities', () => {
             position: { x: 0, y: 0 },
             movesRemaining: 3,
             maxMoves: 3,
+            isSkipping: false,
             cargo: new Map(),
             occupation: { kind: 'RURE', state: 'MOVING' },
             turnsInJob: 0
           }],
           goods: new Map(),
-          hammers: 0
+          hammers: 0,
+          culture: 'EUROPEAN',
+          organization: 'STATE',
+          attitude: 'NEUTRAL'
         }]
-      } as any;
+      };
 
       state.players = [player];
       state.currentPlayerId = 'player-1';
       server.replaceState(state);
 
-      // Malicious job assignment
       server.dispatch({
         type: 'assignJob',
         settlementId: 's1',
         unitId: 'u1',
-        job: 'INVALID_JOB_TYPE' as any
+        job: 'INVALID_JOB_TYPE' as unknown as string
       });
 
       const playerState = server.getState().players[0];
       const updatedSettlement = playerState?.settlements[0];
       const unit = updatedSettlement?.units[0];
 
-      // It should NOT accept "INVALID_JOB_TYPE" as a valid JobType.
-      // It should remain at its previous occupation (RURE in this test) because the command was ignored.
       expect(unit?.occupation).toEqual({ kind: 'RURE', state: 'MOVING' });
     });
 
@@ -96,7 +96,7 @@ describe('Security Vulnerabilities', () => {
         const server = new LocalGameServer();
         const state = createInitialAuthoritativeGameState();
 
-        const player = {
+        const player: Player = {
           id: 'player-1',
           name: 'Test',
           isHuman: true,
@@ -114,9 +114,12 @@ describe('Security Vulnerabilities', () => {
             productionQueue: [],
             units: [],
             goods: new Map(),
-            hammers: 0
+            hammers: 0,
+            culture: 'EUROPEAN',
+            organization: 'STATE',
+            attitude: 'NEUTRAL'
           }]
-        } as any;
+        };
 
         state.players = [player];
         state.currentPlayerId = 'player-1';
@@ -125,7 +128,7 @@ describe('Security Vulnerabilities', () => {
         server.dispatch({
           type: 'buyBuilding',
           settlementId: 's1',
-          building: 'INVALID_BUILDING' as any
+          building: 'INVALID_BUILDING' as unknown as BuildingType
         });
 
         const playerState = server.getState().players[0];
