@@ -19,6 +19,10 @@ export class EconomySystem {
     newPrice: number;
     actualSellAmount: number;
   } {
+    if (amount <= 0 || !Number.isInteger(amount)) {
+      return { goldGained: 0, newPrice: currentPrice, actualSellAmount: 0 };
+    }
+
     const cargoAmount = unit.cargo.get(good) ?? 0;
     const actualSellAmount = Math.min(amount, cargoAmount);
 
@@ -45,6 +49,10 @@ export class EconomySystem {
     cost: number;
     canAfford: boolean;
   } {
+    if (amount <= 0 || !Number.isInteger(amount)) {
+      return { cost: 0, canAfford: false };
+    }
+
     const cost = amount * currentPrice;
     return {
       cost,

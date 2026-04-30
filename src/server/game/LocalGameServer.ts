@@ -5,7 +5,15 @@ import type { Player } from '@shared/game/entities/Player';
 import type { Settlement } from '@shared/game/entities/Settlement';
 import type { Unit } from '@shared/game/entities/Unit';
 import type { Position } from '@shared/game/entities/Position';
-import { BuildingType, GoodType, Nation, TurnPhase, UnitType, type JobType } from '@shared/game/entities/types';
+import {
+  BuildingType,
+  GoodType,
+  JobType,
+  Nation,
+  TurnPhase,
+  UnitType,
+  type Occupation,
+} from '@shared/game/entities/types';
 import { GameSystem } from '@shared/game/systems/GameSystem';
 import { NamingSystem, type NamingStats } from '@shared/game/systems/NamingSystem';
 import { ProductionSystem } from '@shared/game/systems/ProductionSystem';
@@ -266,6 +274,11 @@ export class LocalGameServer {
       return [];
     }
 
+    // Input validation: Ensure valid building type
+    if (!Object.values(BuildingType).includes(building)) {
+      return [];
+    }
+
     const settlement = player.settlements.find((candidate) => candidate.id === settlementId);
     if (!settlement) {
       return [];
@@ -303,6 +316,28 @@ export class LocalGameServer {
       return [];
     }
 
+    // Input validation: Ensure valid job type or field work coordinates
+    let validatedOccupation: Occupation | null = null;
+    if (Object.values(JobType).includes(job as JobType)) {
+      validatedOccupation = job as JobType;
+    } else if (job.includes(',')) {
+      const [rawX, rawY] = job.split(',').map(Number);
+      if (
+        rawX !== undefined &&
+        rawY !== undefined &&
+        Number.isInteger(rawX) &&
+        Number.isInteger(rawY) &&
+        rawX >= 0 &&
+        rawY >= 0
+      ) {
+        validatedOccupation = { kind: 'FIELD_WORK', tileX: rawX, tileY: rawY };
+      }
+    }
+
+    if (!validatedOccupation) {
+      return [];
+    }
+
     let unit = settlement.units.find((candidate) => candidate.id === unitId);
     if (!unit) {
       const playerUnitIndex = owner.units.findIndex((candidate) => candidate.id === unitId);
@@ -318,14 +353,7 @@ export class LocalGameServer {
       return [];
     }
 
-    if (job.includes(',')) {
-      const [rawX, rawY] = job.split(',').map(Number);
-      if (rawX !== undefined && rawY !== undefined && Number.isFinite(rawX) && Number.isFinite(rawY)) {
-        unit.occupation = { kind: 'FIELD_WORK', tileX: rawX, tileY: rawY };
-      }
-    } else {
-      unit.occupation = job as JobType;
-    }
+    unit.occupation = validatedOccupation;
 
     settlement.population = calculatePopulation(settlement);
     return [];
@@ -386,17 +414,22 @@ export class LocalGameServer {
       return [];
     }
 
-    const selectedShip = player.units.find(
-      (unit) => unit.id === fromUnitId && unit.type === UnitType.SHIP
-    );
-    if (!selectedShip) {
-      return [];
-    }
-
+    // Input validation: Ensure valid recruitable unit type
     const costs: Record<string, number> = {
       ...RECRUITMENT_COSTS,
       [UnitType.SHIP]: 0,
     };
+    if (!Object.keys(costs).includes(unitType)) {
+      return [];
+    }
+
+    const selectedShip = player.units.find(
+      (unit) => unit.id === fromUnitId && unit.type === UnitType.SHIP
+    );
+
+    if (!selectedShip) {
+      return [];
+    }
 
     let goldCost = costs[unitType] ?? 0;
     if (unitType === UnitType.SOLDIER && player.nation === Nation.SPAIN) {

@@ -41,7 +41,7 @@ describe('SaveManager', () => {
       namingStats: {},
     };
 
-    SaveManager.save(state as GameState, 'slot1');
+    SaveManager.save(state, 'slot1');
 
     const loadedState = SaveManager.load('slot1');
     const manifest = SaveManager.listSaves();
@@ -82,7 +82,7 @@ describe('SaveManager', () => {
       namingStats: {},
     };
 
-    SaveManager.save(state as GameState, 'slot1');
+    SaveManager.save(state, 'slot1');
     SaveManager.deleteSave('slot1');
 
     expect(SaveManager.load('slot1')).toBeNull();
