@@ -1,20 +1,12 @@
 import type { Player } from '../entities/Player';
 import type { Tile } from '../entities/Tile';
 import type { NamingStats } from './NamingSystem';
-
-export interface AIUnitMovedEffect {
-  readonly type: 'unitMoved';
-  readonly id: string;
-  readonly fromX: number;
-  readonly fromY: number;
-  readonly toX: number;
-  readonly toY: number;
-}
+import type { GameEffect } from '../protocol';
 
 export interface AISystemResult {
   readonly players: Player[];
   readonly namingStats: NamingStats;
-  readonly effects: readonly AIUnitMovedEffect[];
+  readonly effects: readonly GameEffect[];
 }
 
 

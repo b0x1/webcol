@@ -697,14 +697,7 @@ export class LocalGameServer {
 
         this.state.players = aiResult.players;
         this.state.namingStats = aiResult.namingStats;
-        effects.push(...aiResult.effects.map((effect) => ({
-          type: 'unitMoved',
-          id: effect.id,
-          fromX: effect.fromX,
-          fromY: effect.fromY,
-          toX: effect.toX,
-          toY: effect.toY,
-        } satisfies GameEffect)));
+        effects.push(...aiResult.effects);
         continue;
       }
 
@@ -867,23 +860,13 @@ export class LocalGameServer {
 
     const isBuilding = Object.values(BuildingType).includes(currentItem as BuildingType);
     const isUnit = Object.values(UnitType).includes(currentItem as UnitType);
+    const cost = this.getProductionCost(currentItem, isBuilding);
 
-    const cost = isBuilding
-      ? (BUILDING_COSTS[currentItem as BuildingType] ?? { hammers: 40, tools: 0 })
-      : (UNIT_BUILD_COSTS[currentItem as UnitType] ?? { hammers: 40, tools: 0, muskets: 0 });
-
-    const currentTools = settlement.inventory.get(GoodType.TOOLS) ?? 0;
-    const currentMuskets = settlement.inventory.get(GoodType.MUSKETS) ?? 0;
-    const toolsNeeded = (cost as { tools?: number }).tools ?? 0;
-    const musketsNeeded = (cost as { muskets?: number }).muskets ?? 0;
-
-    if (currentTools < toolsNeeded || currentMuskets < musketsNeeded || settlement.hammers < cost.hammers) {
+    if (!this.canAffordConstruction(settlement, cost)) {
       return currentNamingStats;
     }
 
-    settlement.hammers -= cost.hammers;
-    settlement.inventory.set(GoodType.TOOLS, currentTools - toolsNeeded);
-    settlement.inventory.set(GoodType.MUSKETS, currentMuskets - musketsNeeded);
+    this.deductConstructionResources(settlement, cost);
     settlement.productionQueue.shift();
 
     if (isBuilding) {
@@ -892,10 +875,7 @@ export class LocalGameServer {
         type: 'notification',
         message: `${settlement.name} completed ${currentItem as BuildingType}!`,
       });
-      return currentNamingStats;
-    }
-
-    if (isUnit) {
+    } else if (isUnit) {
       const namingResult = NamingSystem.getNextName(
         player.nation,
         (currentItem as UnitType) === UnitType.SHIP ? 'ship' : 'unit',
@@ -921,6 +901,49 @@ export class LocalGameServer {
     }
 
     return currentNamingStats;
+  }
+
+  private getProductionCost(
+    item: BuildingType | UnitType,
+    isBuilding: boolean
+  ): { hammers: number; tools: number; muskets: number } {
+    if (isBuilding) {
+      const cost = (BUILDING_COSTS as Record<string, { hammers: number; tools?: number }>)[item as string] ?? { hammers: 40, tools: 0 };
+      return { hammers: cost.hammers, tools: cost.tools ?? 0, muskets: 0 };
+    }
+    const cost = (UNIT_BUILD_COSTS as Record<string, { hammers: number; tools?: number; muskets?: number }>)[item as string] ?? { hammers: 40, tools: 0, muskets: 0 };
+    return { hammers: cost.hammers, tools: cost.tools ?? 0, muskets: cost.muskets ?? 0 };
+  }
+
+  private canAffordConstruction(
+    settlement: Settlement,
+    cost: { hammers: number; tools: number; muskets: number }
+  ): boolean {
+    const currentTools = settlement.inventory.get(GoodType.TOOLS) ?? 0;
+    const currentMuskets = settlement.inventory.get(GoodType.MUSKETS) ?? 0;
+
+    return (
+      settlement.hammers >= cost.hammers &&
+      currentTools >= cost.tools &&
+      currentMuskets >= cost.muskets
+    );
+  }
+
+  private deductConstructionResources(
+    settlement: Settlement,
+    cost: { hammers: number; tools: number; muskets: number }
+  ): void {
+    settlement.hammers -= cost.hammers;
+
+    if (cost.tools > 0) {
+      const currentTools = settlement.inventory.get(GoodType.TOOLS) ?? 0;
+      settlement.inventory.set(GoodType.TOOLS, currentTools - cost.tools);
+    }
+
+    if (cost.muskets > 0) {
+      const currentMuskets = settlement.inventory.get(GoodType.MUSKETS) ?? 0;
+      settlement.inventory.set(GoodType.MUSKETS, currentMuskets - cost.muskets);
+    }
   }
 
   private processPopulationGrowth(
