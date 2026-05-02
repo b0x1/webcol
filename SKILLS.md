@@ -6,7 +6,7 @@ Use these pattern. Do not invent new pattern unless old one fail.
 
 ## EVENTBUS
 
-File: `src/game/state/EventBus.ts`
+File: `src/client/game/state/EventBus.ts`
 
 Scene shout event.
 React hear in `useEffect`.
@@ -26,9 +26,43 @@ Smell:
 
 ---
 
+## PROTOCOL
+
+File: `src/shared/game/protocol.ts`
+
+Command go in. Effect come out.
+Command: player want do thing.
+Effect: game world changed.
+
+New action:
+- add to `GameCommand` union
+- add to `GameEffect` union if UI need know specific thing happened
+
+Smell:
+- UI change state without Command -> stop
+- Command contains complex object -> stop, use ID
+
+---
+
+## SERVER
+
+File: `src/server/game/LocalGameServer.ts`
+
+Server is God.
+Server hold `AuthoritativeGameState`.
+Server apply Command, return Effect.
+No cheat. Server validate all.
+
+Smell:
+- Server trust Client blindly -> stop
+- Client calculate result then tell Server -> stop
+
+---
+
 ## SYSTEM
 
 System pure TypeScript.
+Used by Server to change state.
 No Phaser.
 No React.
 No Zustand read inside.
@@ -36,8 +70,9 @@ Input in. plain data out.
 
 Good:
 ```typescript
+// Inside LocalGameServer
 const result = CombatSystem.resolveCombat(attacker, defender, tile);
-useGameStore.getState().applyResult(result);
+return [{ type: 'combatResolved', result }];
 ```
 
 Bad:
@@ -76,11 +111,11 @@ Store hold serialisable data only.
 No Phaser object.
 No React ref.
 No class instance.
-Store validate input.
-Heavy rule go system.
+Store sync with Server.
+Store call `dispatchCommand` to do work.
 
 Smell:
-- store calculate game rule blob -> move to system
+- store calculate game rule blob -> move to server/system
 - store keep framework object -> stop
 
 ---
@@ -103,7 +138,7 @@ Smell:
 
 ## CONSTANT
 
-Magic number or string go `src/game/constants.ts`.
+Magic number or string go `src/shared/game/constants.ts`.
 
 Smell:
 - `if (population > 50)` -> bad
