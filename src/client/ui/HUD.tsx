@@ -4,37 +4,28 @@ import { useUIStore } from '@client/game/state/uiStore';
 import { UnitType } from '@shared/game/entities/types';
 
 export const HUD: React.FC = () => {
-  const {
-    turn,
-  } = useGameStore();
+  const turn = useGameStore((state) => state.turn);
+  const gold = useGameStore((state) => selectCurrentPlayer(state)?.gold ?? 0);
+  const hasShip = useGameStore((state) =>
+    selectCurrentPlayer(state)?.units.some((u) => u.type === UnitType.SHIP) ?? false
+  );
 
-  const {
-    setEuropeScreenOpen,
-    setSaveModalOpen,
-    setReportsModalOpen,
-    isMainMenuOpen,
-    isSettlementScreenOpen,
-    isEuropeScreenOpen,
-    isReportsModalOpen,
-    isSaveModalOpen,
-    isNativeTradeModalOpen,
-    isHowToPlayModalOpen,
-    isGameSetupModalOpen,
-    isDebugMode,
-    toggleDebugMode,
-  } = useUIStore();
+  const isMainMenuOpen = useUIStore((state) => state.isMainMenuOpen);
+  const isDebugMode = useUIStore((state) => state.isDebugMode);
+  const setEuropeScreenOpen = useUIStore((state) => state.setEuropeScreenOpen);
+  const setSaveModalOpen = useUIStore((state) => state.setSaveModalOpen);
+  const setReportsModalOpen = useUIStore((state) => state.setReportsModalOpen);
+  const toggleDebugMode = useUIStore((state) => state.toggleDebugMode);
 
-  const isAnyModalOpen =
-    isSettlementScreenOpen ||
-    isEuropeScreenOpen ||
-    isReportsModalOpen ||
-    isSaveModalOpen ||
-    isNativeTradeModalOpen ||
-    isHowToPlayModalOpen ||
-    isGameSetupModalOpen;
-
-  const currentPlayer = useGameStore(selectCurrentPlayer);
-  const hasShip = currentPlayer?.units.some((u) => u.type === UnitType.SHIP);
+  const isAnyModalOpen = useUIStore((state) =>
+    state.isSettlementScreenOpen ||
+    state.isEuropeScreenOpen ||
+    state.isReportsModalOpen ||
+    state.isSaveModalOpen ||
+    state.isNativeTradeModalOpen ||
+    state.isHowToPlayModalOpen ||
+    state.isGameSetupModalOpen
+  );
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -102,7 +93,7 @@ export const HUD: React.FC = () => {
           <span className="text-yellow-400 font-black">R</span>EPORTS
         </button>
         <div className="min-w-[100px] font-mono font-bold bg-slate-900/50 px-3 py-1 rounded border border-white/10">
-          GOLD: <span className="text-yellow-400">{currentPlayer?.gold ?? 0}</span>
+          GOLD: <span className="text-yellow-400">{gold}</span>
         </div>
       </div>
     </div>

@@ -4,19 +4,22 @@ import { useUIStore } from '@client/game/state/uiStore';
 import { Flag } from './Flag';
 
 export const ForeignSettlementModal: React.FC = () => {
-  const { selectedSettlementId, players } = useGameStore();
+  const selectedSettlementId = useGameStore((state) => state.selectedSettlementId);
+  const players = useGameStore((state) => state.players);
+  const currentPlayerId = useGameStore((state) => state.currentPlayerId);
+  const selectSettlement = useGameStore((state) => state.selectSettlement);
+  const isDebugMode = useUIStore((state) => state.isDebugMode);
 
   if (!selectedSettlementId) return null;
 
-  const allSettlements = players.flatMap(p => p.settlements);
+  const allSettlements = players.flatMap((p) => p.settlements);
 
-  const settlement = allSettlements.find(s => s.id === selectedSettlementId);
+  const settlement = allSettlements.find((s) => s.id === selectedSettlementId);
   if (!settlement) return null;
 
-  const settlementOwner = players.find(p => p.settlements.some(s => s.id === settlement.id));
-  const currentPlayerId = useGameStore.getState().currentPlayerId;
+  const settlementOwner = players.find((p) => p.settlements.some((s) => s.id === settlement.id));
   const isOwned = settlement.ownerId === currentPlayerId;
-  if (isOwned && !useUIStore.getState().isDebugMode) return null;
+  if (isOwned && !isDebugMode) return null;
 
   const nationName = settlementOwner?.name ?? settlement.culture;
   const nation = settlementOwner?.nation ?? 'IROQUOIS';
@@ -50,7 +53,9 @@ export const ForeignSettlementModal: React.FC = () => {
         </div>
 
         <button
-          onClick={() => { useGameStore.getState().selectSettlement(null); }}
+          onClick={() => {
+            selectSettlement(null);
+          }}
           className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white font-black uppercase tracking-widest text-[10px] rounded transition-colors border border-white/5"
         >
           Close

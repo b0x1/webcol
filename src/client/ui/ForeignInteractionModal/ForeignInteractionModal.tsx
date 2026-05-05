@@ -4,10 +4,8 @@ import { useUIStore } from '@client/game/state/uiStore';
 import { Attitude, UnitType } from '@shared/game/entities/types';
 
 export const ForeignInteractionModal: React.FC = () => {
-  const {
-    tradeWithSettlement,
-    learnFromSettlement,
-  } = useGameStore();
+  const tradeWithSettlement = useGameStore((state) => state.tradeWithSettlement);
+  const learnFromSettlement = useGameStore((state) => state.learnFromSettlement);
 
   const {
     isNativeTradeModalOpen,
