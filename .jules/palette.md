@@ -13,3 +13,7 @@
 ## 2026-04-27 - [Consistent Modal Dismissal and Keyboard Support]
 **Learning:** Forcing users to reach for the mouse to dismiss or confirm a disruptive modal (like an "End Turn" warning) breaks game flow. However, global keyboard listeners must respect the focused element; overriding `Enter` when a different button is focused creates deceptive and destructive interactions.
 **Action:** Use `Escape` for dismissal, but rely on standard browser behavior for `Enter` by using `autoFocus` on the preferred (safest) button. Implement ARIA attributes (`role="alertdialog"`) for all confirmation modals.
+
+## 2026-05-04 - [Contextual Accessibility with Keyboard Hints]
+**Learning:** In keyboard-heavy interfaces like games, standard ARIA labels are insufficient if they don't communicate the shortcut. Including the shortcut key in the `aria-label` (e.g., "Load Game (L)") and using the `title` attribute to explain disabled states (e.g., "Requires a Ship") significantly reduces user frustration and cognitive load.
+**Action:** Always include keyboard shortcut hints in `aria-label` and descriptive reasonings in `title` for buttons that can be disabled.

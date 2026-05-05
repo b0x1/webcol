@@ -165,7 +165,8 @@ export const UnitPanel: React.FC = () => {
               <button
                 onClick={() => { if (canBuildSettlement) { foundSettlement(unit.id); }} }
                 disabled={!canBuildSettlement}
-                className={`w-full py-2.5 bg-green-600 text-white font-black uppercase tracking-widest text-xs rounded shadow-lg transition-all transform ${canBuildSettlement ? 'cursor-pointer hover:bg-green-500 active:scale-95' : 'opacity-50 cursor-not-allowed'}`}
+                className={`w-full py-2.5 bg-green-600 text-white font-black uppercase tracking-widest text-xs rounded shadow-lg transition-all transform focus-visible:ring-2 focus-visible:ring-blue-500 outline-none ${canBuildSettlement ? 'cursor-pointer hover:bg-green-500 active:scale-95' : 'opacity-50 cursor-not-allowed'}`}
+                aria-label="Build Settlement (B)"
               >
                 <span className="text-yellow-400 font-black">B</span>UILD SETTLEMENT
               </button>
@@ -179,13 +180,15 @@ export const UnitPanel: React.FC = () => {
           <div className="flex gap-2">
             <button
               onClick={() => { skipUnit(unit.id); }}
-              className="flex-1 py-2.5 cursor-pointer bg-red-700 hover:bg-red-600 text-white font-black uppercase tracking-widest text-[10px] rounded shadow-lg transition-all transform active:scale-95"
+              className="flex-1 py-2.5 cursor-pointer bg-red-700 hover:bg-red-600 text-white font-black uppercase tracking-widest text-[10px] rounded shadow-lg transition-all transform active:scale-95 focus-visible:ring-2 focus-visible:ring-blue-500 outline-none"
+              aria-label="Skip Unit (Space)"
             >
               SKIP (Space)
             </button>
             <button
               onClick={() => { selectUnit(null); }}
-              className="flex-1 py-2.5 cursor-pointer bg-slate-700 hover:bg-slate-600 text-white font-black uppercase tracking-widest text-[10px] rounded shadow-lg transition-all transform active:scale-95"
+              className="flex-1 py-2.5 cursor-pointer bg-slate-700 hover:bg-slate-600 text-white font-black uppercase tracking-widest text-[10px] rounded shadow-lg transition-all transform active:scale-95 focus-visible:ring-2 focus-visible:ring-blue-500 outline-none"
+              aria-label="Wait"
             >
               Wait
             </button>
@@ -195,7 +198,8 @@ export const UnitPanel: React.FC = () => {
       {isReadOnly && (
         <button
           onClick={() => { selectUnit(null); }}
-          className="w-full py-2.5 cursor-pointer bg-slate-700 hover:bg-slate-600 text-white font-black uppercase tracking-widest text-[10px] rounded shadow-lg transition-all transform active:scale-95"
+          className="w-full py-2.5 cursor-pointer bg-slate-700 hover:bg-slate-600 text-white font-black uppercase tracking-widest text-[10px] rounded shadow-lg transition-all transform active:scale-95 focus-visible:ring-2 focus-visible:ring-blue-500 outline-none"
+          aria-label="Close"
         >
           Close
         </button>

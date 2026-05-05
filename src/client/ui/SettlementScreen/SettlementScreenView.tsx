@@ -60,7 +60,8 @@ export const SettlementScreenView: React.FC<SettlementScreenViewProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest rounded transition-all transform active:scale-95 cursor-pointer shadow-lg border border-red-500/50"
+            className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest rounded transition-all transform active:scale-95 cursor-pointer shadow-lg border border-red-500/50 focus-visible:ring-2 focus-visible:ring-blue-500 outline-none"
+            aria-label="Return to Map (Esc)"
           >
             Return to Map (Esc)
           </button>

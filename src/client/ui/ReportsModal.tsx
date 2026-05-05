@@ -62,7 +62,8 @@ export const ReportsModal: React.FC = () => {
           <h2 className="text-3xl font-black uppercase tracking-tight">Reports</h2>
           <button
             onClick={() => { setReportsModalOpen(false); }}
-            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded transition-colors cursor-pointer"
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500 outline-none"
+            aria-label="Close (Esc)"
           >
             Close (Esc)
           </button>
@@ -73,7 +74,7 @@ export const ReportsModal: React.FC = () => {
             <button
               key={tab}
               onClick={() => { setActiveTab(tab); }}
-              className={`flex-1 py-3 px-4 rounded-md font-bold uppercase text-sm tracking-widest transition-all cursor-pointer ${
+              className={`flex-1 py-3 px-4 rounded-md font-bold uppercase text-sm tracking-widest transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500 outline-none ${
                 activeTab === tab
                   ? 'bg-blue-600 text-white shadow-lg'
                   : 'text-slate-400 hover:text-white hover:bg-slate-700'
