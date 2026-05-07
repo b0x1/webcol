@@ -6,6 +6,7 @@ import type { Settlement } from '@shared/game/entities/Settlement';
 import type { Unit } from '@shared/game/entities/Unit';
 import type { Position } from '@shared/game/entities/Position';
 import {
+  Attitude,
   BuildingType,
   GoodType,
   JobType,
@@ -360,6 +361,11 @@ export class LocalGameServer {
   }
 
   private sellGood(unitId: string, good: GoodType, amount: number): readonly GameEffect[] {
+    // Input validation: Ensure valid good type and positive amount
+    if (!Object.values(GoodType).includes(good) || amount <= 0 || !Number.isInteger(amount)) {
+      return [];
+    }
+
     const player = this.selectCurrentPlayer();
     const unit = player?.units.find((candidate) => candidate.id === unitId);
     if (!player || !unit) {
@@ -386,6 +392,11 @@ export class LocalGameServer {
   }
 
   private buyGood(unitId: string, good: GoodType, amount: number): readonly GameEffect[] {
+    // Input validation: Ensure valid good type and positive amount
+    if (!Object.values(GoodType).includes(good) || amount <= 0 || !Number.isInteger(amount)) {
+      return [];
+    }
+
     const player = this.selectCurrentPlayer();
     const unit = player?.units.find((candidate) => candidate.id === unitId);
     if (!player || !unit) {
@@ -478,6 +489,11 @@ export class LocalGameServer {
   }
 
   private tradeWithSettlement(settlementId: string, unitId: string, goodOffered: GoodType): readonly GameEffect[] {
+    // Input validation: Ensure valid good type
+    if (!Object.values(GoodType).includes(goodOffered)) {
+      return [];
+    }
+
     const player = this.selectCurrentPlayer();
     const unit = player?.units.find((candidate) => candidate.id === unitId);
     if (!player || !unit) {
@@ -492,6 +508,11 @@ export class LocalGameServer {
     const settlementIndex = foreignPlayer.settlements.findIndex((candidate) => candidate.id === settlementId);
     const settlement = foreignPlayer.settlements[settlementIndex];
     if (!settlement) {
+      return [];
+    }
+
+    // Defensive guard: Ensure unit has the good before trading to avoid unhandled exception
+    if ((unit.cargo.get(goodOffered) ?? 0) <= 0) {
       return [];
     }
 
@@ -526,6 +547,11 @@ export class LocalGameServer {
     const settlementIndex = foreignPlayer.settlements.findIndex((candidate) => candidate.id === settlementId);
     const settlement = foreignPlayer.settlements[settlementIndex];
     if (!settlement) {
+      return [];
+    }
+
+    // Defensive guards: Ensure preconditions are met before learning to avoid unhandled exceptions
+    if (settlement.attitude !== Attitude.FRIENDLY || unit.type !== UnitType.COLONIST) {
       return [];
     }
 
