@@ -1,30 +1,44 @@
 import React from 'react';
-import { useGameStore } from '@client/game/state/gameStore';
+import { useStoreWithEqualityFn } from 'zustand/traditional';
+import { shallow } from 'zustand/shallow';
+import { useGameStore, selectUnitsAtPosition } from '@client/game/state/gameStore';
 import { TerrainType } from '@shared/game/entities/types';
-import { isSame } from '@shared/game/entities/Position';
 
 export const FieldPanel: React.FC = () => {
-  const { selectedTile, map, selectedUnitId, players } = useGameStore();
+  const selectedTile = useGameStore((state) => state.selectedTile);
+  const map = useGameStore((state) => state.map);
+  const selectedUnitId = useGameStore((state) => state.selectedUnitId);
+
+  const unitsAtTile = useStoreWithEqualityFn(
+    useGameStore,
+    (state) => (selectedTile ? selectUnitsAtPosition(state, selectedTile.position) : []),
+    shallow,
+  );
 
   if (!selectedTile) return null;
 
-  const tile = map[selectedTile.position.y]?.[selectedTile.position.x] as { terrainType: TerrainType; hasResource: string | null; movementCost: number } | undefined;
+  const tile = map[selectedTile.position.y]?.[selectedTile.position.x] as
+    | { terrainType: TerrainType; hasResource: string | null; movementCost: number }
+    | undefined;
   if (!tile) return null;
 
   const getDefenseBonus = (type: TerrainType) => {
     switch (type) {
-      case TerrainType.MOUNTAINS: return 1.0;
-      case TerrainType.HILLS: return 0.5;
-      case TerrainType.FOREST: return 0.25;
-      case TerrainType.SWAMP: return -0.25;
-      default: return 0;
+      case TerrainType.MOUNTAINS:
+        return 1.0;
+      case TerrainType.HILLS:
+        return 0.5;
+      case TerrainType.FOREST:
+        return 0.25;
+      case TerrainType.SWAMP:
+        return -0.25;
+      default:
+        return 0;
     }
   };
 
   const defenseBonus = getDefenseBonus(tile.terrainType);
 
-  const allUnits = players.flatMap(p => p.units);
-  const unitsAtTile = allUnits.filter(u => isSame(u.position, selectedTile.position));
   const showAboveUnitPanel = selectedUnitId ?? unitsAtTile.length > 1;
 
   return (

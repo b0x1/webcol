@@ -1,17 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useStoreWithEqualityFn } from 'zustand/traditional';
-import { shallow } from 'zustand/shallow';
-import { useGameStore, selectAvailableUnits } from '@client/game/state/gameStore';
+import { useGameStore, selectAvailableUnitsCount } from '@client/game/state/gameStore';
 import { useUIStore } from '@client/game/state/uiStore';
 import { eventBus } from '@client/game/state/EventBus';
 import { MiniMapCanvas } from './MiniMap/components/MiniMapCanvas';
 
 export const MiniMap: React.FC = () => {
-  const {
-    map,
-    selectNextUnit,
-    endTurn,
-  } = useGameStore();
+  const map = useGameStore((state) => state.map);
+  const selectNextUnit = useGameStore((state) => state.selectNextUnit);
+  const endTurn = useGameStore((state) => state.endTurn);
 
   const {
     isMainMenuOpen,
@@ -37,8 +33,8 @@ export const MiniMap: React.FC = () => {
 
   const [viewport, setViewport] = useState({ x: 0, y: 0, width: 0, height: 0 });
 
-  const availableUnits = useStoreWithEqualityFn(useGameStore, selectAvailableUnits, shallow);
-  const hasAvailableUnits = availableUnits.length > 0;
+  const availableUnitsCount = useGameStore(selectAvailableUnitsCount);
+  const hasAvailableUnits = availableUnitsCount > 0;
 
   const handleEndTurn = useCallback(() => {
     if (hasAvailableUnits) {
@@ -97,7 +93,7 @@ export const MiniMap: React.FC = () => {
             : 'bg-red-700 hover:bg-red-600 text-white border-red-500'
         }`}
       >
-        {hasAvailableUnits ? `Next Unit (${availableUnits.length})` : 'End Turn'}
+        {hasAvailableUnits ? `Next Unit (${availableUnitsCount})` : 'End Turn'}
       </button>
     </div>
   );

@@ -10,11 +10,10 @@ import { ResourcesTab } from './ReportsModal/components/ResourcesTab';
 type ReportTab = 'units' | 'settlements' | 'resources';
 
 export const ReportsModal: React.FC = () => {
-  const {
-    players,
-    selectUnit,
-    selectSettlement,
-  } = useGameStore();
+  const players = useGameStore((state) => state.players);
+  const selectUnit = useGameStore((state) => state.selectUnit);
+  const selectSettlement = useGameStore((state) => state.selectSettlement);
+
   const {
     isReportsModalOpen,
     setReportsModalOpen,

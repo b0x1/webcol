@@ -20,32 +20,22 @@ import type { Unit } from '@shared/game/entities/Unit';
 const EMPTY_TILE_UNITS: readonly Unit[] = [];
 
 export const UnitPanel: React.FC = () => {
-  const {
-    selectedUnitId,
-    selectedTile,
-    skipUnit,
-    selectUnit,
-  } = useGameStore();
-  const {
-    isMainMenuOpen,
-    isSettlementScreenOpen,
-    isEuropeScreenOpen,
-    isReportsModalOpen,
-    isSaveModalOpen,
-    isNativeTradeModalOpen,
-    isHowToPlayModalOpen,
-    isGameSetupModalOpen,
-  } = useUIStore();
+  const selectedUnitId = useGameStore((state) => state.selectedUnitId);
+  const selectedTile = useGameStore((state) => state.selectedTile);
+  const skipUnit = useGameStore((state) => state.skipUnit);
+  const selectUnit = useGameStore((state) => state.selectUnit);
   const foundSettlement = useGameStore((state) => state.foundSettlement);
 
-  const isAnyModalOpen =
-    isSettlementScreenOpen ||
-    isEuropeScreenOpen ||
-    isReportsModalOpen ||
-    isSaveModalOpen ||
-    isNativeTradeModalOpen ||
-    isHowToPlayModalOpen ||
-    isGameSetupModalOpen;
+  const isMainMenuOpen = useUIStore((state) => state.isMainMenuOpen);
+  const isAnyModalOpen = useUIStore((state) =>
+    state.isSettlementScreenOpen ||
+    state.isEuropeScreenOpen ||
+    state.isReportsModalOpen ||
+    state.isSaveModalOpen ||
+    state.isNativeTradeModalOpen ||
+    state.isHowToPlayModalOpen ||
+    state.isGameSetupModalOpen
+  );
 
   const unit = useGameStore(selectSelectedUnit);
   const player = useGameStore(selectCurrentPlayer);

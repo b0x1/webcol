@@ -3,7 +3,7 @@ import { useGameStore, selectCurrentPlayer, selectSelectedUnit } from '@client/g
 import { UnitType, GoodType } from '@shared/game/entities/types';
 
 export const RecruitPanel: React.FC = () => {
-  const { recruitUnit } = useGameStore();
+  const recruitUnit = useGameStore((state) => state.recruitUnit);
   const player = useGameStore(selectCurrentPlayer);
   const selectedUnit = useGameStore(selectSelectedUnit);
 
