@@ -1,9 +1,8 @@
-import { BUILDING_COSTS, COLONY_CONSTANTS, RECRUITMENT_COSTS, UNIT_BUILD_COSTS } from '@shared/game/constants';
+import { RECRUITMENT_COSTS } from '@shared/game/constants';
 import { calculatePopulation } from '@shared/game/entities/Settlement';
 import { createUnit } from '@shared/game/entities/Unit';
 import type { Player } from '@shared/game/entities/Player';
 import type { Settlement } from '@shared/game/entities/Settlement';
-import type { Unit } from '@shared/game/entities/Unit';
 import type { Position } from '@shared/game/entities/Position';
 import {
   Attitude,
@@ -16,8 +15,8 @@ import {
   type Occupation,
 } from '@shared/game/entities/types';
 import { GameSystem } from '@shared/game/systems/GameSystem';
-import { NamingSystem, type NamingStats } from '@shared/game/systems/NamingSystem';
-import { ProductionSystem } from '@shared/game/systems/ProductionSystem';
+import { NamingSystem } from '@shared/game/systems/NamingSystem';
+import { TurnEngine } from '@shared/game/systems/TurnEngine';
 import { MovementSystem } from '@shared/game/systems/MovementSystem';
 import { UnitSystem } from '@shared/game/systems/UnitSystem';
 import { SettlementSystem } from '@shared/game/systems/SettlementSystem';
@@ -701,7 +700,12 @@ export class LocalGameServer {
       }
 
       if (this.state.phase === TurnPhase.PRODUCTION) {
-        const result = this.runProduction(this.state.players, this.state.map, this.state.namingStats);
+        const result = TurnEngine.runProduction(
+          this.state.players,
+          this.state.map,
+          this.state.namingStats,
+          generateId
+        );
         this.state.players = result.players;
         this.state.namingStats = result.namingStats;
         effects.push(...result.effects);
@@ -740,273 +744,6 @@ export class LocalGameServer {
     }
   }
 
-  private runProduction(
-    players: Player[],
-    map: AuthoritativeGameState['map'],
-    namingStats: NamingStats,
-  ): { players: Player[]; namingStats: NamingStats; effects: GameEffect[] } {
-    let currentNamingStats = { ...namingStats };
-    const effects: GameEffect[] = [];
-
-    const updatedPlayers = players.map((player) => {
-      const newPlayerUnits = [...player.units];
-      const newSettlements = player.settlements.map((settlement) => {
-        const nextSettlement: Settlement = {
-          ...settlement,
-          buildings: [...settlement.buildings],
-          productionQueue: [...settlement.productionQueue],
-          inventory: new Map(settlement.inventory),
-          units: settlement.units.map((unit) => ({ ...unit, cargo: new Map(unit.cargo) })),
-          goods: new Map(settlement.goods),
-        };
-
-        currentNamingStats = this.processSettlementTurn(
-          nextSettlement,
-          player,
-          newPlayerUnits,
-          map,
-          currentNamingStats,
-          effects,
-        );
-
-        return nextSettlement;
-      });
-
-      return {
-        ...player,
-        units: newPlayerUnits,
-        settlements: newSettlements,
-      };
-    });
-
-    return { players: updatedPlayers, namingStats: currentNamingStats, effects };
-  }
-
-  private processSettlementTurn(
-    settlement: Settlement,
-    player: Player,
-    playerUnits: Unit[],
-    map: AuthoritativeGameState['map'],
-    namingStats: NamingStats,
-    effects: GameEffect[],
-  ): NamingStats {
-    let currentNamingStats = namingStats;
-    settlement.population = calculatePopulation(settlement);
-
-    settlement.units.forEach((unit) => {
-      unit.turnsInJob += 1;
-      if (unit.turnsInJob >= COLONY_CONSTANTS.EXPERT_PROMOTION_TURNS && !unit.expertise) {
-        if (typeof unit.occupation === 'string') {
-          unit.expertise = unit.occupation;
-          effects.push({
-            type: 'notification',
-            message: `${unit.type} has become an expert ${unit.expertise}!`,
-          });
-        }
-      }
-    });
-
-    const { netProduction, hammersProduced } = ProductionSystem.calculateSettlementProduction(
-      settlement,
-      map,
-      true
-    );
-
-    netProduction.forEach((amount, good) => {
-      settlement.inventory.set(good, Math.max(0, (settlement.inventory.get(good) ?? 0) + amount));
-    });
-    settlement.hammers += hammersProduced;
-
-    if (settlement.buildings.includes(BuildingType.PRINTING_PRESS)) {
-      const namingResult = NamingSystem.getNextName(player.nation, 'unit', currentNamingStats);
-      currentNamingStats = namingResult.updatedStats;
-
-      const newUnit = createUnit(
-        generateId('unit'),
-        settlement.ownerId,
-        namingResult.name,
-        UnitType.COLONIST,
-        settlement.position.x,
-        settlement.position.y,
-        3
-      );
-
-      playerUnits.push(newUnit);
-      effects.push({
-        type: 'notification',
-        message: `An intellectual has joined the cause in ${settlement.name}!`,
-      });
-    }
-
-    currentNamingStats = this.processConstruction(
-      settlement,
-      player,
-      playerUnits,
-      currentNamingStats,
-      effects,
-    );
-
-    currentNamingStats = this.processPopulationGrowth(
-      settlement,
-      player,
-      playerUnits,
-      currentNamingStats,
-      effects,
-    );
-
-    const cap = settlement.buildings.includes(BuildingType.WAREHOUSE)
-      ? COLONY_CONSTANTS.WAREHOUSE_CAPACITY
-      : COLONY_CONSTANTS.DEFAULT_CAPACITY;
-
-    settlement.inventory.forEach((amount, good) => {
-      if (amount > cap) {
-        settlement.inventory.set(good, cap);
-      }
-    });
-
-    return currentNamingStats;
-  }
-
-  private processConstruction(
-    settlement: Settlement,
-    player: Player,
-    playerUnits: Unit[],
-    namingStats: NamingStats,
-    effects: GameEffect[],
-  ): NamingStats {
-    let currentNamingStats = namingStats;
-    if (settlement.productionQueue.length === 0) {
-      return currentNamingStats;
-    }
-
-    const currentItem = settlement.productionQueue[0];
-    if (!currentItem) {
-      return currentNamingStats;
-    }
-
-    const isBuilding = Object.values(BuildingType).includes(currentItem as BuildingType);
-    const isUnit = Object.values(UnitType).includes(currentItem as UnitType);
-    const cost = this.getProductionCost(currentItem, isBuilding);
-
-    if (!this.canAffordConstruction(settlement, cost)) {
-      return currentNamingStats;
-    }
-
-    this.deductConstructionResources(settlement, cost);
-    settlement.productionQueue.shift();
-
-    if (isBuilding) {
-      settlement.buildings.push(currentItem as BuildingType);
-      effects.push({
-        type: 'notification',
-        message: `${settlement.name} completed ${currentItem as BuildingType}!`,
-      });
-    } else if (isUnit) {
-      const namingResult = NamingSystem.getNextName(
-        player.nation,
-        (currentItem as UnitType) === UnitType.SHIP ? 'ship' : 'unit',
-        currentNamingStats
-      );
-      currentNamingStats = namingResult.updatedStats;
-
-      const newUnit = createUnit(
-        generateId('unit'),
-        settlement.ownerId,
-        namingResult.name,
-        currentItem as UnitType,
-        settlement.position.x,
-        settlement.position.y,
-        3
-      );
-      settlement.units.push(newUnit);
-      playerUnits.push(newUnit);
-      effects.push({
-        type: 'notification',
-        message: `${settlement.name} completed ${currentItem as UnitType}!`,
-      });
-    }
-
-    return currentNamingStats;
-  }
-
-  private getProductionCost(
-    item: BuildingType | UnitType,
-    isBuilding: boolean
-  ): { hammers: number; tools: number; muskets: number } {
-    if (isBuilding) {
-      const cost = (BUILDING_COSTS as Record<string, { hammers: number; tools?: number }>)[item as string] ?? { hammers: 40, tools: 0 };
-      return { hammers: cost.hammers, tools: cost.tools ?? 0, muskets: 0 };
-    }
-    const cost = (UNIT_BUILD_COSTS as Record<string, { hammers: number; tools?: number; muskets?: number }>)[item as string] ?? { hammers: 40, tools: 0, muskets: 0 };
-    return { hammers: cost.hammers, tools: cost.tools ?? 0, muskets: cost.muskets ?? 0 };
-  }
-
-  private canAffordConstruction(
-    settlement: Settlement,
-    cost: { hammers: number; tools: number; muskets: number }
-  ): boolean {
-    const currentTools = settlement.inventory.get(GoodType.TOOLS) ?? 0;
-    const currentMuskets = settlement.inventory.get(GoodType.MUSKETS) ?? 0;
-
-    return (
-      settlement.hammers >= cost.hammers &&
-      currentTools >= cost.tools &&
-      currentMuskets >= cost.muskets
-    );
-  }
-
-  private deductConstructionResources(
-    settlement: Settlement,
-    cost: { hammers: number; tools: number; muskets: number }
-  ): void {
-    settlement.hammers -= cost.hammers;
-
-    if (cost.tools > 0) {
-      const currentTools = settlement.inventory.get(GoodType.TOOLS) ?? 0;
-      settlement.inventory.set(GoodType.TOOLS, currentTools - cost.tools);
-    }
-
-    if (cost.muskets > 0) {
-      const currentMuskets = settlement.inventory.get(GoodType.MUSKETS) ?? 0;
-      settlement.inventory.set(GoodType.MUSKETS, currentMuskets - cost.muskets);
-    }
-  }
-
-  private processPopulationGrowth(
-    settlement: Settlement,
-    player: Player,
-    playerUnits: Unit[],
-    namingStats: NamingStats,
-    effects: GameEffect[],
-  ): NamingStats {
-    const currentFood = settlement.inventory.get(GoodType.FOOD) ?? 0;
-    if (currentFood < COLONY_CONSTANTS.FOOD_GROWTH_THRESHOLD) {
-      return namingStats;
-    }
-
-    settlement.inventory.set(
-      GoodType.FOOD,
-      currentFood - COLONY_CONSTANTS.FOOD_GROWTH_THRESHOLD
-    );
-
-    const namingResult = NamingSystem.getNextName(player.nation, 'unit', namingStats);
-    const newColonist = createUnit(
-      generateId('unit'),
-      settlement.ownerId,
-      namingResult.name,
-      UnitType.COLONIST,
-      settlement.position.x,
-      settlement.position.y,
-      3
-    );
-    playerUnits.push(newColonist);
-    effects.push({
-      type: 'notification',
-      message: `A new colonist has been born in ${settlement.name}!`,
-    });
-
-    return namingResult.updatedStats;
-  }
 
   private selectCurrentPlayer(): Player | undefined {
     return TraversalUtils.findPlayerById(this.state.players, this.state.currentPlayerId);
