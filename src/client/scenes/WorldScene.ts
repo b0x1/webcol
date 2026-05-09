@@ -2,7 +2,7 @@ import * as Phaser from 'phaser';
 import { TileMap } from '../game/map/TileMap';
 import { TerrainRenderer } from '../game/map/TerrainRenderer';
 import { SpriteLoader } from '../game/utils/SpriteLoader';
-import { getReachableTilesForUnit, useGameStore } from '@client/game/state/gameStore';
+import { getReachableTilesForUnit, useGameStore, selectUnitById } from '@client/game/state/gameStore';
 import { eventBus } from '@client/game/state/EventBus';
 import { MAP_CONSTANTS } from '@shared/game/constants';
 import { UnitRenderer } from '../game/map/UnitRenderer';
@@ -59,41 +59,42 @@ export class WorldScene extends Phaser.Scene {
     this.storeUnsubscribe = useGameStore.subscribe((state, prevState) => {
       if (!this.scene.isActive('WorldScene')) return;
 
-      const playerSettlements = state.players.flatMap(p => p.settlements);
-      const prevPlayerSettlements = prevState.players.flatMap(p => p.settlements);
-      const playerUnits = state.players.flatMap(p => p.units);
-      const prevPlayerUnits = prevState.players.flatMap(p => p.units);
+      const mapChanged = state.map !== prevState.map;
+      const playersChanged = state.players !== prevState.players;
+      const selectionChanged = state.selectedUnitId !== prevState.selectedUnitId;
 
-      // ⚡ Turbo: Skip expensive terrain rendering if nothing relevant changed
-      if (
-        state.map !== prevState.map ||
-        playerSettlements.length !== prevPlayerSettlements.length ||
-        !playerSettlements.every((c, i) => c === prevPlayerSettlements[i])
-      ) {
+      if (!mapChanged && !playersChanged && !selectionChanged) return;
+
+      // 1. Terrain Rendering - Skip if nothing relevant changed
+      // We check for map changes or settlement changes (via player array or settlement list references)
+      const settlementsChanged = playersChanged && (
+        state.players.length !== prevState.players.length ||
+        state.players.some((p, i) => p.settlements !== prevState.players[i]?.settlements)
+      );
+
+      if (mapChanged || settlementsChanged) {
+        const playerSettlements = state.players.flatMap(p => p.settlements);
         this.terrainRenderer.renderTileMap(state.map, [], playerSettlements);
       }
 
-      // ⚡ Turbo: Skip expensive unit rendering if no units or selections changed
-      if (
-        state.players !== prevState.players ||
-        state.selectedUnitId !== prevState.selectedUnitId
-      ) {
+      // 2. Unit Rendering - Skip if no units or selections changed
+      if (playersChanged || selectionChanged) {
         this.unitRenderer.render(state.players, state.selectedUnitId);
       }
 
-      // ⚡ Turbo: Skip pathfinding if selected unit or map hasn't changed
-      if (
-        state.selectedUnitId !== prevState.selectedUnitId ||
-        playerUnits.find(u => u.id === state.selectedUnitId) !== prevPlayerUnits.find(u => u.id === state.selectedUnitId) ||
-        state.map !== prevState.map
-      ) {
-        const selectedUnit = playerUnits.find((u) => u.id === state.selectedUnitId);
-        if (selectedUnit) {
-          this.reachableTiles = getReachableTilesForUnit(selectedUnit, state.map);
-          this.terrainRenderer.updateReachableHighlights(this.reachableTiles);
-        } else {
-          this.reachableTiles = [];
-          this.terrainRenderer.clearReachableHighlights();
+      // 3. Pathfinding / Reachable Highlights - Skip if selected unit or map hasn't changed
+      if (selectionChanged || playersChanged || mapChanged) {
+        const selectedUnit = selectUnitById(state, state.selectedUnitId);
+        const prevSelectedUnit = selectUnitById(prevState, prevState.selectedUnitId);
+
+        if (selectedUnit !== prevSelectedUnit || mapChanged) {
+          if (selectedUnit) {
+            this.reachableTiles = getReachableTilesForUnit(selectedUnit, state.map);
+            this.terrainRenderer.updateReachableHighlights(this.reachableTiles);
+          } else {
+            this.reachableTiles = [];
+            this.terrainRenderer.clearReachableHighlights();
+          }
         }
       }
     });
