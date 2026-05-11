@@ -17,3 +17,7 @@
 ## 2026-05-04 - [Contextual Accessibility with Keyboard Hints]
 **Learning:** In keyboard-heavy interfaces like games, standard ARIA labels are insufficient if they don't communicate the shortcut. Including the shortcut key in the `aria-label` (e.g., "Load Game (L)") and using the `title` attribute to explain disabled states (e.g., "Requires a Ship") significantly reduces user frustration and cognitive load.
 **Action:** Always include keyboard shortcut hints in `aria-label` and descriptive reasonings in `title` for buttons that can be disabled.
+
+## 2026-05-11 - [Enhanced Accessibility and Iconography in Reports]
+**Learning:** Dense data tables (like game reports) are difficult to parse with text alone. Replacing or augmenting text with standard game iconography (`ResourceIcon`, `Sprite`) improves recognition speed. Furthermore, complex UI structures like tabbed interfaces must follow WAI-ARIA patterns (`role="tablist"`, `role="tab"`) to remain navigable for screen-reader users.
+**Action:** Use icons in table headers and rows for high-density data, and strictly follow ARIA patterns for navigation-heavy components.

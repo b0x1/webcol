@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Player } from '@shared/game/entities/Player';
 import { Flag } from '../../Flag';
+import { Sprite } from '../../Sprite';
 import { ReportTable } from './ReportTable';
 import type { Position } from '@shared/game/entities/Position';
 
@@ -22,7 +23,14 @@ export const UnitsTab: React.FC<Props> = ({ displayedPlayers, onUnitClick }) => 
             <td className="p-3">
               <Flag nation={player.nation} size={24} />
             </td>
-            <td className="p-3">{unit.type}</td>
+            <td className="p-3">
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 relative shrink-0">
+                  <Sprite type={unit.type} category="units" size={24} />
+                </div>
+                <span className="font-bold">{unit.type}</span>
+              </div>
+            </td>
             <td className="p-3">
               {unit.position.x}, {unit.position.y}
             </td>
@@ -42,7 +50,14 @@ export const UnitsTab: React.FC<Props> = ({ displayedPlayers, onUnitClick }) => 
               <td className="p-3">
                 <Flag nation={player.nation} size={24} />
               </td>
-              <td className="p-3">{unit.type} (In Settlement)</td>
+              <td className="p-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-6 h-6 relative shrink-0 opacity-60">
+                    <Sprite type={unit.type} category="units" size={24} />
+                  </div>
+                  <span>{unit.type} <span className="text-[10px] opacity-70">(In Settlement)</span></span>
+                </div>
+              </td>
               <td className="p-3">
                 {unit.position.x}, {unit.position.y}
               </td>

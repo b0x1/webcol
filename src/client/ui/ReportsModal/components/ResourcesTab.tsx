@@ -2,6 +2,7 @@ import React from 'react';
 import type { Player } from '@shared/game/entities/Player';
 import { GoodType } from '@shared/game/entities/types';
 import { Flag } from '../../Flag';
+import { ResourceIcon } from '../../ResourceIcon';
 import { ReportTable } from './ReportTable';
 import type { Position } from '@shared/game/entities/Position';
 import { useGameStore, selectSettlementProduction } from '@client/game/state/gameStore';
@@ -17,8 +18,13 @@ export const ResourcesTab: React.FC<Props> = ({ displayedPlayers, onSettlementCl
     { content: 'Flag', className: 'sticky left-0 bg-slate-800 z-10' },
     { content: 'Settlement', className: 'sticky left-[64px] bg-slate-800 z-10' },
     ...goods.map((good) => ({
-      content: good,
-      className: 'text-[10px] uppercase tracking-wider font-bold text-slate-400',
+      content: (
+        <div className="flex flex-col items-center gap-1" title={good.replace('_', ' ')}>
+          <ResourceIcon good={good} size={20} />
+          <span className="sr-only">{good}</span>
+        </div>
+      ),
+      className: 'text-[10px] uppercase tracking-wider font-bold text-slate-400 min-w-[60px]',
     })),
   ];
 
