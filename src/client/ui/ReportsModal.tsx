@@ -68,10 +68,14 @@ export const ReportsModal: React.FC = () => {
           </button>
         </div>
 
-        <div className="flex gap-2 mb-6 p-1 bg-slate-900/50 rounded-lg">
+        <div className="flex gap-2 mb-6 p-1 bg-slate-900/50 rounded-lg" role="tablist" aria-label="Report Categories">
           {(['units', 'settlements', 'resources'] as ReportTab[]).map((tab) => (
             <button
               key={tab}
+              id={`tab-${tab}`}
+              role="tab"
+              aria-selected={activeTab === tab}
+              aria-controls="reports-panel"
               onClick={() => { setActiveTab(tab); }}
               className={`flex-1 py-3 px-4 rounded-md font-bold uppercase text-sm tracking-widest transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500 outline-none ${
                 activeTab === tab
@@ -84,7 +88,12 @@ export const ReportsModal: React.FC = () => {
           ))}
         </div>
 
-        <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+        <div
+          id="reports-panel"
+          role="tabpanel"
+          aria-labelledby={`tab-${activeTab}`}
+          className="flex-1 overflow-y-auto pr-2 custom-scrollbar"
+        >
           {activeTab === 'units' && (
             <UnitsTab
               displayedPlayers={displayedPlayers}
