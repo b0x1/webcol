@@ -1,7 +1,7 @@
 import type { Unit } from '../entities/Unit';
 import type { Tile } from '../entities/Tile';
 import { TerrainType, UnitType } from '../entities/types';
-import { isSame, toKey, type Position, getNeighbors } from '../entities/Position';
+import { isSame, type Position } from '../entities/Position';
 
 /* eslint-disable-next-line @typescript-eslint/no-extraneous-class */
 export class MovementSystem {
@@ -11,17 +11,23 @@ export class MovementSystem {
 
   static getReachableTiles(unit: Unit, map: Tile[][]): (Position & { cost: number })[] {
     const reachable: (Position & { cost: number })[] = [];
-    const visited = new Map<string, number>();
-    const queue: (Position & { cost: number })[] = [];
-    let head = 0;
-
-    queue.push({ ...unit.position, cost: 0 });
-    visited.set(toKey(unit.position), 0);
-
     const height = map.length;
     const width = map[0]?.length ?? 0;
 
-    // ⚡ Turbo: Use index-based queue to avoid O(N) shift() operations
+    if (width === 0 || height === 0) return [];
+
+    // ⚡ Turbo: Use Map with numeric keys (y * width + x) to avoid string concatenation
+    // We use a Map instead of a full-map TypedArray to stay memory-efficient for large maps
+    // where units only explore a small local area.
+    const visited = new Map<number, number>();
+    const queue: (Position & { cost: number })[] = [];
+    let head = 0;
+
+    const startIdx = unit.position.y * width + unit.position.x;
+    queue.push({ ...unit.position, cost: 0 });
+    visited.set(startIdx, 0);
+
+    // Use index-based queue to avoid O(N) shift() operations
     while (head < queue.length) {
       const current = queue[head++];
       if (!current) continue;
@@ -31,23 +37,38 @@ export class MovementSystem {
         reachable.push(current);
       }
 
-      const neighbors = getNeighbors(current, width, height);
-      for (const neighbor of neighbors) {
-        const row = map[neighbor.y];
-        const targetTile = row?.[neighbor.x];
-        if (!targetTile) continue;
+      const { x, y, cost } = current;
 
-        const moveCost = this.getMovementCost(unit, targetTile);
+      // ⚡ Turbo: Inline neighbor search to avoid array and object allocations from getNeighbors
+      // Note: This 8-way traversal matches the getNeighbors implementation in Position.ts
+      for (let dy = -1; dy <= 1; dy++) {
+        const ny = y + dy;
+        if (ny < 0 || ny >= height) continue;
 
-        if (moveCost !== Infinity) {
-          const totalCost = current.cost + moveCost;
+        const row = map[ny];
+        if (!row) continue;
 
-          if (totalCost <= unit.movesRemaining) {
-            const key = toKey(neighbor);
-            const prevCost = visited.get(key);
-            if (prevCost === undefined || prevCost > totalCost) {
-              visited.set(key, totalCost);
-              queue.push({ ...neighbor, cost: totalCost });
+        for (let dx = -1; dx <= 1; dx++) {
+          if (dx === 0 && dy === 0) continue;
+
+          const nx = x + dx;
+          if (nx < 0 || nx >= width) continue;
+
+          const targetTile = row[nx];
+          if (!targetTile) continue;
+
+          const moveCost = this.getMovementCost(unit, targetTile);
+
+          if (moveCost !== Infinity) {
+            const totalCost = cost + moveCost;
+
+            if (totalCost <= unit.movesRemaining) {
+              const idx = ny * width + nx;
+              const prevCost = visited.get(idx);
+              if (prevCost === undefined || prevCost > totalCost) {
+                visited.set(idx, totalCost);
+                queue.push({ x: nx, y: ny, cost: totalCost });
+              }
             }
           }
         }
