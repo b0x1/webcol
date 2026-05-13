@@ -12,3 +12,8 @@
 **Vulnerability:** Game state exploits via unsanitized command parameters (e.g., negative transaction amounts, invalid enum strings).
 **Learning:** Validating inputs at the authoritative state boundary (the "Server") prevents logic exploits and runtime crashes. Relying only on UI-level validation is insufficient for robust security.
 **Prevention:** Always validate command parameters against allowed ranges (e.g., positive integers) and valid enum values (using `Object.values().includes()`) before modifying authoritative state.
+
+## 2025-05-25 - Server-Side Authorization (Ownership) Checks
+**Vulnerability:** Authorization bypass (IDOR) where a player could modify settlements or units they did not own via direct command dispatch.
+**Learning:** Checking for entity existence is insufficient; the server must also verify that the current player has the authority (ownership) to modify that specific entity.
+**Prevention:** Always validate that the `currentPlayerId` matches the owner of the target resource before applying state transitions in the authoritative server.

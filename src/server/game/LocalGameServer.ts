@@ -298,7 +298,7 @@ export class LocalGameServer {
     }
 
     const owner = this.selectSettlementOwner(settlementId);
-    if (!owner) {
+    if (owner?.id !== this.state.currentPlayerId) {
       return [];
     }
 
