@@ -4,6 +4,7 @@ import { createUnit } from '@shared/game/entities/Unit';
 import type { Player } from '@shared/game/entities/Player';
 import type { Settlement } from '@shared/game/entities/Settlement';
 import type { Position } from '@shared/game/entities/Position';
+import type { Unit } from '@shared/game/entities/Unit';
 import {
   Attitude,
   BuildingType,
@@ -303,24 +304,44 @@ export class LocalGameServer {
     }
 
     if (job === null) {
-      const unitIndex = settlement.units.findIndex((candidate) => candidate.id === unitId);
-      const unit = settlement.units[unitIndex];
-      if (unit) {
-        unit.occupation = { kind: 'RURE', state: 'MOVING' };
-        if (!owner.units.some((candidate) => candidate.id === unitId)) {
-          owner.units.push({ ...unit });
-        }
-        settlement.units.splice(unitIndex, 1);
-      }
+      this.unassignUnitFromJob(settlement, owner, unitId);
       settlement.population = calculatePopulation(settlement);
       return [];
     }
 
-    // Input validation: Ensure valid job type or field work coordinates
-    let validatedOccupation: Occupation | null = null;
+    const validatedOccupation = this.validateOccupation(job);
+    if (!validatedOccupation) {
+      return [];
+    }
+
+    const unit = this.ensureUnitInSettlement(settlement, owner, unitId);
+    if (!unit) {
+      return [];
+    }
+
+    unit.occupation = validatedOccupation;
+    settlement.population = calculatePopulation(settlement);
+    return [];
+  }
+
+  private unassignUnitFromJob(settlement: Settlement, owner: Player, unitId: string): void {
+    const unitIndex = settlement.units.findIndex((candidate) => candidate.id === unitId);
+    const unit = settlement.units[unitIndex];
+    if (unit) {
+      unit.occupation = { kind: 'RURE', state: 'MOVING' };
+      if (!owner.units.some((candidate) => candidate.id === unitId)) {
+        owner.units.push({ ...unit });
+      }
+      settlement.units.splice(unitIndex, 1);
+    }
+  }
+
+  private validateOccupation(job: string): Occupation | null {
     if (Object.values(JobType).includes(job as JobType)) {
-      validatedOccupation = job as JobType;
-    } else if (job.includes(',')) {
+      return job as JobType;
+    }
+
+    if (job.includes(',')) {
       const [rawX, rawY] = job.split(',').map(Number);
       if (
         rawX !== undefined &&
@@ -330,14 +351,18 @@ export class LocalGameServer {
         rawX >= 0 &&
         rawY >= 0
       ) {
-        validatedOccupation = { kind: 'FIELD_WORK', tileX: rawX, tileY: rawY };
+        return { kind: 'FIELD_WORK', tileX: rawX, tileY: rawY };
       }
     }
 
-    if (!validatedOccupation) {
-      return [];
-    }
+    return null;
+  }
 
+  private ensureUnitInSettlement(
+    settlement: Settlement,
+    owner: Player,
+    unitId: string
+  ): Unit | undefined {
     let unit = settlement.units.find((candidate) => candidate.id === unitId);
     if (!unit) {
       const playerUnitIndex = owner.units.findIndex((candidate) => candidate.id === unitId);
@@ -348,15 +373,7 @@ export class LocalGameServer {
         owner.units.splice(playerUnitIndex, 1);
       }
     }
-
-    if (!unit) {
-      return [];
-    }
-
-    unit.occupation = validatedOccupation;
-
-    settlement.population = calculatePopulation(settlement);
-    return [];
+    return unit;
   }
 
   private sellGood(unitId: string, good: GoodType, amount: number): readonly GameEffect[] {
@@ -612,43 +629,58 @@ export class LocalGameServer {
     );
 
     if (result.winner === 'attacker') {
-      const defenderPlayer = this.selectUnitOwner(defender.id);
-      if (defenderPlayer) {
-        const unitIndex = defenderPlayer.units.findIndex((candidate) => candidate.id === defender.id);
-        if (unitIndex !== -1) {
-          defenderPlayer.units.splice(unitIndex, 1);
-        }
-      }
-
-      const capturedSettlementPlayer = this.selectSettlementOwner(defender.id);
-      if (capturedSettlementPlayer && capturedSettlementPlayer.id !== this.state.currentPlayerId) {
-        const settlementIndex = capturedSettlementPlayer.settlements.findIndex((candidate) => candidate.id === defender.id);
-        const settlement = capturedSettlementPlayer.settlements[settlementIndex];
-        if (settlement) {
-          if (settlement.units.length > 1) {
-            settlement.units.pop();
-            settlement.population = calculatePopulation(settlement);
-          }
-
-          attacker.position = { ...target };
-          attacker.movesRemaining = 0;
-          settlement.ownerId = player.id;
-          settlement.units.forEach((unit) => {
-            unit.ownerId = player.id;
-          });
-
-          player.settlements.push(settlement);
-          capturedSettlementPlayer.settlements.splice(settlementIndex, 1);
-        }
-      }
+      this.handleCombatVictory(player, attacker, defender, target);
     } else {
-      const attackerIndex = player.units.findIndex((candidate) => candidate.id === attackerId);
-      if (attackerIndex !== -1) {
-        player.units.splice(attackerIndex, 1);
-      }
+      this.handleCombatDefeat(player, attackerId);
     }
 
     return [{ type: 'combatResolved', result }];
+  }
+
+  private handleCombatVictory(
+    attackerPlayer: Player,
+    attackerUnit: Unit,
+    defender: Unit | Settlement,
+    target: Position
+  ): void {
+    const defenderPlayer = this.selectUnitOwner(defender.id);
+    if (defenderPlayer) {
+      const unitIndex = defenderPlayer.units.findIndex((candidate) => candidate.id === defender.id);
+      if (unitIndex !== -1) {
+        defenderPlayer.units.splice(unitIndex, 1);
+      }
+    }
+
+    const capturedSettlementPlayer = this.selectSettlementOwner(defender.id);
+    if (capturedSettlementPlayer && capturedSettlementPlayer.id !== this.state.currentPlayerId) {
+      const settlementIndex = capturedSettlementPlayer.settlements.findIndex(
+        (candidate) => candidate.id === defender.id
+      );
+      const settlement = capturedSettlementPlayer.settlements[settlementIndex];
+      if (settlement) {
+        if (settlement.units.length > 1) {
+          settlement.units.pop();
+          settlement.population = calculatePopulation(settlement);
+        }
+
+        attackerUnit.position = { ...target };
+        attackerUnit.movesRemaining = 0;
+        settlement.ownerId = attackerPlayer.id;
+        settlement.units.forEach((unit) => {
+          unit.ownerId = attackerPlayer.id;
+        });
+
+        attackerPlayer.settlements.push(settlement);
+        capturedSettlementPlayer.settlements.splice(settlementIndex, 1);
+      }
+    }
+  }
+
+  private handleCombatDefeat(player: Player, attackerId: string): void {
+    const attackerIndex = player.units.findIndex((candidate) => candidate.id === attackerId);
+    if (attackerIndex !== -1) {
+      player.units.splice(attackerIndex, 1);
+    }
   }
 
   private endTurn(): readonly GameEffect[] {
@@ -670,80 +702,80 @@ export class LocalGameServer {
           this.state.phase = TurnPhase.MOVEMENT;
           return effects;
         }
-
-        const currentPlayerIndex = this.state.players.findIndex(
-          (player) => player.id === this.state.currentPlayerId
-        );
-        const nextPlayerIndex = (currentPlayerIndex + 1) % this.state.players.length;
-        const nextPlayer = this.state.players[nextPlayerIndex];
-        if (!nextPlayer) {
-          return effects;
-        }
-
-        const nextTurn = nextPlayerIndex === 0 ? this.state.turn + 1 : this.state.turn;
-        if (nextTurn > this.state.turn && nextPlayerIndex === 0) {
-          effects.push({ type: 'autosaveRequested' });
-        }
-
-        this.state.players.forEach((player) => {
-          if (player.id === nextPlayer.id) {
-            player.units.forEach((unit) => {
-              unit.movesRemaining = unit.maxMoves;
-              unit.isSkipping = false;
-            });
-          }
-        });
-
+        this.advanceToNextPlayer(effects);
         this.state.phase = TurnPhase.MOVEMENT;
-        this.state.currentPlayerId = nextPlayer.id;
-        this.state.turn = nextTurn;
       }
 
-      if (this.state.phase === TurnPhase.PRODUCTION) {
-        const result = TurnEngine.runProduction(
-          this.state.players,
-          this.state.map,
-          this.state.namingStats,
-          generateId
-        );
-        this.state.players = result.players;
-        this.state.namingStats = result.namingStats;
-        effects.push(...result.effects);
-        continue;
+      this.processPhase(effects);
+
+      if (this.isHumanControllablePhase()) {
+        return effects;
       }
-
-      if (this.state.phase === TurnPhase.TRADE) {
-        continue;
-      }
-
-      if (this.state.phase === TurnPhase.AI) {
-        const aiResult = AISystem.runAITurn(
-          this.state.players,
-          this.state.map,
-          this.state.namingStats,
-          random,
-          generateId,
-        );
-
-        this.state.players = aiResult.players;
-        this.state.namingStats = aiResult.namingStats;
-        effects.push(...aiResult.effects);
-        continue;
-      }
-
-      if (this.state.phase === TurnPhase.END_TURN) {
-        continue;
-      }
-
-      const currentPlayer = this.selectCurrentPlayer();
-      if (currentPlayer && !currentPlayer.isHuman) {
-        continue;
-      }
-
-      return effects;
     }
   }
 
+  private advanceToNextPlayer(effects: GameEffect[]): void {
+    const currentPlayerIndex = this.state.players.findIndex(
+      (player) => player.id === this.state.currentPlayerId
+    );
+    const nextPlayerIndex = (currentPlayerIndex + 1) % this.state.players.length;
+    const nextPlayer = this.state.players[nextPlayerIndex];
+    if (!nextPlayer) {
+      return;
+    }
+
+    const nextTurn = nextPlayerIndex === 0 ? this.state.turn + 1 : this.state.turn;
+    if (nextTurn > this.state.turn && nextPlayerIndex === 0) {
+      effects.push({ type: 'autosaveRequested' });
+    }
+
+    this.state.players.forEach((player) => {
+      if (player.id === nextPlayer.id) {
+        player.units.forEach((unit) => {
+          unit.movesRemaining = unit.maxMoves;
+          unit.isSkipping = false;
+        });
+      }
+    });
+
+    this.state.currentPlayerId = nextPlayer.id;
+    this.state.turn = nextTurn;
+  }
+
+  private processPhase(effects: GameEffect[]): void {
+    if (this.state.phase === TurnPhase.PRODUCTION) {
+      const result = TurnEngine.runProduction(
+        this.state.players,
+        this.state.map,
+        this.state.namingStats,
+        generateId
+      );
+      this.state.players = result.players;
+      this.state.namingStats = result.namingStats;
+      effects.push(...result.effects);
+    } else if (this.state.phase === TurnPhase.AI) {
+      const aiResult = AISystem.runAITurn(
+        this.state.players,
+        this.state.map,
+        this.state.namingStats,
+        random,
+        generateId,
+      );
+
+      this.state.players = aiResult.players;
+      this.state.namingStats = aiResult.namingStats;
+      effects.push(...aiResult.effects);
+    }
+  }
+
+  private isHumanControllablePhase(): boolean {
+    if (this.state.phase !== TurnPhase.MOVEMENT) {
+      return false;
+    }
+
+    const currentPlayer = this.selectCurrentPlayer();
+    return !!currentPlayer?.isHuman;
+  }
 
   private selectCurrentPlayer(): Player | undefined {
     return TraversalUtils.findPlayerById(this.state.players, this.state.currentPlayerId);

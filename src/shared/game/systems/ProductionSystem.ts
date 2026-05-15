@@ -18,12 +18,30 @@ export class ProductionSystem {
     isActualProduction = false
   ): { netProduction: Map<GoodType, number>; hammersProduced: number } {
     const netProduction = new Map<GoodType, number>();
-    let hammersProduced = 0;
-
     // Optimization: Pre-initialize with ALL_GOOD_TYPES to avoid repeated Object.values calls
     ALL_GOOD_TYPES.forEach((good) => netProduction.set(good, 0));
 
-    // 1. Workforce production
+    const hammersProduced = this.calculateWorkforceProduction(
+      settlement,
+      map,
+      netProduction,
+      isActualProduction
+    );
+
+    this.applyBuildingBonuses(settlement, netProduction);
+    this.applyFoodConsumption(settlement, netProduction);
+
+    return { netProduction, hammersProduced };
+  }
+
+  private static calculateWorkforceProduction(
+    settlement: Settlement,
+    map: Tile[][],
+    netProduction: Map<GoodType, number>,
+    isActualProduction: boolean
+  ): number {
+    let hammersProduced = 0;
+
     settlement.units.forEach((unit) => {
       let amount = COLONY_CONSTANTS.PRODUCTION_PER_WORKER;
 
@@ -74,30 +92,32 @@ export class ProductionSystem {
         const tile = map[tileY]?.[tileX];
         const good = tile ? TERRAIN_PRODUCTION_RULES[tile.terrainType] : null;
         if (good) {
-          // If specialized in something that matches the terrain good (e.g. LUMBERJACK for FOREST)
-          // Actually, JobType doesn't perfectly map to TerrainProduction but we can check.
-          // For now keep it simple or check against expertise if it matches the produced good.
-          // Note: JobType.FARMER is removed, but we might want to check for something else?
-          // Actually, original code didn't have specialty bonus for tile production.
           netProduction.set(good, (netProduction.get(good) ?? 0) + amount);
         }
       }
     });
 
-    // 2. Building bonuses
+    return hammersProduced;
+  }
+
+  private static applyBuildingBonuses(
+    settlement: Settlement,
+    netProduction: Map<GoodType, number>
+  ): void {
     if (settlement.buildings.includes(BuildingType.LUMBER_MILL)) {
       netProduction.set(GoodType.LUMBER, (netProduction.get(GoodType.LUMBER) ?? 0) + 2);
     }
     if (settlement.buildings.includes(BuildingType.IRON_WORKS)) {
       netProduction.set(GoodType.ORE, (netProduction.get(GoodType.ORE) ?? 0) + 2);
     }
+  }
 
-    // 3. Food consumption
-    // Population is defined as number of units in the settlement
+  private static applyFoodConsumption(
+    settlement: Settlement,
+    netProduction: Map<GoodType, number>
+  ): void {
     const foodConsumption = settlement.units.length * COLONY_CONSTANTS.FOOD_CONSUMPTION_PER_CITIZEN;
     netProduction.set(GoodType.FOOD, (netProduction.get(GoodType.FOOD) ?? 0) - foodConsumption);
-
-    return { netProduction, hammersProduced };
   }
 
   static getInventoryCapacity(settlement: Settlement): number {
