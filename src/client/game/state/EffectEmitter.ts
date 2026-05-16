@@ -20,6 +20,7 @@ export const emitEffects = (
       case 'combatResolved':
         useGameStore.setState((state) => {
           state.combatResult = effect.result;
+          return state;
         });
         break;
       case 'gameStarted':
@@ -35,6 +36,7 @@ export const emitEffects = (
           state.selectedSettlementId = null;
           state.selectedTile = null;
           state.combatResult = null;
+          return state;
         });
         break;
       case 'autosaveRequested':
