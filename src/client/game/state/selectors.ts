@@ -3,8 +3,7 @@ import type { GameState } from './types';
 import type { Player } from '@shared/game/entities/Player';
 import type { Settlement } from '@shared/game/entities/Settlement';
 import type { Unit } from '@shared/game/entities/Unit';
-import type { Position } from '@shared/game/entities/Position';
-import { isSame } from '@shared/game/entities/Position';
+import { distance, isSame, type Position } from '@shared/game/entities/Position';
 import { TraversalUtils } from '@shared/game/utils/TraversalUtils';
 
 /**
@@ -71,10 +70,14 @@ export const selectUnitsAtSettlement = (state: GameState, settlementId: string):
   if (!settlement || !owner) return [];
 
   const units = [...settlement.units];
+  // ⚡ Turbo: Use a Set for O(1) unit ID lookups during deduplication
+  const unitIds = new Set(units.map((u) => u.id));
+
   for (const unit of owner.units) {
     if (isSame(unit.position, settlement.position)) {
-      if (!units.some(u => u.id === unit.id)) {
+      if (!unitIds.has(unit.id)) {
         units.push(unit);
+        unitIds.add(unit.id);
       }
     }
   }
@@ -113,4 +116,17 @@ export const selectIsSettlementOwnedByCurrentPlayer = (state: GameState, settlem
   if (!settlementId) return false;
   const player = selectCurrentPlayer(state);
   return player?.settlements.some((s) => s.id === settlementId) ?? false;
+};
+
+/**
+ * Checks if a unit is adjacent to any settlement.
+ * ⚡ Turbo: Move this O(N) check into a selector to allow for memoization in components.
+ */
+export const selectIsUnitAdjacentToAnySettlement = (state: GameState, unitId: string | null): boolean => {
+  const unit = selectUnitById(state, unitId);
+  if (!unit) return false;
+
+  return state.players.some((p) =>
+    p.settlements.some((s) => distance(s.position, unit.position) <= 1),
+  );
 };

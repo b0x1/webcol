@@ -74,7 +74,7 @@ export class WorldScene extends Phaser.Scene {
 
       if (mapChanged || settlementsChanged) {
         const playerSettlements = state.players.flatMap(p => p.settlements);
-        this.terrainRenderer.renderTileMap(state.map, [], playerSettlements);
+        this.terrainRenderer.renderTileMap(state.map, [], playerSettlements, mapChanged);
       }
 
       // 2. Unit Rendering - Skip if no units or selections changed
