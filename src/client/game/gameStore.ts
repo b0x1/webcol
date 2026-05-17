@@ -14,12 +14,12 @@ import {
   selectSettlementAtPosition,
   selectUnitsAtPosition,
 } from '@client/game/state/selectors';
-import { SaveManager } from '@client/game/state/SaveManager';
 import { createInitialAuthoritativeGameState } from '@server/game/createInitialAuthoritativeGameState';
-import type { AuthoritativeGameState } from '@shared/game/AuthoritativeGameState';
 import { LocalGameServer } from '@server/game/LocalGameServer';
-import type { GameCommand, GameEffect } from '@shared/game/protocol';
+import type { GameCommand } from '@shared/game/protocol';
 import { LocalGameTransport } from './LocalGameTransport';
+import { emitEffects } from './state/EffectEmitter';
+import { applyAuthoritativeState, extractAuthoritativeState } from './state/AuthoritativeStateMapper';
 
 enableMapSet();
 
@@ -27,76 +27,13 @@ const transport = new LocalGameTransport(new LocalGameServer());
 const initialSnapshot = transport.getSnapshot();
 const baseState = createInitialAuthoritativeGameState();
 
-const applyAuthoritativeState = (
-  state: GameState,
-  snapshot: ReturnType<typeof transport.getSnapshot>,
-): void => {
-  state.players = snapshot.players;
-  state.currentPlayerId = snapshot.currentPlayerId;
-  state.turn = snapshot.turn;
-  state.phase = snapshot.phase;
-  state.europePrices = snapshot.europePrices;
-  state.map = snapshot.map;
-  state.namingStats = snapshot.namingStats;
-};
-
-const extractAuthoritativeState = (state: GameState): AuthoritativeGameState => ({
-  players: state.players,
-  currentPlayerId: state.currentPlayerId,
-  turn: state.turn,
-  phase: state.phase,
-  europePrices: state.europePrices,
-  map: state.map,
-  namingStats: state.namingStats,
-});
-
-const emitEffects = (
-  effects: readonly GameEffect[],
-  snapshot: ReturnType<typeof transport.getSnapshot>,
-): void => {
-  effects.forEach((effect) => {
-    switch (effect.type) {
-      case 'notification':
-        eventBus.emit('notification', effect.message);
-        break;
-      case 'unitMoved':
-        eventBus.emit('unitMoved', effect);
-        break;
-      case 'combatResolved':
-        useGameStore.setState((state) => {
-          state.combatResult = effect.result;
-        });
-        break;
-      case 'gameStarted':
-        eventBus.emit('gameStarted');
-        break;
-      case 'gameLoaded':
-        eventBus.emit('gameLoaded');
-        break;
-      case 'returnToMainMenu':
-        eventBus.emit('returnToMainMenu');
-        useGameStore.setState((state) => {
-          state.selectedUnitId = null;
-          state.selectedSettlementId = null;
-          state.selectedTile = null;
-          state.combatResult = null;
-        });
-        break;
-      case 'autosaveRequested':
-        SaveManager.save(snapshot, 'autosave');
-        eventBus.emit('notification', 'Auto-saved');
-        break;
-    }
-  });
-};
-
 const dispatchCommand = (command: GameCommand): void => {
   transport.replaceState(extractAuthoritativeState(useGameStore.getState()));
   const message = transport.send(command);
   useGameStore.setState((state) => {
     applyAuthoritativeState(state, message.state);
   });
-  emitEffects(message.effects, message.state);
+  emitEffects(message.effects, message.state, useGameStore);
 };
 
 export const useGameStore = create<GameState>()(
@@ -302,7 +239,7 @@ transport.subscribe((message) => {
   useGameStore.setState((state) => {
     applyAuthoritativeState(state, message.state);
   });
-  emitEffects(message.effects, message.state);
+  emitEffects(message.effects, message.state, useGameStore);
 });
 
 export * from '@client/game/state/selectors';
