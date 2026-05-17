@@ -9,12 +9,12 @@ import {
   selectSettlementAtPosition,
   selectUnitById,
   selectUnitsAtPosition,
+  selectIsUnitAdjacentToAnySettlement,
 } from '@client/game/state/gameStore';
 import { useUIStore } from '@client/game/state/uiStore';
 import { UnitType } from '@shared/game/entities/types';
 import { UnitSelector } from './UnitPanel/components/UnitSelector';
 import { ResourceIcon } from './ResourceIcon';
-import { distance } from '@shared/game/entities/Position';
 import type { Unit } from '@shared/game/entities/Unit';
 
 const EMPTY_TILE_UNITS: readonly Unit[] = [];
@@ -54,10 +54,8 @@ export const UnitPanel: React.FC = () => {
     const selected = selectUnitById(state, state.selectedUnitId);
     return state.players.find((p) => p.id === selected?.ownerId);
   });
-  const allSettlements = useStoreWithEqualityFn(
-    useGameStore,
-    (state) => state.players.flatMap((p) => p.settlements),
-    shallow,
+  const isAdjacentToSettlement = useGameStore((state) =>
+    selectIsUnitAdjacentToAnySettlement(state, state.selectedUnitId),
   );
 
   useEffect(() => {
@@ -106,10 +104,6 @@ export const UnitPanel: React.FC = () => {
   if (!unit) return null;
 
   const isReadOnly = unit.ownerId !== player?.id;
-
-  const isAdjacentToSettlement = allSettlements.some(s =>
-    distance(s.position, unit.position) <= 1
-  );
 
   const canBuildSettlement = (unit.type === UnitType.COLONIST || unit.type === UnitType.VILLAGER) && !isAdjacentToSettlement;
 

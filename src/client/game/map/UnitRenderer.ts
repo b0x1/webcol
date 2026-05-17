@@ -2,8 +2,6 @@ import type Phaser from 'phaser';
 import type { Unit } from '@shared/game/entities/Unit';
 import type { Player } from '@shared/game/entities/Player';
 import type { TerrainRenderer } from './TerrainRenderer';
-import { toKey } from '@shared/game/entities/Position';
-
 export class UnitRenderer {
   public unitSprites: Phaser.GameObjects.Group;
   public selectionRings: Phaser.GameObjects.Group;
@@ -20,13 +18,14 @@ export class UnitRenderer {
     this.selectionRings.clear(true, true);
     this.unitBadges.clear(true, true);
 
-    const unitsByTile: Record<string, Unit[]> = {};
+    // ⚡ Turbo: Use numeric keys (y << 16 | x) for grouping units to avoid string allocations
+    const unitsByTile = new Map<number, Unit[]>();
 
     // Optimization: Pre-calculate settlement positions per player for O(1) lookup
-    const playerSettlementPositions = new Map<string, Set<string>>();
+    const playerSettlementPositions = new Map<string, Set<number>>();
     players.forEach(p => {
-      const set = new Set<string>();
-      p.settlements.forEach(s => set.add(toKey(s.position)));
+      const set = new Set<number>();
+      p.settlements.forEach(s => set.add((s.position.y << 16) | s.position.x));
       playerSettlementPositions.set(p.id, set);
     });
 
@@ -34,24 +33,22 @@ export class UnitRenderer {
       const mySettlements = playerSettlementPositions.get(player.id);
       player.units.forEach((unit) => {
         // Skip rendering units that are in a settlement (except if currently selected, though gameStore logic handles that too)
-        const key = toKey(unit.position);
+        const key = (unit.position.y << 16) | unit.position.x;
         const inSettlement = mySettlements?.has(key) ?? false;
         if (inSettlement && selectedUnitId !== unit.id) return;
 
-        let list = unitsByTile[key];
+        let list = unitsByTile.get(key);
         if (!list) {
           list = [];
-          unitsByTile[key] = list;
+          unitsByTile.set(key, list);
         }
         list.push(unit);
       });
     });
 
-    Object.entries(unitsByTile).forEach(([key, units]) => {
-      const parts = key.split(',');
-      const tx = Number(parts[0]);
-      const ty = Number(parts[1]);
-      if (isNaN(tx) || isNaN(ty)) return;
+    unitsByTile.forEach((units, key) => {
+      const tx = key & 0xffff;
+      const ty = key >>> 16;
 
       const { x: worldX, y: worldY } = this.terrainRenderer.tileToWorld({ x: tx, y: ty });
 

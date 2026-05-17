@@ -57,6 +57,7 @@ export class TerrainRenderer {
     tiles: Tile[][],
     _npcSettlements: Settlement[] = [], // Deprecated
     playerSettlements: Settlement[] = [],
+    mapChanged = true,
   ): void {
     const height = tiles.length;
     const width = tiles[0]?.length ?? 0;
@@ -85,36 +86,39 @@ export class TerrainRenderer {
       }
     }
 
-    if (this.coastBorders) {
-      this.coastBorders.destroy();
-    }
-    this.coastBorders = this.scene.add.graphics();
-    this.coastBorders.lineStyle(2, 0x1a6b8a, 0.8);
-    this.coastBorders.setDepth(1);
+    if (mapChanged) {
+      // ⚡ Turbo: Skip expensive O(N) tile iteration if map haven't changed
+      if (this.coastBorders) {
+        this.coastBorders.destroy();
+      }
+      this.coastBorders = this.scene.add.graphics();
+      this.coastBorders.lineStyle(2, 0x1a6b8a, 0.8);
+      this.coastBorders.setDepth(1);
 
-    tiles.forEach((row, y) => {
-      row.forEach((tile, x) => {
-        const terrainIndex = this.terrainIndexMap.get(tile.terrainType);
-        if (terrainIndex !== undefined && this.terrainLayer) {
-          this.terrainLayer.putTileAt(terrainIndex, x, y);
-        }
-
-        if (tile.hasResource) {
-          const resourceIndex = this.resourceIndexMap.get(tile.hasResource);
-          if (resourceIndex !== undefined && this.resourceLayer) {
-            this.resourceLayer.putTileAt(resourceIndex, x, y);
+      tiles.forEach((row, y) => {
+        row.forEach((tile, x) => {
+          const terrainIndex = this.terrainIndexMap.get(tile.terrainType);
+          if (terrainIndex !== undefined && this.terrainLayer) {
+            this.terrainLayer.putTileAt(terrainIndex, x, y);
           }
-        } else {
-          this.resourceLayer?.removeTileAt(x, y);
-        }
 
-        if (tile.terrainType === TerrainType.COAST) {
-          const pos = { x, y };
-          const worldPos = this.tileToWorld(pos);
-          this.drawCoastBorders(tiles, pos, worldPos);
-        }
+          if (tile.hasResource) {
+            const resourceIndex = this.resourceIndexMap.get(tile.hasResource);
+            if (resourceIndex !== undefined && this.resourceLayer) {
+              this.resourceLayer.putTileAt(resourceIndex, x, y);
+            }
+          } else {
+            this.resourceLayer?.removeTileAt(x, y);
+          }
+
+          if (tile.terrainType === TerrainType.COAST) {
+            const pos = { x, y };
+            const worldPos = this.tileToWorld(pos);
+            this.drawCoastBorders(tiles, pos, worldPos);
+          }
+        });
       });
-    });
+    }
 
     this.renderPlayerSettlements(playerSettlements);
   }
