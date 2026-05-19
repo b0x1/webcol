@@ -2,7 +2,9 @@ import React from 'react';
 import { useStoreWithEqualityFn } from 'zustand/traditional';
 import { shallow } from 'zustand/shallow';
 import { useGameStore, selectUnitsAtPosition } from '@client/game/state/gameStore';
-import { TerrainType } from '@shared/game/entities/types';
+import { TerrainType, type GoodType } from '@shared/game/entities/types';
+import { Sprite } from './Sprite';
+import { ResourceIcon } from './ResourceIcon';
 
 export const FieldPanel: React.FC = () => {
   const selectedTile = useGameStore((state) => state.selectedTile);
@@ -43,21 +45,35 @@ export const FieldPanel: React.FC = () => {
 
   return (
     <div className={`absolute left-5 w-64 bg-black/80 text-white p-4 rounded-xl pointer-events-auto shadow-2xl border border-white/10 backdrop-blur-sm font-sans mb-2 ${showAboveUnitPanel ? 'bottom-[calc(20px+16rem)]' : 'bottom-5'}`}>
-      <div className="flex justify-between items-start mb-2">
-        <h3 className="text-lg font-black uppercase tracking-tight text-green-400">
-          {tile.terrainType.replace('_', ' ')}
-        </h3>
+      <div className="flex justify-between items-center mb-3">
+        <div className="flex items-center gap-3">
+          <div className="relative w-10 h-10 shrink-0 bg-slate-900/50 rounded border border-white/10 overflow-hidden" aria-hidden="true">
+            <Sprite type={tile.terrainType} category="terrain" size={40} />
+          </div>
+          <h3 className="text-lg font-black uppercase tracking-tight text-green-400">
+            {tile.terrainType.replace(/_/g, ' ')}
+          </h3>
+        </div>
         <span className="text-[10px] font-mono text-slate-500">
           {selectedTile.position.x}, {selectedTile.position.y}
         </span>
       </div>
 
       <div className="space-y-1.5 text-xs">
-        <div className="flex justify-between">
+        <div className="flex justify-between items-center">
           <span className="text-slate-400 uppercase tracking-widest text-[9px] font-bold">Resources</span>
-          <span className="font-bold text-blue-300 capitalize">
-            {tile.hasResource ? tile.hasResource.toLowerCase().replace('_', ' ') : 'None'}
-          </span>
+          <div className="flex items-center gap-1.5">
+            {tile.hasResource ? (
+              <>
+                <ResourceIcon good={tile.hasResource as GoodType} size={16} className="shrink-0" aria-hidden="true" />
+                <span className="font-bold text-blue-300 capitalize">
+                  {tile.hasResource.toLowerCase().replace(/_/g, ' ')}
+                </span>
+              </>
+            ) : (
+              <span className="font-bold text-slate-600 italic">None</span>
+            )}
+          </div>
         </div>
         <div className="flex justify-between">
           <span className="text-slate-400 uppercase tracking-widest text-[9px] font-bold">Movement Cost</span>

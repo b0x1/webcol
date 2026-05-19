@@ -21,3 +21,7 @@
 ## 2026-05-11 - [Enhanced Accessibility and Iconography in Reports]
 **Learning:** Dense data tables (like game reports) are difficult to parse with text alone. Replacing or augmenting text with standard game iconography (`ResourceIcon`, `Sprite`) improves recognition speed. Furthermore, complex UI structures like tabbed interfaces must follow WAI-ARIA patterns (`role="tablist"`, `role="tab"`) to remain navigable for screen-reader users.
 **Action:** Use icons in table headers and rows for high-density data, and strictly follow ARIA patterns for navigation-heavy components.
+
+## 2026-05-18 - [Accessibility for Redundant Decorative Icons]
+**Learning:** In tile-based or data-rich panels where iconography is paired with descriptive text (e.g., Terrain icons next to Terrain names), the icons should be marked with `aria-hidden="true"`. This prevents screen readers from announcing redundant information, streamlining the experience for visually impaired users.
+**Action:** Always apply `aria-hidden="true"` to `Sprite` or `ResourceIcon` components when they serve as redundant visual cues alongside text.
