@@ -65,13 +65,19 @@ export function createSettlement(
  * - Available units (RURE occupation) do not count.
  */
 export function calculatePopulation(settlement: Settlement): number {
-  return settlement.units.filter((u) => {
-    const occ = u.occupation;
+  // ⚡ Bolt: Use a simple loop with a counter instead of filter().length to avoid intermediate array allocation.
+  let count = 0;
+  for (const unit of settlement.units) {
+    const occ = unit.occupation;
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (!occ) return false;
+    if (!occ) continue;
     // JobType is a string
-    if (typeof occ === 'string') return true;
-    // FieldWork and Rure are objects
-    return occ.kind === 'FIELD_WORK';
-  }).length;
+    if (typeof occ === 'string') {
+      count++;
+    } else if (occ.kind === 'FIELD_WORK') {
+      // FieldWork is an object
+      count++;
+    }
+  }
+  return count;
 }

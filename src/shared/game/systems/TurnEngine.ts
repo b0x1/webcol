@@ -16,6 +16,9 @@ export interface TurnEngineResult {
   readonly effects: readonly GameEffect[];
 }
 
+const BUILDING_TYPES_SET = new Set<string>(Object.values(BuildingType));
+const UNIT_TYPES_SET = new Set<string>(Object.values(UnitType));
+
 /* eslint-disable-next-line @typescript-eslint/no-extraneous-class */
 export class TurnEngine {
   private constructor() {
@@ -155,8 +158,9 @@ export class TurnEngine {
       return currentNamingStats;
     }
 
-    const isBuilding = Object.values(BuildingType).includes(currentItem as BuildingType);
-    const isUnit = Object.values(UnitType).includes(currentItem as UnitType);
+    // ⚡ Bolt: Use pre-calculated Sets for O(1) lookup instead of creating new arrays with Object.values()
+    const isBuilding = BUILDING_TYPES_SET.has(currentItem);
+    const isUnit = UNIT_TYPES_SET.has(currentItem);
     const cost = this.getProductionCost(currentItem, isBuilding);
 
     if (!this.canAffordConstruction(settlement, cost)) {
