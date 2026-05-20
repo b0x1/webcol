@@ -17,3 +17,8 @@
 **Vulnerability:** Authorization bypass (IDOR) where a player could modify settlements or units they did not own via direct command dispatch.
 **Learning:** Checking for entity existence is insufficient; the server must also verify that the current player has the authority (ownership) to modify that specific entity.
 **Prevention:** Always validate that the `currentPlayerId` matches the owner of the target resource before applying state transitions in the authoritative server.
+
+## 2025-06-10 - Server-Side Spatial Validation
+**Vulnerability:** Unit teleportation exploit due to missing adjacency checks on the authoritative server.
+**Learning:** Even if a player owns an entity, the server must validate that requested spatial transitions (e.g., movement) are physically possible within the game's rules (e.g., distance limits) to prevent client-side hacks.
+**Prevention:** Always validate that the target position of a movement command is within the allowed radius (e.g., adjacent) of the entity's current position before updating authoritative state.

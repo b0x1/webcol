@@ -206,4 +206,102 @@ describe('Security Vulnerabilities', () => {
       expect(unit?.occupation).toEqual({ kind: 'RURE', state: 'MOVING' });
     });
   });
+
+  describe('Movement Security', () => {
+    it('prevents unit teleportation (non-adjacent movement)', () => {
+      const server = new LocalGameServer();
+      const state = createInitialAuthoritativeGameState();
+
+      const player: Player = {
+        id: 'player-1',
+        name: 'Test',
+        isHuman: true,
+        gold: 100,
+        nation: Nation.ENGLAND,
+        units: [{
+          id: 'u1',
+          ownerId: 'player-1',
+          name: 'Unit 1',
+          type: UnitType.COLONIST,
+          position: { x: 0, y: 0 },
+          movesRemaining: 3,
+          maxMoves: 3,
+          isSkipping: false,
+          cargo: new Map(),
+          occupation: { kind: 'RURE', state: 'MOVING' },
+          turnsInJob: 0
+        }],
+        settlements: []
+      };
+
+      state.players = [player];
+      state.currentPlayerId = 'player-1';
+      // Ensure map is large enough
+      state.map = Array(10).fill(null).map(() => Array(10).fill({ terrainType: 'GRASSLAND' }));
+      server.replaceState(state);
+
+      // Try to move to (5, 5) which is NOT adjacent to (0, 0)
+      server.dispatch({
+        type: 'moveUnit',
+        unitId: 'u1',
+        to: { x: 5, y: 5 }
+      });
+
+      const updatedUnit = server.getState().players[0]?.units[0];
+      expect(updatedUnit?.position).toEqual({ x: 0, y: 0 });
+    });
+
+    it('prevents a player from moving a unit they do not own', () => {
+      const server = new LocalGameServer();
+      const state = createInitialAuthoritativeGameState();
+
+      const player1: Player = {
+        id: 'player-1',
+        name: 'Player 1',
+        isHuman: true,
+        gold: 100,
+        nation: Nation.ENGLAND,
+        units: [],
+        settlements: []
+      };
+
+      const player2: Player = {
+        id: 'player-2',
+        name: 'Player 2',
+        isHuman: false,
+        gold: 100,
+        nation: Nation.FRANCE,
+        units: [{
+          id: 'u2',
+          ownerId: 'player-2',
+          name: 'Unit 2',
+          type: UnitType.COLONIST,
+          position: { x: 5, y: 5 },
+          movesRemaining: 3,
+          maxMoves: 3,
+          isSkipping: false,
+          cargo: new Map(),
+          occupation: { kind: 'RURE', state: 'MOVING' },
+          turnsInJob: 0
+        }],
+        settlements: []
+      };
+
+      state.players = [player1, player2];
+      state.currentPlayerId = 'player-1';
+      state.map = Array(10).fill(null).map(() => Array(10).fill({ terrainType: 'GRASSLAND' }));
+      server.replaceState(state);
+
+      // Player 1 tries to move Player 2's unit
+      server.dispatch({
+        type: 'moveUnit',
+        unitId: 'u2',
+        to: { x: 5, y: 6 }
+      });
+
+      const updatedPlayer2 = server.getState().players.find(p => p.id === 'player-2');
+      const unit = updatedPlayer2?.units[0];
+      expect(unit?.position).toEqual({ x: 5, y: 5 });
+    });
+  });
 });
