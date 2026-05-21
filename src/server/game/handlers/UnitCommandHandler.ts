@@ -1,4 +1,4 @@
-import type { Position } from '@shared/game/entities/Position';
+import { isNeighbor, type Position } from '@shared/game/entities/Position';
 import { UnitSystem } from '@shared/game/systems/UnitSystem';
 import { MovementSystem } from '@shared/game/systems/MovementSystem';
 import { TraversalUtils } from '@shared/game/utils/TraversalUtils';
@@ -16,7 +16,12 @@ export class UnitCommandHandler {
 
     const unitIndex = player.units.findIndex((candidate) => candidate.id === unitId);
     const unit = player.units[unitIndex];
-    if (!unit) {
+    if (unit?.ownerId !== state.currentPlayerId) {
+      return [];
+    }
+
+    // Security: Prevent teleportation by ensuring movement is to a neighbor tile
+    if (!isNeighbor(unit.position, to)) {
       return [];
     }
 
