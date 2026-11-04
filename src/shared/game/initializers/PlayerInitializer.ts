@@ -88,7 +88,7 @@ export class PlayerInitializer {
       }
       const { name: shipName, updatedStats: shipStats } = NamingSystem.getNextName(nation, 'ship', currentNamingStats);
       currentNamingStats = shipStats;
-      units.push(createUnit('u5', 'player-1', shipName, UnitType.SHIP, shipX, shipY, 6));
+      units.push(createUnit(`u${units.length + 1}`, 'player-1', shipName, UnitType.SHIP, shipX, shipY, 6));
     } else {
       for (let i = 0; i < 3; i++) {
         const { name, updatedStats } = NamingSystem.getNextName(nation, 'unit', currentNamingStats);
