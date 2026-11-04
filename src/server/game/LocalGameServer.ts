@@ -12,6 +12,7 @@ import { createInitialAuthoritativeGameState } from './createInitialAuthoritativ
 import { UnitCommandHandler } from './handlers/UnitCommandHandler';
 import { SettlementCommandHandler } from './handlers/SettlementCommandHandler';
 import { EconomyCommandHandler } from './handlers/EconomyCommandHandler';
+import { VoyageCommandHandler } from './handlers/VoyageCommandHandler';
 import { CombatCommandHandler } from './handlers/CombatCommandHandler';
 import { TurnCommandHandler } from './handlers/TurnCommandHandler';
 
@@ -90,9 +91,9 @@ export class LocalGameServer {
           command.direction,
         );
       case 'sailToEurope':
-        return EconomyCommandHandler.sailToEurope(this.state, command.unitId);
+        return VoyageCommandHandler.sailToEurope(this.state, command.unitId);
       case 'returnFromEurope':
-        return EconomyCommandHandler.returnFromEurope(this.state, command.unitId);
+        return VoyageCommandHandler.returnFromEurope(this.state, command.unitId);
       case 'improveTile':
         return UnitCommandHandler.improveTile(this.state, command.unitId);
       case 'recruitUnit':
