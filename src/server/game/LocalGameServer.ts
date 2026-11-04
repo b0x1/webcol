@@ -56,6 +56,15 @@ export class LocalGameServer {
   }
 
   private applyCommand(command: GameCommand): readonly GameEffect[] {
+    if (
+      this.state.outcome !== 'playing' &&
+      command.type !== 'initGame' &&
+      command.type !== 'loadGame' &&
+      command.type !== 'resetGame'
+    ) {
+      return [];
+    }
+
     switch (command.type) {
       case 'initGame':
         return this.initGame(command.params);

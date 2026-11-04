@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createInitialAuthoritativeGameState } from '@server/game/createInitialAuthoritativeGameState';
+import { LocalGameServer } from '@server/game/LocalGameServer';
 import { TurnCommandHandler } from '@server/game/handlers/TurnCommandHandler';
 import { COLONY_CONSTANTS, VICTORY_CONSTANTS } from '@shared/game/constants';
 import { createPlayer } from '@shared/game/entities/Player';
@@ -118,6 +119,29 @@ describe('TurnCommandHandler', () => {
     expect(state.outcome).toBe('loss');
     expect(first.some((effect) => effect.type === 'gameEnded' && effect.result === 'loss')).toBe(true);
     expect(second.some((effect) => effect.type === 'gameEnded')).toBe(false);
+  });
+
+  it('does not move a unit after the game is lost', () => {
+    const human = createPlayer('p1', 'Human', true, 0, Nation.ENGLAND);
+    human.settlements.push(createSettlement('c1', 'p1', 'Home', 2, 2, 1, 'EUROPEAN', 'STATE'));
+    const soldier = createUnit('u1', 'p1', 'Guard', UnitType.SOLDIER, 0, 0, 3);
+    human.units.push(soldier);
+
+    const state = createInitialAuthoritativeGameState();
+    state.players = [human];
+    state.currentPlayerId = 'p1';
+    state.phase = TurnPhase.MOVEMENT;
+    state.map = grasslandMap();
+
+    const server = new LocalGameServer();
+    server.replaceState(state);
+    server.dispatch({ type: 'endTurn' });
+    server.dispatch({ type: 'moveUnit', unitId: 'u1', to: { x: 1, y: 0 } });
+
+    const unit = server.getState().players[0]?.units.find((candidate) => candidate.id === 'u1');
+    expect(server.getState().outcome).toBe('loss');
+    expect(unit?.position).toEqual({ x: 0, y: 0 });
+    expect(unit?.movesRemaining).toBe(3);
   });
 
   it('ends the game when the human reaches the gold and colony goal', () => {
