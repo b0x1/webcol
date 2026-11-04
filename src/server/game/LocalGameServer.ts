@@ -12,6 +12,8 @@ import { createInitialAuthoritativeGameState } from './createInitialAuthoritativ
 import { UnitCommandHandler } from './handlers/UnitCommandHandler';
 import { SettlementCommandHandler } from './handlers/SettlementCommandHandler';
 import { EconomyCommandHandler } from './handlers/EconomyCommandHandler';
+import { ForeignCommandHandler } from './handlers/ForeignCommandHandler';
+import { RecruitCommandHandler } from './handlers/RecruitCommandHandler';
 import { VoyageCommandHandler } from './handlers/VoyageCommandHandler';
 import { CombatCommandHandler } from './handlers/CombatCommandHandler';
 import { TurnCommandHandler } from './handlers/TurnCommandHandler';
@@ -97,11 +99,11 @@ export class LocalGameServer {
       case 'improveTile':
         return UnitCommandHandler.improveTile(this.state, command.unitId);
       case 'recruitUnit':
-        return EconomyCommandHandler.recruitUnit(this.state, command.unitType, command.fromUnitId, generateId);
+        return RecruitCommandHandler.recruitUnit(this.state, command.unitType, command.fromUnitId, generateId);
       case 'tradeWithSettlement':
-        return EconomyCommandHandler.tradeWithSettlement(this.state, command.settlementId, command.unitId, command.goodOffered, random);
+        return ForeignCommandHandler.tradeWithSettlement(this.state, command.settlementId, command.unitId, command.goodOffered, random);
       case 'learnFromSettlement':
-        return EconomyCommandHandler.learnFromSettlement(this.state, command.settlementId, command.unitId);
+        return ForeignCommandHandler.learnFromSettlement(this.state, command.settlementId, command.unitId);
       case 'attackSettlement':
         return CombatCommandHandler.attackSettlement(this.state, command.settlementId, command.unitId, random);
       case 'resolveCombat':
