@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useGameStore } from './gameStore';
-import { selectAvailableUnits, selectAvailableUnitsCount } from './selectors';
+import { selectAvailableUnits, selectAvailableUnitsCount, selectDisplayedMovementCost } from './selectors';
 import { createPlayer } from '@shared/game/entities/Player';
 import { createUnit } from '@shared/game/entities/Unit';
 import { createTile } from '@shared/game/entities/Tile';
@@ -30,5 +30,25 @@ describe('selectors', () => {
     const state = useGameStore.getState();
     expect(selectAvailableUnitsCount(state)).toBe(selectAvailableUnits(state).length);
     expect(selectAvailableUnitsCount(state)).toBe(1);
+  });
+
+  it('shows the movement system cost, using a land unit when nothing is selected', () => {
+    const ship = createUnit('ship', 'p1', 'Ship', UnitType.SHIP, 0, 0, 4);
+    const player = createPlayer('p1', 'P1', true, 0, Nation.ENGLAND);
+    player.units = [ship];
+    const map = [[
+      createTile('ocean', 0, 0, TerrainType.OCEAN, 1),
+      createTile('forest', 1, 0, TerrainType.FOREST, 1),
+    ]];
+    useGameStore.setState({
+      players: [player],
+      currentPlayerId: 'p1',
+      map,
+      selectedUnitId: 'ship',
+    });
+
+    expect(selectDisplayedMovementCost(useGameStore.getState(), { x: 0, y: 0 })).toBe(1);
+    useGameStore.setState({ selectedUnitId: null });
+    expect(selectDisplayedMovementCost(useGameStore.getState(), { x: 1, y: 0 })).toBe(2);
   });
 });

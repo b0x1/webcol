@@ -1,6 +1,7 @@
 import { enableMapSet } from 'immer';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
+import { isSame } from '@shared/game/entities/Position';
 import type { Settlement } from '@shared/game/entities/Settlement';
 import type { Unit } from '@shared/game/entities/Unit';
 import type { GoodType } from '@shared/game/entities/types';
@@ -12,6 +13,7 @@ import type { GameState } from '@client/game/state/types';
 import {
   selectCurrentPlayer,
   selectSettlementAtPosition,
+  selectUnitById,
   selectUnitsAtPosition,
 } from '@client/game/state/selectors';
 import type { GameCommand } from '@shared/game/protocol';
@@ -121,10 +123,15 @@ export const useGameStore = create<GameState>()(
     },
 
     moveUnit: (unitId, to) => {
+      const previous = selectUnitById(get(), unitId);
+      const from = previous ? { x: previous.position.x, y: previous.position.y } : null;
       dispatchCommand({ type: 'moveUnit', unitId, to });
-      set((state) => {
-        state.selectedUnitId = null;
-      });
+      const after = selectUnitById(get(), unitId);
+      if (from && after && !isSame(from, after.position)) {
+        set((state) => {
+          state.selectedUnitId = null;
+        });
+      }
     },
 
     endTurn: () => {

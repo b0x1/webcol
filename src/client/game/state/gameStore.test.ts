@@ -38,6 +38,7 @@ describe('gameStore', () => {
 
       seed({ players: [player], currentPlayerId: 'p1', map });
 
+      useGameStore.setState({ selectedUnitId: 'u1' });
       useGameStore.getState().moveUnit('u1', { x: 1, y: 0 });
 
       const updatedPlayer = useGameStore.getState().players[0];
@@ -46,6 +47,7 @@ describe('gameStore', () => {
       expect(updatedUnit.position.x).toBe(1);
       expect(updatedUnit.position.y).toBe(0);
       expect(updatedUnit.movesRemaining).toBe(2);
+      expect(useGameStore.getState().selectedUnitId).toBeNull();
     });
 
     it('should not update unit position when not enough movesRemaining', () => {
@@ -59,6 +61,7 @@ describe('gameStore', () => {
 
       seed({ players: [player], currentPlayerId: 'p1', map });
 
+      useGameStore.setState({ selectedUnitId: 'u1' });
       useGameStore.getState().moveUnit('u1', { x: 1, y: 0 });
 
       const updatedPlayer = useGameStore.getState().players[0];
@@ -67,6 +70,7 @@ describe('gameStore', () => {
       expect(updatedUnit.position.x).toBe(0);
       expect(updatedUnit.position.y).toBe(0);
       expect(updatedUnit.movesRemaining).toBe(1);
+      expect(useGameStore.getState().selectedUnitId).toBe('u1');
     });
   });
 

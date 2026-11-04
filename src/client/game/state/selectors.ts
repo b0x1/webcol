@@ -1,10 +1,14 @@
 import { ProductionSystem } from '@shared/game/systems/ProductionSystem';
+import { MovementSystem } from '@shared/game/systems/MovementSystem';
 import type { GameState } from './types';
 import type { Player } from '@shared/game/entities/Player';
 import type { Settlement } from '@shared/game/entities/Settlement';
-import type { Unit } from '@shared/game/entities/Unit';
+import { createUnit, type Unit } from '@shared/game/entities/Unit';
+import { UnitType } from '@shared/game/entities/types';
 import { distance, isSame, type Position } from '@shared/game/entities/Position';
 import { TraversalUtils } from '@shared/game/utils/TraversalUtils';
+
+const landMoveCostUnit = createUnit('land-move-cost', '', '', UnitType.COLONIST, 0, 0, 1);
 
 /**
  * Returns the currently active player based on currentPlayerId.
@@ -41,6 +45,19 @@ export const selectUnitOwner = (state: GameState, unitId: string | null): Player
  */
 export const selectSelectedUnit = (state: GameState): Unit | undefined =>
   selectUnitById(state, state.selectedUnitId);
+
+/**
+ * Movement cost the selected unit would pay to enter a tile.
+ * With no selection, this is the land-unit cost.
+ */
+export const selectDisplayedMovementCost = (state: GameState, position: Position): number => {
+  const tile = state.map[position.y]?.[position.x];
+  if (!tile) {
+    return Infinity;
+  }
+
+  return MovementSystem.getMovementCost(selectSelectedUnit(state) ?? landMoveCostUnit, tile);
+};
 
 /**
  * Returns the currently selected settlement.

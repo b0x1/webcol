@@ -1,4 +1,4 @@
-import { isNeighbor, type Position } from '@shared/game/entities/Position';
+import { isSame, type Position } from '@shared/game/entities/Position';
 import { UnitType } from '@shared/game/entities/types';
 import { UnitSystem } from '@shared/game/systems/UnitSystem';
 import { MovementSystem } from '@shared/game/systems/MovementSystem';
@@ -22,23 +22,14 @@ export class UnitCommandHandler {
       return [];
     }
 
-    // Security: Prevent teleportation by ensuring movement is to a neighbor tile
-    if (!isNeighbor(unit.position, to)) {
-      return [];
-    }
-
-    if (!UnitSystem.canMoveTo(unit, to.x, to.y, state.map)) {
-      return [];
-    }
-
-    const targetTile = state.map[to.y]?.[to.x];
-    if (!targetTile) {
+    const destination = MovementSystem.getReachableTiles(unit, state.map).find((tile) => isSame(tile, to));
+    if (!destination || !UnitSystem.canMoveTo(unit, to.x, to.y, state.map)) {
       return [];
     }
 
     const from = { ...unit.position };
     unit.position = { ...to };
-    unit.movesRemaining -= MovementSystem.getMovementCost(unit, targetTile);
+    unit.movesRemaining -= destination.cost;
 
     const settlement = TraversalUtils.findSettlementAt([player], to);
     if (settlement) {

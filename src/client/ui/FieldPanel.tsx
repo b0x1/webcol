@@ -1,7 +1,7 @@
 import React from 'react';
 import { useStoreWithEqualityFn } from 'zustand/traditional';
 import { shallow } from 'zustand/shallow';
-import { useGameStore, selectUnitsAtPosition } from '@client/game/state/gameStore';
+import { useGameStore, selectDisplayedMovementCost, selectUnitsAtPosition } from '@client/game/state/gameStore';
 import { TerrainType, type GoodType } from '@shared/game/entities/types';
 import { Sprite } from './Sprite';
 import { ResourceIcon } from './ResourceIcon';
@@ -10,6 +10,13 @@ export const FieldPanel: React.FC = () => {
   const selectedTile = useGameStore((state) => state.selectedTile);
   const map = useGameStore((state) => state.map);
   const selectedUnitId = useGameStore((state) => state.selectedUnitId);
+  const movementCost = useGameStore((state) => {
+    const position = state.selectedTile?.position;
+    if (!position) {
+      return null;
+    }
+    return selectDisplayedMovementCost(state, position);
+  });
 
   const unitsAtTile = useStoreWithEqualityFn(
     useGameStore,
@@ -20,7 +27,7 @@ export const FieldPanel: React.FC = () => {
   if (!selectedTile) return null;
 
   const tile = map[selectedTile.position.y]?.[selectedTile.position.x] as
-    | { terrainType: TerrainType; hasResource: string | null; movementCost: number }
+    | { terrainType: TerrainType; hasResource: string | null }
     | undefined;
   if (!tile) return null;
 
@@ -77,7 +84,9 @@ export const FieldPanel: React.FC = () => {
         </div>
         <div className="flex justify-between">
           <span className="text-slate-400 uppercase tracking-widest text-[9px] font-bold">Movement Cost</span>
-          <span className="font-bold text-yellow-400">{tile.movementCost}</span>
+          <span className="font-bold text-yellow-400">
+            {movementCost !== null && Number.isFinite(movementCost) ? movementCost : '—'}
+          </span>
         </div>
         <div className="flex justify-between">
           <span className="text-slate-400 uppercase tracking-widest text-[9px] font-bold">Defense Bonus</span>
