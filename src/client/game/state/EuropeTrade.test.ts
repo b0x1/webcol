@@ -36,6 +36,8 @@ function seedShip(muskets = 0): void {
     turn: 1,
     phase: TurnPhase.MOVEMENT,
     europePrices: { ...europePrices },
+    soldOnTurn: {},
+    outcome: 'playing',
     map: [],
   });
   useGameStore.setState({ selectedUnitId: 'ship1' });

@@ -15,6 +15,8 @@ function seed(state: Pick<SaveGameState, 'players' | 'currentPlayerId' | 'map'> 
     turn: state.turn ?? initial.turn,
     phase: state.phase ?? initial.phase,
     europePrices: state.europePrices ?? initial.europePrices,
+    soldOnTurn: state.soldOnTurn ?? initial.soldOnTurn,
+    outcome: state.outcome ?? initial.outcome,
     map: state.map,
   });
 }

@@ -1,3 +1,5 @@
+import type { GameOutcome } from '@shared/game/AuthoritativeGameState';
+import { GoodType } from '@shared/game/entities/types';
 import type { SaveGameState } from '@shared/game/protocol';
 
 export type SaveData = SaveGameState;
@@ -17,6 +19,8 @@ export class SaveSystem {
       turn: state.turn,
       phase: state.phase,
       europePrices: state.europePrices,
+      soldOnTurn: state.soldOnTurn,
+      outcome: state.outcome,
       map: state.map,
     };
 
@@ -26,16 +30,24 @@ export class SaveSystem {
   static deserialize(serialized: string): SaveGameState | null {
     try {
       const parsed = JSON.parse(serialized, (key, value) => this.reviver(key, value)) as unknown;
-      if (this.isValidSaveData(parsed)) {
-        return parsed;
+      if (!this.isValidSaveData(parsed)) {
+        return null;
       }
-      return null;
+      const soldOnTurn = this.readSoldOnTurn(parsed.soldOnTurn);
+      const outcome = this.readOutcome(parsed.outcome);
+      if (!soldOnTurn || !outcome) {
+        return null;
+      }
+      return { ...parsed, soldOnTurn, outcome };
     } catch {
       return null;
     }
   }
 
-  private static isValidSaveData(data: unknown): data is SaveGameState {
+  private static isValidSaveData(data: unknown): data is SaveGameState & {
+    soldOnTurn?: unknown;
+    outcome?: unknown;
+  } {
     if (typeof data !== 'object' || data === null) {
       return false;
     }
@@ -50,6 +62,42 @@ export class SaveSystem {
       typeof candidate.europePrices === 'object' &&
       Array.isArray(candidate.map)
     );
+  }
+
+  private static readSoldOnTurn(value: unknown): Partial<Record<GoodType, number>> | null {
+    if (value === undefined) {
+      return {};
+    }
+    if (!this.isRecord(value)) {
+      return null;
+    }
+
+    const sold: Partial<Record<GoodType, number>> = {};
+    for (const good of Object.values(GoodType)) {
+      const amount = value[good];
+      if (amount === undefined) {
+        continue;
+      }
+      if (typeof amount !== 'number') {
+        return null;
+      }
+      sold[good] = amount;
+    }
+    return sold;
+  }
+
+  private static isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
+  }
+
+  private static readOutcome(value: unknown): GameOutcome | null {
+    if (value === undefined) {
+      return 'playing';
+    }
+    if (value === 'playing' || value === 'loss' || value === 'goal') {
+      return value;
+    }
+    return null;
   }
 
   private static replacer(_key: string, value: unknown): unknown {

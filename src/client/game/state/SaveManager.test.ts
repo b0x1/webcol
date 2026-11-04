@@ -23,6 +23,8 @@ describe('SaveManager', () => {
       | 'selectedUnitId'
       | 'selectedSettlementId'
       | 'europePrices'
+      | 'soldOnTurn'
+      | 'outcome'
       | 'map'
       | 'selectedTile'
       | 'combatResult'
@@ -35,6 +37,8 @@ describe('SaveManager', () => {
       selectedUnitId: null,
       selectedSettlementId: null,
       europePrices: {} as GameState['europePrices'],
+      soldOnTurn: {},
+      outcome: 'playing',
       map: [[tile]],
       selectedTile: null,
       combatResult: null,
@@ -64,6 +68,8 @@ describe('SaveManager', () => {
       | 'selectedUnitId'
       | 'selectedSettlementId'
       | 'europePrices'
+      | 'soldOnTurn'
+      | 'outcome'
       | 'map'
       | 'selectedTile'
       | 'combatResult'
@@ -76,6 +82,8 @@ describe('SaveManager', () => {
       selectedUnitId: null,
       selectedSettlementId: null,
       europePrices: {} as GameState['europePrices'],
+      soldOnTurn: {},
+      outcome: 'playing',
       map: [[tile]],
       selectedTile: null,
       combatResult: null,

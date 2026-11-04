@@ -25,6 +25,8 @@ export interface SaveGameState {
   turn: number;
   phase: TurnPhase;
   europePrices: Record<GoodType, number>;
+  soldOnTurn: Partial<Record<GoodType, number>>;
+  outcome: GameOutcome;
   map: Tile[][];
 }
 

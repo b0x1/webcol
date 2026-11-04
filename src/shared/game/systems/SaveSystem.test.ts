@@ -62,6 +62,8 @@ describe('SaveSystem serialization round-trip', () => {
         [GoodType.TRADE_GOODS]: 6,
         [GoodType.MUSKETS]: 8,
       } satisfies Record<GoodType, number>,
+      soldOnTurn: { [GoodType.LUMBER]: 5 },
+      outcome: 'goal',
       map: [[tile]],
     } satisfies SaveData;
 
@@ -80,5 +82,23 @@ describe('SaveSystem serialization round-trip', () => {
     expect(loadedState.players[0]?.settlements[0]?.units[0]?.occupation).toBe(JobType.LUMBERJACK);
     expect(loadedState.map[0]?.[0]?.terrainType).toBe(TerrainType.PLAINS);
     expect(loadedState.players[1]?.settlements[0]?.goods.get(GoodType.TRADE_GOODS)).toBe(20);
+    expect(loadedState.soldOnTurn).toEqual({ [GoodType.LUMBER]: 5 });
+    expect(loadedState.outcome).toBe('goal');
+  });
+
+  it('reads a save from before sale turns as still playing', () => {
+    const serialized = JSON.stringify({
+      players: [],
+      currentPlayerId: 'p1',
+      turn: 2,
+      phase: TurnPhase.MOVEMENT,
+      europePrices: { [GoodType.FOOD]: 1 },
+      map: [],
+    });
+
+    const loadedState = SaveSystem.deserialize(serialized);
+
+    expect(loadedState?.outcome).toBe('playing');
+    expect(loadedState?.soldOnTurn).toEqual({});
   });
 });
