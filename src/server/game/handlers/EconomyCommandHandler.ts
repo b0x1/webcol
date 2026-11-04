@@ -1,15 +1,18 @@
-import { RECRUITMENT_COSTS } from '@shared/game/constants';
+import { RECRUITMENT_COSTS, RECRUITMENT_CONSTANTS, UNIT_CONSTANTS } from '@shared/game/constants';
 import { createUnit } from '@shared/game/entities/Unit';
 import type { Player } from '@shared/game/entities/Player';
 import {
   Attitude,
   GoodType,
   Nation,
+  TerrainType,
   UnitType,
 } from '@shared/game/entities/types';
+import { canTradeWithEurope, cargoHold, cargoUsed, isBeside, settlementBeside } from '@shared/game/rules/TradeRules';
 import { NamingSystem } from '@shared/game/systems/NamingSystem';
 import { EconomySystem } from '@shared/game/systems/EconomySystem';
 import { ForeignInteractionSystem } from '@shared/game/systems/ForeignInteractionSystem';
+import { ProductionSystem } from '@shared/game/systems/ProductionSystem';
 import { TraversalUtils } from '@shared/game/utils/TraversalUtils';
 import type { AuthoritativeGameState } from '@shared/game/AuthoritativeGameState';
 import type { GameEffect } from '@shared/game/protocol';
@@ -29,7 +32,7 @@ export class EconomyCommandHandler {
 
     const player = this.selectCurrentPlayer(state);
     const unit = player?.units.find((candidate) => candidate.id === unitId);
-    if (!player || !unit) {
+    if (!player || !unit || !canTradeWithEurope(unit, player, state.map)) {
       return [];
     }
 
@@ -65,7 +68,11 @@ export class EconomyCommandHandler {
 
     const player = this.selectCurrentPlayer(state);
     const unit = player?.units.find((candidate) => candidate.id === unitId);
-    if (!player || !unit) {
+    if (!player || !unit || !canTradeWithEurope(unit, player, state.map)) {
+      return [];
+    }
+
+    if (cargoUsed(unit) + amount > cargoHold(unit)) {
       return [];
     }
 
@@ -113,9 +120,13 @@ export class EconomyCommandHandler {
       return [];
     }
 
+    if (!canTradeWithEurope(selectedShip, player, state.map)) {
+      return [];
+    }
+
     let goldCost = costs[unitType] ?? 0;
     if (unitType === UnitType.SOLDIER && player.nation === Nation.SPAIN) {
-      goldCost = 600;
+      goldCost = RECRUITMENT_CONSTANTS.SPAIN_SOLDIER_COST;
     }
 
     if (player.gold < goldCost) {
@@ -124,11 +135,33 @@ export class EconomyCommandHandler {
 
     let musketsToConsume = 0;
     if (unitType === UnitType.SOLDIER) {
-      musketsToConsume = 50;
+      musketsToConsume = RECRUITMENT_CONSTANTS.SOLDIER_MUSKETS;
       const currentMuskets = selectedShip.cargo.get(GoodType.MUSKETS) ?? 0;
       if (currentMuskets < musketsToConsume) {
         return [];
       }
+    }
+
+    const recruitedMoves = this.movesForRecruit(unitType);
+    const recruited = createUnit(
+      generateId('unit'),
+      player.id,
+      'Recruit',
+      unitType,
+      selectedShip.position.x,
+      selectedShip.position.y,
+      recruitedMoves,
+    );
+
+    if (unitType !== UnitType.SHIP && selectedShip.inEurope !== true) {
+      const harbor = settlementBeside(selectedShip, player.settlements);
+      if (!harbor) {
+        return [];
+      }
+      recruited.position = { ...harbor.position };
+      recruited.inEurope = false;
+    } else if (unitType !== UnitType.SHIP) {
+      recruited.inEurope = true;
     }
 
     if (musketsToConsume > 0) {
@@ -145,16 +178,9 @@ export class EconomyCommandHandler {
       state.namingStats
     );
     state.namingStats = namingResult.updatedStats;
+    recruited.name = namingResult.name;
 
-    player.units.push(createUnit(
-      generateId('unit'),
-      player.id,
-      namingResult.name,
-      unitType,
-      selectedShip.position.x,
-      selectedShip.position.y,
-      1
-    ));
+    player.units.push(recruited);
 
     return [];
   }
@@ -184,11 +210,10 @@ export class EconomyCommandHandler {
 
     const settlementIndex = foreignPlayer.settlements.findIndex((candidate) => candidate.id === settlementId);
     const settlement = foreignPlayer.settlements[settlementIndex];
-    if (!settlement) {
+    if (!settlement || settlement.ownerId === player.id || !isBeside(unit.position, settlement.position)) {
       return [];
     }
 
-    // Defensive guard: Ensure unit has the good before trading to avoid unhandled exception
     if ((unit.cargo.get(goodOffered) ?? 0) <= 0) {
       return [];
     }
@@ -227,11 +252,10 @@ export class EconomyCommandHandler {
 
     const settlementIndex = foreignPlayer.settlements.findIndex((candidate) => candidate.id === settlementId);
     const settlement = foreignPlayer.settlements[settlementIndex];
-    if (!settlement) {
+    if (!settlement || settlement.ownerId === player.id || !isBeside(unit.position, settlement.position)) {
       return [];
     }
 
-    // Defensive guards: Ensure preconditions are met before learning to avoid unhandled exceptions
     if (settlement.attitude !== Attitude.FRIENDLY || unit.type !== UnitType.COLONIST) {
       return [];
     }
@@ -245,6 +269,113 @@ export class EconomyCommandHandler {
     }
 
     return [];
+  }
+
+  static transferGood(
+    state: AuthoritativeGameState,
+    unitId: string,
+    settlementId: string,
+    good: GoodType,
+    amount: number,
+    direction: 'load' | 'unload',
+  ): readonly GameEffect[] {
+    if (!Object.values(GoodType).includes(good) || amount <= 0 || !Number.isInteger(amount)) {
+      return [];
+    }
+
+    const player = this.selectCurrentPlayer(state);
+    const unit = player?.units.find((candidate) => candidate.id === unitId);
+    const settlement = player?.settlements.find((candidate) => candidate.id === settlementId);
+    if (!player || !unit || !settlement || unit.inEurope === true || !isBeside(unit.position, settlement.position)) {
+      return [];
+    }
+
+    if (direction === 'load') {
+      const stock = settlement.inventory.get(good) ?? 0;
+      const room = cargoHold(unit) - cargoUsed(unit);
+      const moved = Math.min(amount, stock, room);
+      if (moved <= 0) {
+        return [];
+      }
+      settlement.inventory.set(good, stock - moved);
+      unit.cargo.set(good, (unit.cargo.get(good) ?? 0) + moved);
+      return [];
+    }
+
+    const carried = unit.cargo.get(good) ?? 0;
+    const stored = settlement.inventory.get(good) ?? 0;
+    const room = ProductionSystem.getInventoryCapacity(settlement) - stored;
+    const moved = Math.min(amount, carried, Math.max(0, room));
+    if (moved <= 0) {
+      return [];
+    }
+
+    const remaining = carried - moved;
+    if (remaining === 0) {
+      unit.cargo.delete(good);
+    } else {
+      unit.cargo.set(good, remaining);
+    }
+    settlement.inventory.set(good, stored + moved);
+    return [];
+  }
+
+  static sailToEurope(state: AuthoritativeGameState, unitId: string): readonly GameEffect[] {
+    const player = this.selectCurrentPlayer(state);
+    if (!player) {
+      return [];
+    }
+
+    const ship = player.units.find((candidate) => candidate.id === unitId);
+    if (ship?.type !== UnitType.SHIP || ship.inEurope === true || ship.movesRemaining <= 0) {
+      return [];
+    }
+
+    const tile = state.map[ship.position.y]?.[ship.position.x];
+    if (!tile || (tile.terrainType !== TerrainType.OCEAN && tile.terrainType !== TerrainType.COAST)) {
+      return [];
+    }
+
+    ship.inEurope = true;
+    ship.movesRemaining = 0;
+    return [{ type: 'notification', message: `${ship.name} sailed for Europe.` }];
+  }
+
+  static returnFromEurope(state: AuthoritativeGameState, unitId: string): readonly GameEffect[] {
+    const player = this.selectCurrentPlayer(state);
+    if (!player) {
+      return [];
+    }
+
+    const ship = player.units.find((candidate) => candidate.id === unitId);
+    if (ship?.type !== UnitType.SHIP || ship.inEurope !== true) {
+      return [];
+    }
+
+    const landing = player.settlements[0]?.position ?? ship.position;
+    ship.inEurope = false;
+    ship.movesRemaining = 0;
+    player.units.forEach((unit) => {
+      if (unit.inEurope !== true || unit.id === ship.id) {
+        return;
+      }
+      unit.inEurope = false;
+      if (unit.type !== UnitType.SHIP) {
+        unit.position = { ...landing };
+      }
+    });
+
+    return [{ type: 'notification', message: `${ship.name} returned from Europe.` }];
+  }
+
+  private static movesForRecruit(unitType: UnitType): number {
+    if (unitType === UnitType.SHIP) {
+      return UNIT_CONSTANTS.SHIP_MOVES;
+    }
+    if (unitType === UnitType.PIONEER) {
+      return UNIT_CONSTANTS.PIONEER_MOVES;
+    }
+    return UNIT_CONSTANTS.DEFAULT_MOVES;
   }
 
   private static selectCurrentPlayer(state: AuthoritativeGameState): Player | undefined {

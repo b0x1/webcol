@@ -91,7 +91,10 @@ export class ProductionSystem {
         const { tileX, tileY } = unit.occupation;
         const tile = map[tileY]?.[tileX];
         const good = tile ? TERRAIN_PRODUCTION_RULES[tile.terrainType] : null;
-        if (good) {
+        if (tile && good) {
+          if (tile.hasResource) {
+            amount += COLONY_CONSTANTS.RESOURCE_BONUS;
+          }
           netProduction.set(good, (netProduction.get(good) ?? 0) + amount);
         }
       }
@@ -105,10 +108,10 @@ export class ProductionSystem {
     netProduction: Map<GoodType, number>
   ): void {
     if (settlement.buildings.includes(BuildingType.LUMBER_MILL)) {
-      netProduction.set(GoodType.LUMBER, (netProduction.get(GoodType.LUMBER) ?? 0) + 2);
+      netProduction.set(GoodType.LUMBER, (netProduction.get(GoodType.LUMBER) ?? 0) + COLONY_CONSTANTS.BUILDING_BONUS);
     }
     if (settlement.buildings.includes(BuildingType.IRON_WORKS)) {
-      netProduction.set(GoodType.ORE, (netProduction.get(GoodType.ORE) ?? 0) + 2);
+      netProduction.set(GoodType.ORE, (netProduction.get(GoodType.ORE) ?? 0) + COLONY_CONSTANTS.BUILDING_BONUS);
     }
   }
 

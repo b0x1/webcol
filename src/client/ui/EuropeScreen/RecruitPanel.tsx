@@ -1,16 +1,20 @@
 import React from 'react';
 import { useGameStore, selectCurrentPlayer, selectSelectedUnit } from '@client/game/state/gameStore';
-import { UnitType, GoodType } from '@shared/game/entities/types';
+import { UnitType, GoodType, Nation } from '@shared/game/entities/types';
+import { RECRUITMENT_COSTS, RECRUITMENT_CONSTANTS } from '@shared/game/constants';
 
 export const RecruitPanel: React.FC = () => {
   const recruitUnit = useGameStore((state) => state.recruitUnit);
   const player = useGameStore(selectCurrentPlayer);
   const selectedUnit = useGameStore(selectSelectedUnit);
 
+  const soldierCost = player?.nation === Nation.SPAIN
+    ? RECRUITMENT_CONSTANTS.SPAIN_SOLDIER_COST
+    : RECRUITMENT_COSTS.SOLDIER;
   const unitsToRecruit = [
-    { type: UnitType.COLONIST, cost: 500, requirement: 'None' },
-    { type: UnitType.SOLDIER, cost: 800, requirement: '50 Muskets' },
-    { type: UnitType.PIONEER, cost: 650, requirement: 'None' },
+    { type: UnitType.COLONIST, cost: RECRUITMENT_COSTS.COLONIST, requirement: 'None', muskets: 0 },
+    { type: UnitType.SOLDIER, cost: soldierCost, requirement: `${RECRUITMENT_CONSTANTS.SOLDIER_MUSKETS} Muskets`, muskets: RECRUITMENT_CONSTANTS.SOLDIER_MUSKETS },
+    { type: UnitType.PIONEER, cost: RECRUITMENT_COSTS.PIONEER, requirement: 'None', muskets: 0 },
   ];
 
   if (selectedUnit?.type !== UnitType.SHIP) return null;
@@ -22,7 +26,7 @@ export const RecruitPanel: React.FC = () => {
         {unitsToRecruit.map((u) => {
           const canAffordGold = (player?.gold ?? 0) >= u.cost;
           const hasMuskets =
-            u.type !== UnitType.SOLDIER || (selectedUnit.cargo.get(GoodType.MUSKETS) ?? 0) >= 50;
+            u.muskets === 0 || (selectedUnit.cargo.get(GoodType.MUSKETS) ?? 0) >= u.muskets;
           const canRecruit = canAffordGold && hasMuskets;
 
           return (

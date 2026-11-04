@@ -8,8 +8,6 @@ import { SpriteLoader } from '../game/utils/SpriteLoader';
 import { eventBus } from '@client/game/state/EventBus';
 
 export class MainMenuScene extends Phaser.Scene {
-  private terrainRenderer!: TerrainRenderer;
-
   constructor() {
     super('MainMenuScene');
   }
@@ -29,7 +27,7 @@ export class MainMenuScene extends Phaser.Scene {
     const width = Math.ceil(this.cameras.main.width / MAP_CONSTANTS.TILE_SIZE) + 1;
     const height = Math.ceil(this.cameras.main.height / MAP_CONSTANTS.TILE_SIZE) + 1;
 
-    this.terrainRenderer = new TerrainRenderer(this, MAP_CONSTANTS.TILE_SIZE);
+    const terrainRenderer = new TerrainRenderer(this, MAP_CONSTANTS.TILE_SIZE);
 
     const generator = new TerrainGenerator(width, height, `menu-bg-${Date.now()}`);
     const terrainData = generator.generate();
@@ -50,7 +48,7 @@ export class MainMenuScene extends Phaser.Scene {
       })
     );
 
-    this.terrainRenderer.renderTileMap(tiles, []);
+    terrainRenderer.renderTileMap(tiles, []);
 
     // Dark overlay
     const overlay = this.add.graphics();

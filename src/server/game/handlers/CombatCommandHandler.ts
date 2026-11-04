@@ -1,9 +1,12 @@
 import { calculatePopulation } from '@shared/game/entities/Settlement';
 import type { Player } from '@shared/game/entities/Player';
 import type { Settlement } from '@shared/game/entities/Settlement';
-import type { Position } from '@shared/game/entities/Position';
+import { isNeighbor, type Position } from '@shared/game/entities/Position';
 import type { Unit } from '@shared/game/entities/Unit';
+import { Culture } from '@shared/game/entities/types';
 import { CombatSystem } from '@shared/game/systems/CombatSystem';
+import { MovementSystem } from '@shared/game/systems/MovementSystem';
+import { UnitSystem } from '@shared/game/systems/UnitSystem';
 import { TraversalUtils } from '@shared/game/utils/TraversalUtils';
 import type { AuthoritativeGameState } from '@shared/game/AuthoritativeGameState';
 import type { GameEffect } from '@shared/game/protocol';
@@ -31,14 +34,21 @@ export class CombatCommandHandler {
     }
 
     const attacker = player.units.find((candidate) => candidate.id === attackerId);
-    if (!attacker) {
+    if (!attacker || attacker.inEurope === true) {
+      return [];
+    }
+
+    if (!isNeighbor(attacker.position, target) || attacker.movesRemaining <= 0) {
       return [];
     }
 
     const otherPlayers = state.players.filter((candidate) => candidate.id !== state.currentPlayerId);
     const defenderUnit = TraversalUtils.findUnitsAt(otherPlayers, target)[0];
     const defenderSettlement = TraversalUtils.findSettlementAt(state.players, target);
-    const defender = defenderUnit ?? (
+    const garrison = defenderSettlement && defenderSettlement.ownerId !== state.currentPlayerId
+      ? defenderSettlement.units.find((unit) => unit.ownerId === defenderSettlement.ownerId)
+      : undefined;
+    const defender = defenderUnit ?? garrison ?? (
       defenderSettlement && defenderSettlement.ownerId !== state.currentPlayerId
         ? defenderSettlement
         : undefined
@@ -47,6 +57,8 @@ export class CombatCommandHandler {
     if (!defender) {
       return [];
     }
+
+    attacker.movesRemaining = 0;
 
     const defenderTile = state.map[target.y]?.[target.x];
     if (!defenderTile) {
@@ -85,29 +97,57 @@ export class CombatCommandHandler {
       }
     }
 
+    if ('maxMoves' in defender) {
+      this.removeDefenderUnit(state, defender.id);
+      return;
+    }
+
     const capturedSettlementPlayer = this.selectSettlementOwner(state, defender.id);
-    if (capturedSettlementPlayer && capturedSettlementPlayer.id !== state.currentPlayerId) {
-      const settlementIndex = capturedSettlementPlayer.settlements.findIndex(
-        (candidate) => candidate.id === defender.id
-      );
-      const settlement = capturedSettlementPlayer.settlements[settlementIndex];
-      if (settlement) {
-        if (settlement.units.length > 1) {
-          settlement.units.pop();
-          settlement.population = calculatePopulation(settlement);
+    if (!capturedSettlementPlayer || capturedSettlementPlayer.id === state.currentPlayerId) {
+      return;
+    }
+
+    const settlementIndex = capturedSettlementPlayer.settlements.findIndex(
+      (candidate) => candidate.id === defender.id
+    );
+    const settlement = capturedSettlementPlayer.settlements[settlementIndex];
+    if (!settlement) {
+      return;
+    }
+
+    settlement.ownerId = attackerPlayer.id;
+    settlement.units.forEach((unit) => {
+      unit.ownerId = attackerPlayer.id;
+    });
+    attackerPlayer.settlements.push(settlement);
+    capturedSettlementPlayer.settlements.splice(settlementIndex, 1);
+
+    const tile = state.map[target.y]?.[target.x];
+    if (tile && Number.isFinite(MovementSystem.getMovementCost(attackerUnit, tile))) {
+      attackerUnit.position = { ...target };
+      UnitSystem.enterSettlement(attackerUnit, attackerPlayer, settlement);
+    }
+  }
+
+  private static removeDefenderUnit(state: AuthoritativeGameState, unitId: string): void {
+    state.players.forEach((player) => {
+      const unitIndex = player.units.findIndex((candidate) => candidate.id === unitId);
+      if (unitIndex !== -1) {
+        player.units.splice(unitIndex, 1);
+      }
+
+      player.settlements.forEach((settlement) => {
+        const garrisonIndex = settlement.units.findIndex((candidate) => candidate.id === unitId);
+        if (garrisonIndex === -1) {
+          return;
         }
 
-        attackerUnit.position = { ...target };
-        attackerUnit.movesRemaining = 0;
-        settlement.ownerId = attackerPlayer.id;
-        settlement.units.forEach((unit) => {
-          unit.ownerId = attackerPlayer.id;
-        });
-
-        attackerPlayer.settlements.push(settlement);
-        capturedSettlementPlayer.settlements.splice(settlementIndex, 1);
-      }
-    }
+        settlement.units.splice(garrisonIndex, 1);
+        if (settlement.culture !== Culture.NATIVE) {
+          settlement.population = calculatePopulation(settlement);
+        }
+      });
+    });
   }
 
   private static handleCombatDefeat(player: Player, attackerId: string): void {

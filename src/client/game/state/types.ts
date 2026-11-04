@@ -25,6 +25,16 @@ export interface GameState extends AuthoritativeGameState, ClientViewState {
   assignJob: (settlementId: string, unitId: string, job: string | null) => void;
   sellGood: (unitId: string, good: GoodType, amount: number) => void;
   buyGood: (unitId: string, good: GoodType, amount: number) => void;
+  transferGood: (
+    unitId: string,
+    settlementId: string,
+    good: GoodType,
+    amount: number,
+    direction: 'load' | 'unload',
+  ) => void;
+  sailToEurope: (unitId: string) => void;
+  returnFromEurope: (unitId: string) => void;
+  improveTile: (unitId: string) => void;
   recruitUnit: (unitType: UnitType) => void;
   tradeWithSettlement: (settlementId: string, unitId: string, goodOffered: GoodType) => void;
   learnFromSettlement: (settlementId: string, unitId: string) => void;

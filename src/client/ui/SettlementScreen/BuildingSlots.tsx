@@ -2,6 +2,7 @@ import React from 'react';
 import type { Unit } from '@shared/game/entities/Unit';
 import type { JobType } from '@shared/game/entities/types';
 import { BuildingType } from '@shared/game/entities/types';
+import { BUILDING_COSTS } from '@shared/game/constants';
 import { useGameStore, selectSettlementById } from '@client/game/state/gameStore';
 import { JOB_PRODUCTION_RULES } from '@shared/game/rules/ProductionRules';
 import { Sprite } from '../Sprite';
@@ -12,7 +13,8 @@ const BUILDINGS_LIST = [
   { type: BuildingType.BLACKSMITHS_HOUSE, name: 'Blacksmith\'s House', bonus: 'Ore -> Tools' },
   { type: BuildingType.LUMBER_MILL, name: 'Lumber Mill', bonus: '+2 LUMBER/turn' },
   { type: BuildingType.IRON_WORKS, name: 'Iron Works', bonus: '+2 ORE/turn' },
-  { type: BuildingType.SCHOOLHOUSE, name: 'Schoolhouse', bonus: 'Education' },
+  { type: BuildingType.SCHOOLHOUSE, name: 'Schoolhouse', bonus: 'Faster training' },
+  { type: BuildingType.STABLES, name: 'Stables', bonus: '+1 pioneer move' },
   { type: BuildingType.WAREHOUSE, name: 'Warehouse', bonus: '400 Storage' },
   { type: BuildingType.STOCKADE, name: 'Stockade', bonus: '+2 Defense' },
   { type: BuildingType.PRINTING_PRESS, name: 'Printing Press', bonus: '+1 Growth' },
@@ -47,6 +49,7 @@ interface Props {
 
 const BuildingSlotsBase: React.FC<Props> = ({ settlementId, ownedBuildings }) => {
   const assignJob = useGameStore(state => state.assignJob);
+  const buyBuilding = useGameStore(state => state.buyBuilding);
   // ⚡ Bolt: Use targeted selector to avoid re-renders when other players or unrelated settlement data changes
   const settlement = useGameStore(state => selectSettlementById(state, settlementId));
   const units = settlement?.units;
@@ -79,7 +82,32 @@ const BuildingSlotsBase: React.FC<Props> = ({ settlementId, ownedBuildings }) =>
     e.dataTransfer.setData('unitId', unitId);
   };
 
+  const queued = new Set(settlement.productionQueue);
+  const forSale = (Object.keys(BUILDING_COSTS) as BuildingType[]).filter(
+    (building) => !ownedBuildings.includes(building) && !queued.has(building),
+  );
+
   return (
+    <div className="flex flex-col gap-4">
+    {forSale.length > 0 && (
+      <div className="flex flex-wrap gap-2">
+        {forSale.map((building) => {
+          const cost = BUILDING_COSTS[building];
+          const label = BUILDINGS_LIST.find((entry) => entry.type === building)?.name ?? building;
+          return (
+            <button
+              key={building}
+              type="button"
+              onClick={() => { buyBuilding(settlementId, building); }}
+              className="px-3 py-2 bg-slate-800 border border-slate-600 rounded text-xs font-bold uppercase tracking-wide hover:border-blue-400 cursor-pointer"
+            >
+              Queue {label}
+              {cost ? ` (${cost.hammers} hammers)` : ''}
+            </button>
+          );
+        })}
+      </div>
+    )}
     <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
       {BUILDINGS_LIST.filter(b => ownedBuildings.includes(b.type)).map((b) => {
         const associatedJob = BUILDING_TO_JOB[b.type];
@@ -117,6 +145,7 @@ const BuildingSlotsBase: React.FC<Props> = ({ settlementId, ownedBuildings }) =>
           </div>
         );
       })}
+    </div>
     </div>
   );
 };

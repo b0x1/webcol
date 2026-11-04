@@ -9,6 +9,7 @@ export const EuropeScreen: React.FC = () => {
   const { isEuropeScreenOpen, setEuropeScreenOpen } = useUIStore();
   const player = useGameStore(selectCurrentPlayer);
   const selectedUnit = useGameStore(selectSelectedUnit);
+  const returnFromEurope = useGameStore((state) => state.returnFromEurope);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -23,7 +24,8 @@ export const EuropeScreen: React.FC = () => {
 
   if (!isEuropeScreenOpen) return null;
 
-  const isShipSelected = selectedUnit?.type === UnitType.SHIP;
+  const ship = selectedUnit?.type === UnitType.SHIP ? selectedUnit : null;
+  const passengers = player?.units.filter((unit) => unit.inEurope === true && unit.type !== UnitType.SHIP) ?? [];
 
   return (
     <div className="absolute inset-0 bg-black/85 flex flex-col items-center justify-center p-10 z-[1000] pointer-events-auto backdrop-blur-sm">
@@ -39,12 +41,26 @@ export const EuropeScreen: React.FC = () => {
         </div>
 
         <div className="flex-1">
-          {!isShipSelected ? (
+          {!ship ? (
             <div className="text-center mt-12 p-10 bg-slate-900/50 rounded-xl border border-slate-700 border-dashed">
               <h3 className="text-2xl font-bold text-slate-400">Please select a <span className="text-blue-400">SHIP</span> to trade or recruit.</h3>
             </div>
           ) : (
             <div className="space-y-8">
+              {ship.inEurope === true && (
+                <button
+                  onClick={() => {
+                    returnFromEurope(ship.id);
+                    setEuropeScreenOpen(false);
+                  }}
+                  className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded cursor-pointer"
+                >
+                  Return to the New World
+                </button>
+              )}
+              {passengers.length > 0 && (
+                <p className="text-sm text-slate-300">Waiting to sail home: {passengers.map((unit) => unit.name).join(', ')}</p>
+              )}
               <MarketPanel />
               <RecruitPanel />
             </div>

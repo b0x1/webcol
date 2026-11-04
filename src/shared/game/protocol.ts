@@ -42,6 +42,10 @@ export type GameCommand =
   | { type: 'assignJob'; settlementId: string; unitId: string; job: string | null }
   | { type: 'sellGood'; unitId: string; good: GoodType; amount: number }
   | { type: 'buyGood'; unitId: string; good: GoodType; amount: number }
+  | { type: 'transferGood'; unitId: string; settlementId: string; good: GoodType; amount: number; direction: 'load' | 'unload' }
+  | { type: 'sailToEurope'; unitId: string }
+  | { type: 'returnFromEurope'; unitId: string }
+  | { type: 'improveTile'; unitId: string }
   | { type: 'recruitUnit'; unitType: UnitType; fromUnitId: string | null }
   | { type: 'tradeWithSettlement'; settlementId: string; unitId: string; goodOffered: GoodType }
   | { type: 'learnFromSettlement'; settlementId: string; unitId: string }

@@ -2,8 +2,7 @@
 
 An open-source turn-based strategy game inspired by the classic
 genre-defining work of art Sid Meier's Colonization,
-implemented by a meat blob prompting [Claude](https://claude.ai) to prompt
-[Jules](https://jules.google.com/).
+implemented by a meat blob prompting coding agents.
 
 ## Architecture and Stack
 
@@ -17,15 +16,20 @@ please read [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 1.  **Install dependencies:**
     ```bash
-    npm install
+    pnpm install
     ```
 
 2.  **Start development server:**
     ```bash
-    npm run dev
+    pnpm dev
     ```
 
-3.  **Build for production:**
+3.  **Check types, lint, and tests:**
     ```bash
-    npm run build
+    pnpm check
+    ```
+
+4.  **Build for production:**
+    ```bash
+    pnpm build
     ```

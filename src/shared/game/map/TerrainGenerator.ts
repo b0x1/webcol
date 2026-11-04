@@ -56,7 +56,8 @@ export class TerrainGenerator {
         // Secondary noise for features like forests
         const f = this.noise2D(6 * nx, 6 * ny);
 
-        row.push(this.getTerrainFromElevation(elevation, f));
+        const latitude = Math.abs(y / this.height - 0.5) * 2;
+        row.push(terrainFromSample(elevation, f, latitude));
       }
       map.push(row);
     }
@@ -133,17 +134,20 @@ export class TerrainGenerator {
     return settlements;
   }
 
-  private getTerrainFromElevation(e: number, f: number): TerrainType {
-    if (e < -0.2) return TerrainType.OCEAN;
-    if (e < -0.1) return TerrainType.COAST;
+}
 
-    // Land
-    if (e > 0.4) return TerrainType.MOUNTAINS;
-    if (e > 0.2) return TerrainType.HILLS;
-
-    // Plains or Forests
-    if (f > 0.3) return TerrainType.FOREST;
-
-    return TerrainType.PLAINS;
-  }
+export function terrainFromSample(elevation: number, feature: number, latitude: number): TerrainType {
+  if (elevation < -0.2) return TerrainType.OCEAN;
+  if (elevation < -0.1) return TerrainType.COAST;
+  if (elevation > 0.4) return TerrainType.MOUNTAINS;
+  if (elevation > 0.2) return TerrainType.HILLS;
+  if (latitude > 0.85 && elevation < 0.35) return TerrainType.ARCTIC;
+  if (latitude > 0.7 && feature < 0.1) return TerrainType.TUNDRA;
+  if (elevation < 0.0 && feature < -0.2) return TerrainType.SWAMP;
+  if (elevation < 0.05 && feature < 0.0) return TerrainType.MARSH;
+  if (feature > 0.3) return TerrainType.FOREST;
+  if (feature > 0.05) return TerrainType.GRASSLAND;
+  if (feature < -0.35) return TerrainType.DESERT;
+  if (elevation > 0.1) return TerrainType.PRAIRIE;
+  return TerrainType.PLAINS;
 }

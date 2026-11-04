@@ -79,7 +79,7 @@ export const ForeignInteractionModal: React.FC = () => {
             <section className="animate-in slide-in-from-bottom-2 duration-500">
               <h4 className="text-lg font-black uppercase tracking-widest text-amber-700 mb-3 border-b border-amber-900/30 pb-1">Wisdom of the Elders</h4>
               <div className="bg-amber-950/20 border border-amber-900/30 p-4 rounded-lg">
-                <p className="text-stone-300 text-sm leading-relaxed mb-4">The inhabitants are willing to teach you the secrets of the land. Your <span className="text-amber-500 font-bold">Colonist</span> will become a <span className="text-amber-500 font-bold">Pioneer</span>.</p>
+                <p className="text-stone-300 text-sm leading-relaxed mb-4">The inhabitants are willing to teach you the secrets of the land. Your <span className="text-amber-500 font-bold">Colonist</span> becomes a <span className="text-amber-500 font-bold">Pioneer</span> with lumberjack expertise.</p>
                 <button
                   onClick={() => { learnFromSettlement(settlement.id, unit.id); }}
                   className="w-full py-3 bg-amber-700 hover:bg-amber-600 text-stone-100 font-black uppercase tracking-widest text-sm rounded shadow-lg transition-all transform active:scale-95 cursor-pointer"

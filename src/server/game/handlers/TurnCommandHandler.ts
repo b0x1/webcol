@@ -1,7 +1,10 @@
 import type { Player } from '@shared/game/entities/Player';
 import {
+  BuildingType,
   TurnPhase,
+  UnitType,
 } from '@shared/game/entities/types';
+import { COLONY_CONSTANTS, NATION_BONUSES } from '@shared/game/constants';
 import { TurnEngine } from '@shared/game/systems/TurnEngine';
 import { AISystem } from '@shared/game/systems/AISystem';
 import { TraversalUtils } from '@shared/game/utils/TraversalUtils';
@@ -23,6 +26,10 @@ export class TurnCommandHandler {
       TurnPhase.AI,
       TurnPhase.END_TURN,
     ];
+
+    if (!state.players.some((player) => player.isHuman)) {
+      return effects;
+    }
 
     for (;;) {
       const currentPhaseIndex = phases.indexOf(state.phase);
@@ -46,31 +53,65 @@ export class TurnCommandHandler {
   }
 
   private static advanceToNextPlayer(state: AuthoritativeGameState, effects: GameEffect[]): void {
-    const currentPlayerIndex = state.players.findIndex(
-      (player) => player.id === state.currentPlayerId
-    );
-    const nextPlayerIndex = (currentPlayerIndex + 1) % state.players.length;
-    const nextPlayer = state.players[nextPlayerIndex];
-    if (!nextPlayer) {
+    if (state.players.length === 0) {
       return;
     }
 
-    const nextTurn = nextPlayerIndex === 0 ? state.turn + 1 : state.turn;
-    if (nextTurn > state.turn && nextPlayerIndex === 0) {
-      effects.push({ type: 'autosaveRequested' });
+    const currentPlayerIndex = state.players.findIndex(
+      (player) => player.id === state.currentPlayerId
+    );
+    const nextSeat = this.findNextParticipatingSeat(state.players, currentPlayerIndex);
+    if (!nextSeat) {
+      return;
     }
 
-    state.players.forEach((player) => {
-      if (player.id === nextPlayer.id) {
-        player.units.forEach((unit) => {
-          unit.movesRemaining = unit.maxMoves;
-          unit.isSkipping = false;
-        });
-      }
+    if (nextSeat.wrapped) {
+      state.turn += 1;
+      effects.push({ type: 'autosaveRequested' });
+      TurnEngine.produceNativeGoods(state.players);
+    }
+
+    const pioneerBonus = nextSeat.player.settlements.some((settlement) =>
+      settlement.buildings.includes(BuildingType.STABLES),
+    )
+      ? COLONY_CONSTANTS.STABLES_MOVE_BONUS
+      : 0;
+
+    nextSeat.player.units.forEach((unit) => {
+      const bonus = unit.type === UnitType.PIONEER ? pioneerBonus : 0;
+      unit.movesRemaining = unit.maxMoves + bonus;
+      unit.isSkipping = false;
     });
 
-    state.currentPlayerId = nextPlayer.id;
-    state.turn = nextTurn;
+    state.currentPlayerId = nextSeat.player.id;
+  }
+
+  private static findNextParticipatingSeat(
+    players: readonly Player[],
+    currentPlayerIndex: number,
+  ): { player: Player; wrapped: boolean } | undefined {
+    let nextIndex = currentPlayerIndex < 0 ? players.length - 1 : currentPlayerIndex;
+    let wrapped = false;
+    let stepsRemaining = players.length;
+
+    while (stepsRemaining > 0) {
+      stepsRemaining -= 1;
+      nextIndex = (nextIndex + 1) % players.length;
+      if (nextIndex === 0) {
+        wrapped = true;
+      }
+
+      const candidate = players[nextIndex];
+      if (candidate && !this.isNativeSeat(candidate)) {
+        return { player: candidate, wrapped };
+      }
+    }
+
+    return undefined;
+  }
+
+  private static isNativeSeat(player: Player): boolean {
+    return !player.isHuman && NATION_BONUSES[player.nation]?.culture === 'NATIVE';
   }
 
   private static processPhase(
@@ -84,7 +125,8 @@ export class TurnCommandHandler {
         state.players,
         state.map,
         state.namingStats,
-        generateId
+        generateId,
+        state.currentPlayerId,
       );
       state.players = result.players;
       state.namingStats = result.namingStats;

@@ -14,6 +14,7 @@ export interface Unit {
   occupation: Occupation;
   expertise?: JobType;
   turnsInJob: number;
+  inEurope?: boolean;
 }
 
 export function createUnit(
@@ -37,5 +38,6 @@ export function createUnit(
     cargo: new Map(),
     occupation: { kind: 'RURE', state: 'MOVING' },
     turnsInJob: 0,
+    inEurope: false,
   };
 }

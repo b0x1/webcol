@@ -1,20 +1,27 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useGameStore } from './gameStore';
+import { createInitialAuthoritativeGameState } from '@server/game/createInitialAuthoritativeGameState';
 import { createPlayer } from '@shared/game/entities/Player';
 import { createUnit } from '@shared/game/entities/Unit';
 import { createTile } from '@shared/game/entities/Tile';
 import { TerrainType, TurnPhase, UnitType, Nation } from '@shared/game/entities/types';
+import type { SaveGameState } from '@shared/game/protocol';
+
+function seed(state: Pick<SaveGameState, 'players' | 'currentPlayerId' | 'map'> & Partial<SaveGameState>): void {
+  const initial = createInitialAuthoritativeGameState();
+  useGameStore.getState().loadGameState({
+    players: state.players,
+    currentPlayerId: state.currentPlayerId,
+    turn: state.turn ?? initial.turn,
+    phase: state.phase ?? initial.phase,
+    europePrices: state.europePrices ?? initial.europePrices,
+    map: state.map,
+  });
+}
 
 describe('gameStore', () => {
   beforeEach(() => {
-    useGameStore.setState({
-      players: [],
-      currentPlayerId: '',
-      turn: 1,
-      phase: TurnPhase.MOVEMENT,
-      selectedUnitId: null,
-      map: [],
-    });
+    seed({ players: [], currentPlayerId: '', map: [] });
   });
 
   describe('moveUnit', () => {
@@ -27,7 +34,7 @@ describe('gameStore', () => {
         [createTile('t00', 0, 0, TerrainType.PLAINS, 1), createTile('t10', 1, 0, TerrainType.PLAINS, 1)],
       ];
 
-      useGameStore.setState({ players: [player], currentPlayerId: 'p1', map });
+      seed({ players: [player], currentPlayerId: 'p1', map });
 
       useGameStore.getState().moveUnit('u1', { x: 1, y: 0 });
 
@@ -48,7 +55,7 @@ describe('gameStore', () => {
         [createTile('t00', 0, 0, TerrainType.PLAINS, 1), createTile('t10', 1, 0, TerrainType.FOREST, 2)],
       ];
 
-      useGameStore.setState({ players: [player], currentPlayerId: 'p1', map });
+      seed({ players: [player], currentPlayerId: 'p1', map });
 
       useGameStore.getState().moveUnit('u1', { x: 1, y: 0 });
 
@@ -65,7 +72,7 @@ describe('gameStore', () => {
     it('should advance phases correctly', () => {
       const p1 = createPlayer('p1', 'Player 1', true, 100, Nation.ENGLAND);
       const map = [[createTile('t00', 0, 0, TerrainType.PLAINS, 1)]];
-      useGameStore.setState({ players: [p1], currentPlayerId: 'p1', phase: TurnPhase.MOVEMENT, map });
+      seed({ players: [p1], currentPlayerId: 'p1', phase: TurnPhase.MOVEMENT, map });
 
       useGameStore.getState().endTurn();
 
@@ -76,10 +83,11 @@ describe('gameStore', () => {
       const p1 = createPlayer('p1', 'Player 1', true, 100, Nation.ENGLAND);
       const p2 = createPlayer('p2', 'Player 2', true, 100, Nation.SPAIN);
 
-      useGameStore.setState({
+      seed({
         players: [p1, p2],
         currentPlayerId: 'p1',
-        phase: TurnPhase.END_TURN
+        phase: TurnPhase.END_TURN,
+        map: [],
       });
 
       useGameStore.getState().endTurn();
@@ -93,11 +101,12 @@ describe('gameStore', () => {
       const p1 = createPlayer('p1', 'Player 1', true, 100, Nation.ENGLAND);
       const p2 = createPlayer('p2', 'Player 2', false, 100, Nation.SPAIN);
 
-      useGameStore.setState({
+      seed({
         players: [p1, p2],
         currentPlayerId: 'p2',
         phase: TurnPhase.END_TURN,
-        turn: 1
+        turn: 1,
+        map: [],
       });
 
       useGameStore.getState().endTurn();
@@ -121,11 +130,11 @@ describe('gameStore', () => {
         [createTile('t00', 0, 0, TerrainType.PLAINS, 1)],
       ];
 
-      useGameStore.setState({
+      seed({
         players: [p1, p2],
         currentPlayerId: 'p1',
         phase: TurnPhase.END_TURN,
-        map
+        map,
       });
 
       useGameStore.getState().endTurn();

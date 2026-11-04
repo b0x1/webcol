@@ -1,11 +1,20 @@
 import React, { useState } from 'react';
-import { useGameStore, selectSelectedUnit } from '@client/game/state/gameStore';
+import { useGameStore, selectCurrentPlayer, selectSelectedUnit } from '@client/game/state/gameStore';
 import { GoodType } from '@shared/game/entities/types';
+import { canTradeWithEurope } from '@shared/game/rules/TradeRules';
 
 export const MarketPanel: React.FC = () => {
   const { europePrices, sellGood, buyGood } =
     useGameStore();
   const selectedUnit = useGameStore(selectSelectedUnit);
+  const canTrade = useGameStore((state) => {
+    const player = selectCurrentPlayer(state);
+    const unit = selectSelectedUnit(state);
+    if (!player || !unit) {
+      return false;
+    }
+    return canTradeWithEurope(unit, player, state.map);
+  });
 
   const [buyAmounts, setBuyAmounts] = useState<Record<string, number>>({});
 
@@ -14,6 +23,9 @@ export const MarketPanel: React.FC = () => {
   return (
     <div className="bg-slate-900/40 p-6 rounded-xl border border-slate-700 shadow-inner">
       <h3 className="text-2xl font-black uppercase tracking-tight mb-4 text-blue-300">Market Prices</h3>
+      {!canTrade && (
+        <p className="mb-4 text-sm text-amber-300">Sail to Europe, or bring the ship alongside one of your colonies, before buying or selling.</p>
+      )}
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="border-b border-slate-600 text-slate-400 text-xs uppercase tracking-widest bg-slate-800/30">
@@ -36,9 +48,9 @@ export const MarketPanel: React.FC = () => {
                   <div className="flex justify-end items-center gap-2">
                     <button
                       onClick={() => { sellGood(selectedUnit.id, good, cargo); }}
-                      disabled={cargo === 0}
+                      disabled={cargo === 0 || !canTrade}
                       className={`px-3 py-1 text-xs font-bold rounded transition-colors cursor-pointer ${
-                        cargo > 0 ? 'bg-green-600 hover:bg-green-500 text-white shadow-sm' : 'bg-slate-700 text-slate-500 cursor-not-allowed opacity-50'
+                        cargo > 0 && canTrade ? 'bg-green-600 hover:bg-green-500 text-white shadow-sm' : 'bg-slate-700 text-slate-500 cursor-not-allowed opacity-50'
                       }`}
                     >
                       Sell All
@@ -55,9 +67,10 @@ export const MarketPanel: React.FC = () => {
                         }
                       />
                       <button
+                        disabled={!canTrade}
                         onClick={() => {
                           const amount = buyAmounts[good] ?? 0;
-                          if (amount > 0) buyGood(selectedUnit.id, good, amount);
+                          if (canTrade && amount > 0) buyGood(selectedUnit.id, good, amount);
                         }}
                         className="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded shadow-sm transition-colors cursor-pointer"
                       >

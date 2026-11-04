@@ -2,37 +2,48 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { useGameStore } from './gameStore';
 import { createPlayer } from '@shared/game/entities/Player';
 import { createUnit } from '@shared/game/entities/Unit';
-import { GoodType, UnitType, Nation } from '@shared/game/entities/types';
+import { GoodType, UnitType, Nation, TurnPhase } from '@shared/game/entities/types';
+
+const europePrices = {
+  [GoodType.FOOD]: 1,
+  [GoodType.LUMBER]: 2,
+  [GoodType.ORE]: 3,
+  [GoodType.TOBACCO]: 4,
+  [GoodType.COTTON]: 3,
+  [GoodType.FURS]: 5,
+  [GoodType.SUGAR]: 3,
+  [GoodType.RUM]: 8,
+  [GoodType.CLOTH]: 8,
+  [GoodType.COATS]: 10,
+  [GoodType.CIGARS]: 10,
+  [GoodType.TOOLS]: 5,
+  [GoodType.TRADE_GOODS]: 6,
+  [GoodType.MUSKETS]: 8,
+} as const;
+
+function seedShip(muskets = 0): void {
+  const player = createPlayer('p1', 'Player 1', true, 1000, Nation.ENGLAND);
+  const ship = createUnit('ship1', 'p1', 'Test Unit', UnitType.SHIP, 0, 0, 1);
+  ship.inEurope = true;
+  ship.cargo.set(GoodType.LUMBER, 50);
+  if (muskets > 0) {
+    ship.cargo.set(GoodType.MUSKETS, muskets);
+  }
+  player.units.push(ship);
+  useGameStore.getState().loadGameState({
+    players: [player],
+    currentPlayerId: 'p1',
+    turn: 1,
+    phase: TurnPhase.MOVEMENT,
+    europePrices: { ...europePrices },
+    map: [],
+  });
+  useGameStore.setState({ selectedUnitId: 'ship1' });
+}
 
 describe('Europe Trade', () => {
   beforeEach(() => {
-    // Reset store state before each test
-    const p1 = createPlayer('p1', 'Player 1', true, 1000, Nation.ENGLAND);
-    const ship = createUnit('ship1', 'p1', 'Test Unit', UnitType.SHIP, 0, 0, 1);
-    ship.cargo.set(GoodType.LUMBER, 50);
-    p1.units.push(ship);
-
-    useGameStore.setState({
-      players: [p1],
-      currentPlayerId: 'p1',
-      selectedUnitId: 'ship1',
-      europePrices: {
-        [GoodType.FOOD]: 1,
-        [GoodType.LUMBER]: 2,
-        [GoodType.ORE]: 3,
-        [GoodType.TOBACCO]: 4,
-        [GoodType.COTTON]: 3,
-        [GoodType.FURS]: 5,
-        [GoodType.SUGAR]: 3,
-        [GoodType.RUM]: 8,
-        [GoodType.CLOTH]: 8,
-        [GoodType.COATS]: 10,
-        [GoodType.CIGARS]: 10,
-        [GoodType.TOOLS]: 5,
-        [GoodType.TRADE_GOODS]: 6,
-        [GoodType.MUSKETS]: 8,
-      },
-    });
+    seedShip();
   });
 
   it('should sell goods and increase player gold', () => {
@@ -82,13 +93,8 @@ describe('Europe Trade', () => {
   });
 
   it('should recruit a SOLDIER if ship has 50 MUSKETS', () => {
+    seedShip(50);
     const { recruitUnit } = useGameStore.getState();
-
-    // Give ship 50 muskets
-    useGameStore.setState((state) => {
-        state.players[0]?.units[0]?.cargo.set(GoodType.MUSKETS, 50);
-    });
-
     recruitUnit(UnitType.SOLDIER);
 
     const { players } = useGameStore.getState();

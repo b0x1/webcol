@@ -1,5 +1,4 @@
 import * as Phaser from 'phaser';
-import { TileMap } from '../game/map/TileMap';
 import { TerrainRenderer } from '../game/map/TerrainRenderer';
 import { SpriteLoader } from '../game/utils/SpriteLoader';
 import { getReachableTilesForUnit, useGameStore, selectUnitById } from '@client/game/state/gameStore';
@@ -11,15 +10,6 @@ import { InputHandler } from '../game/map/InputHandler';
 import type { Position } from '@shared/game/entities/Position';
 
 export class WorldScene extends Phaser.Scene {
-  public tileMap!: TileMap;
-  private terrainRenderer!: TerrainRenderer;
-  private unitRenderer!: UnitRenderer;
-  private cameraManager!: CameraManager;
-  private inputHandler!: InputHandler;
-  private storeUnsubscribe: (() => void) | null = null;
-  private gameLoadedUnsubscribe: (() => void) | null = null;
-  private cameraJumpUnsubscribe: (() => void) | null = null;
-
   private readonly TILE_SIZE = MAP_CONSTANTS.TILE_SIZE;
 
   constructor() {
@@ -35,28 +25,28 @@ export class WorldScene extends Phaser.Scene {
 
   private reachableTiles: (Position & { cost: number })[] = [];
 
+
   create(): void {
     ['terrain', 'units', 'resources', 'other'].forEach((key) => {
       SpriteLoader.register(this, key);
     });
 
-    this.terrainRenderer = new TerrainRenderer(this, this.TILE_SIZE);
-    this.unitRenderer = new UnitRenderer(this, this.terrainRenderer, this.TILE_SIZE);
-    this.cameraManager = new CameraManager(this, this.terrainRenderer, this.TILE_SIZE);
-    this.inputHandler = new InputHandler(this, this.terrainRenderer, this.cameraManager);
+    const terrainRenderer = new TerrainRenderer(this, this.TILE_SIZE);
+    const unitRenderer = new UnitRenderer(this, terrainRenderer, this.TILE_SIZE);
+    const cameraManager = new CameraManager(this, terrainRenderer, this.TILE_SIZE);
+    const inputHandler = new InputHandler(this, terrainRenderer, cameraManager);
 
     const state = useGameStore.getState();
     const tiles = state.map;
     const mapWidth = tiles[0]?.length ?? 0;
     const mapHeight = tiles.length;
 
-    this.tileMap = new TileMap(mapWidth, mapHeight, tiles.map(row => row.map(t => t.terrainType)));
-    this.terrainRenderer.renderTileMap(tiles, [], state.players.flatMap(p => p.settlements));
-    this.cameraManager.setup(mapWidth, mapHeight);
+    terrainRenderer.renderTileMap(tiles, [], state.players.flatMap(p => p.settlements));
+    cameraManager.setup(mapWidth, mapHeight);
 
-    this.inputHandler.setup(mapWidth, mapHeight, () => this.reachableTiles);
+    inputHandler.setup(mapWidth, mapHeight, () => this.reachableTiles);
 
-    this.storeUnsubscribe = useGameStore.subscribe((state, prevState) => {
+    const storeUnsubscribe = useGameStore.subscribe((state, prevState) => {
       if (!this.scene.isActive('WorldScene')) return;
 
       const mapChanged = state.map !== prevState.map;
@@ -74,12 +64,12 @@ export class WorldScene extends Phaser.Scene {
 
       if (mapChanged || settlementsChanged) {
         const playerSettlements = state.players.flatMap(p => p.settlements);
-        this.terrainRenderer.renderTileMap(state.map, [], playerSettlements, mapChanged);
+        terrainRenderer.renderTileMap(state.map, [], playerSettlements, mapChanged);
       }
 
       // 2. Unit Rendering - Skip if no units or selections changed
       if (playersChanged || selectionChanged) {
-        this.unitRenderer.render(state.players, state.selectedUnitId);
+        unitRenderer.render(state.players, state.selectedUnitId);
       }
 
       // 3. Pathfinding / Reachable Highlights - Skip if selected unit or map hasn't changed
@@ -90,37 +80,46 @@ export class WorldScene extends Phaser.Scene {
         if (selectedUnit !== prevSelectedUnit || mapChanged) {
           if (selectedUnit) {
             this.reachableTiles = getReachableTilesForUnit(selectedUnit, state.map);
-            this.terrainRenderer.updateReachableHighlights(this.reachableTiles);
+            terrainRenderer.updateReachableHighlights(this.reachableTiles);
           } else {
             this.reachableTiles = [];
-            this.terrainRenderer.clearReachableHighlights();
+            terrainRenderer.clearReachableHighlights();
           }
         }
       }
     });
 
-    this.gameLoadedUnsubscribe = eventBus.on('gameLoaded', () => {
+    const gameLoadedUnsubscribe = eventBus.on('gameLoaded', () => {
       this.scene.restart();
     });
 
-    this.cameraJumpUnsubscribe = eventBus.on('cameraJump', (pos: Position) => {
-      this.cameraManager.centerOn(pos);
+    const cameraJumpUnsubscribe = eventBus.on('cameraJump', (pos: Position) => {
+      cameraManager.centerOn(pos);
     });
 
-    this.scale.on('resize', (gameSize: Phaser.Structs.Size) => {
+    const onResize = (gameSize: Phaser.Structs.Size): void => {
       this.cameras.main.setViewport(0, 0, gameSize.width, gameSize.height);
-      this.cameraManager.emitViewportUpdate();
-    });
+      cameraManager.emitViewportUpdate();
+    };
+    this.scale.on('resize', onResize);
 
-    this.unitRenderer.render(state.players, state.selectedUnitId);
-    this.cameraManager.emitViewportUpdate();
-  }
-  destroy(): void {
-    if (this.storeUnsubscribe) this.storeUnsubscribe();
-    if (this.gameLoadedUnsubscribe) this.gameLoadedUnsubscribe();
-    if (this.cameraJumpUnsubscribe) this.cameraJumpUnsubscribe();
-    this.inputHandler.destroy();
-    this.terrainRenderer.destroy();
-    this.unitRenderer.destroy();
+    let released = false;
+    const release = (): void => {
+      if (released) {
+        return;
+      }
+      released = true;
+      storeUnsubscribe();
+      gameLoadedUnsubscribe();
+      cameraJumpUnsubscribe();
+      this.scale.off('resize', onResize);
+      inputHandler.destroy();
+      terrainRenderer.destroy();
+      unitRenderer.destroy();
+    };
+    this.events.once('shutdown', release);
+
+    unitRenderer.render(state.players, state.selectedUnitId);
+    cameraManager.emitViewportUpdate();
   }
 }

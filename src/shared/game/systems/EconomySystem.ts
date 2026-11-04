@@ -1,6 +1,7 @@
 import type { Player } from '../entities/Player';
 import type { Unit } from '../entities/Unit';
 import type { GoodType } from '../entities/types';
+import { CARGO_CONSTANTS } from '../constants';
 
 /* eslint-disable-next-line @typescript-eslint/no-extraneous-class */
 export class EconomySystem {
@@ -33,8 +34,8 @@ export class EconomySystem {
     const goldGained = actualSellAmount * currentPrice;
     let newPrice = currentPrice;
 
-    if (actualSellAmount > 20) {
-      newPrice = Math.max(1, currentPrice - 1);
+    if (actualSellAmount > CARGO_CONSTANTS.PRICE_DROP_THRESHOLD) {
+      newPrice = Math.max(CARGO_CONSTANTS.MIN_PRICE, currentPrice - 1);
     }
 
     return { goldGained, newPrice, actualSellAmount };

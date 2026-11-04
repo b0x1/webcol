@@ -80,6 +80,21 @@ export class LocalGameServer {
         return EconomyCommandHandler.sellGood(this.state, command.unitId, command.good, command.amount);
       case 'buyGood':
         return EconomyCommandHandler.buyGood(this.state, command.unitId, command.good, command.amount);
+      case 'transferGood':
+        return EconomyCommandHandler.transferGood(
+          this.state,
+          command.unitId,
+          command.settlementId,
+          command.good,
+          command.amount,
+          command.direction,
+        );
+      case 'sailToEurope':
+        return EconomyCommandHandler.sailToEurope(this.state, command.unitId);
+      case 'returnFromEurope':
+        return EconomyCommandHandler.returnFromEurope(this.state, command.unitId);
+      case 'improveTile':
+        return UnitCommandHandler.improveTile(this.state, command.unitId);
       case 'recruitUnit':
         return EconomyCommandHandler.recruitUnit(this.state, command.unitType, command.fromUnitId, generateId);
       case 'tradeWithSettlement':

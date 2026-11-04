@@ -4,7 +4,7 @@ import type { CameraManager } from './CameraManager';
 import { eventBus } from '@client/game/state/EventBus';
 import { useGameStore } from '@client/game/state/gameStore';
 import { UnitType, Attitude } from '@shared/game/entities/types';
-import { isSame, type Position } from '@shared/game/entities/Position';
+import { isNeighbor, isSame, type Position } from '@shared/game/entities/Position';
 import { TraversalUtils } from '@shared/game/utils/TraversalUtils';
 import { CAMERA_CONSTANTS } from '@shared/game/constants';
 
@@ -152,11 +152,11 @@ export class InputHandler {
     const foreignUnitAtTile = TraversalUtils.findUnitsAt(otherPlayers, pos)[0];
     const foreignSettlementAtTile = TraversalUtils.findSettlementAt(otherPlayers, pos);
 
-    if (selectedUnit.type === UnitType.SOLDIER && foreignUnitAtTile ) {
+    const adjacent = isNeighbor(selectedUnit.position, pos);
+    if (selectedUnit.type === UnitType.SOLDIER && adjacent && (foreignUnitAtTile || foreignSettlementAtTile)) {
       eventBus.emit('combatRequested', pos);
-    } else if (selectedUnit.type === UnitType.SOLDIER && foreignSettlementAtTile ) {
-      eventBus.emit('combatRequested', foreignSettlementAtTile.position);
     } else if (selectedUnit.type === UnitType.COLONIST &&
+        adjacent &&
         foreignSettlementAtTile &&
         foreignSettlementAtTile.attitude !== Attitude.HOSTILE) {
       eventBus.emit('nativeTradeRequested', foreignSettlementAtTile.id);

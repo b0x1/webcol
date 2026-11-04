@@ -27,8 +27,8 @@ export class CombatSystem {
     const attackerBaseStrength = COMBAT_CONSTANTS.UNIT_STRENGTHS[attacker.type];
     let attackerModifier = 1.0;
 
-    if (attacker.type === UnitType.SOLDIER && (attacker.cargo.get(GoodType.MUSKETS) ?? 0) >= 10) {
-      attackerModifier *= 1.3;
+    if (attacker.type === UnitType.SOLDIER && (attacker.cargo.get(GoodType.MUSKETS) ?? 0) >= COMBAT_CONSTANTS.MUSKET_CARGO) {
+      attackerModifier *= COMBAT_CONSTANTS.MUSKET_ATTACK_MODIFIER;
     }
 
     const finalAttackerStrength = attackerBaseStrength * attackerModifier;
@@ -45,7 +45,7 @@ export class CombatSystem {
       if (defender.ownerId.startsWith('npc-')) {
         defenderBaseStrength = COMBAT_CONSTANTS.BASE_NATIVE_STRENGTH;
         if (defender.attitude === Attitude.HOSTILE) {
-          defenderModifier *= 1.2;
+          defenderModifier *= COMBAT_CONSTANTS.HOSTILE_DEFENDER_MODIFIER;
         }
       } else {
         defenderBaseStrength = COMBAT_CONSTANTS.BASE_COLONY_STRENGTH;
@@ -53,14 +53,14 @@ export class CombatSystem {
     }
 
     if (defenderTile.terrainType === TerrainType.HILLS) {
-      defenderModifier *= 1.5;
+      defenderModifier *= COMBAT_CONSTANTS.HILLS_DEFENDER_MODIFIER;
     }
     if (defenderTile.terrainType === TerrainType.MOUNTAINS) {
-      defenderModifier *= 2.0;
+      defenderModifier *= COMBAT_CONSTANTS.MOUNTAINS_DEFENDER_MODIFIER;
     }
 
     if (defenderSettlement?.buildings.includes(BuildingType.STOCKADE)) {
-      defenderModifier *= 1.5;
+      defenderModifier *= COMBAT_CONSTANTS.STOCKADE_DEFENDER_MODIFIER;
     }
 
     const finalDefenderStrength = defenderBaseStrength * defenderModifier;

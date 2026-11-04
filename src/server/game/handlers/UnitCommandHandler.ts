@@ -1,6 +1,8 @@
 import { isNeighbor, type Position } from '@shared/game/entities/Position';
+import { UnitType } from '@shared/game/entities/types';
 import { UnitSystem } from '@shared/game/systems/UnitSystem';
 import { MovementSystem } from '@shared/game/systems/MovementSystem';
+import { PIONEER_CLEARING } from '@shared/game/rules/PioneerRules';
 import { TraversalUtils } from '@shared/game/utils/TraversalUtils';
 import type { AuthoritativeGameState } from '@shared/game/AuthoritativeGameState';
 import type { GameEffect } from '@shared/game/protocol';
@@ -16,7 +18,7 @@ export class UnitCommandHandler {
 
     const unitIndex = player.units.findIndex((candidate) => candidate.id === unitId);
     const unit = player.units[unitIndex];
-    if (unit?.ownerId !== state.currentPlayerId) {
+    if (unit?.ownerId !== state.currentPlayerId || unit.inEurope === true) {
       return [];
     }
 
@@ -96,6 +98,32 @@ export class UnitCommandHandler {
 
     unit.isSkipping = true;
     return [];
+  }
+
+  static improveTile(state: AuthoritativeGameState, unitId: string): readonly GameEffect[] {
+    const player = this.selectCurrentPlayer(state);
+    if (!player) {
+      return [];
+    }
+
+    const unit = player.units.find((candidate) => candidate.id === unitId);
+    if (unit?.ownerId !== player.id) {
+      return [];
+    }
+
+    if (unit.type !== UnitType.PIONEER || unit.inEurope === true || unit.movesRemaining <= 0) {
+      return [];
+    }
+
+    const tile = state.map[unit.position.y]?.[unit.position.x];
+    const cleared = tile ? PIONEER_CLEARING[tile.terrainType] : undefined;
+    if (!tile || !cleared) {
+      return [];
+    }
+
+    tile.terrainType = cleared;
+    unit.movesRemaining = 0;
+    return [{ type: 'notification', message: `${unit.name} cleared the ground.` }];
   }
 
   private static selectCurrentPlayer(state: AuthoritativeGameState): Player | undefined {

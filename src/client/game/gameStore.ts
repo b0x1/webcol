@@ -14,31 +14,22 @@ import {
   selectSettlementAtPosition,
   selectUnitsAtPosition,
 } from '@client/game/state/selectors';
-import { createInitialAuthoritativeGameState } from '@server/game/createInitialAuthoritativeGameState';
-import { LocalGameServer } from '@server/game/LocalGameServer';
 import type { GameCommand } from '@shared/game/protocol';
 import { LocalGameTransport } from './LocalGameTransport';
 import { emitEffects } from './state/EffectEmitter';
-import { applyAuthoritativeState, extractAuthoritativeState } from './state/AuthoritativeStateMapper';
+import { applyAuthoritativeState } from './state/AuthoritativeStateMapper';
 
 enableMapSet();
 
-const transport = new LocalGameTransport(new LocalGameServer());
+const transport = new LocalGameTransport();
 const initialSnapshot = transport.getSnapshot();
-const baseState = createInitialAuthoritativeGameState();
 
 const dispatchCommand = (command: GameCommand): void => {
-  transport.replaceState(extractAuthoritativeState(useGameStore.getState()));
-  const message = transport.send(command);
-  useGameStore.setState((state) => {
-    applyAuthoritativeState(state, message.state);
-  });
-  emitEffects(message.effects, message.state, useGameStore);
+  transport.send(command);
 };
 
 export const useGameStore = create<GameState>()(
   immer((set, get) => ({
-    ...baseState,
     ...initialSnapshot,
     selectedUnitId: null,
     selectedSettlementId: null,
@@ -106,11 +97,7 @@ export const useGameStore = create<GameState>()(
         return;
       }
 
-      set((draft) => {
-        draft.selectedUnitId = nextUnit.id;
-        draft.selectedSettlementId = null;
-      });
-
+      get().selectUnit(nextUnit.id);
       eventBus.emit('cameraJump', {
         x: nextUnit.position.x,
         y: nextUnit.position.y,
@@ -178,6 +165,22 @@ export const useGameStore = create<GameState>()(
 
     buyGood: (unitId, good, amount) => {
       dispatchCommand({ type: 'buyGood', unitId, good, amount });
+    },
+
+    transferGood: (unitId, settlementId, good, amount, direction) => {
+      dispatchCommand({ type: 'transferGood', unitId, settlementId, good, amount, direction });
+    },
+
+    sailToEurope: (unitId) => {
+      dispatchCommand({ type: 'sailToEurope', unitId });
+    },
+
+    returnFromEurope: (unitId) => {
+      dispatchCommand({ type: 'returnFromEurope', unitId });
+    },
+
+    improveTile: (unitId) => {
+      dispatchCommand({ type: 'improveTile', unitId });
     },
 
     recruitUnit: (unitType) => {

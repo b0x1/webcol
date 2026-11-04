@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useGameStore, selectCurrentPlayer } from '@client/game/state/gameStore';
 import { useUIStore } from '@client/game/state/uiStore';
 import { UnitType } from '@shared/game/entities/types';
+import { canTradeWithEurope } from '@shared/game/rules/TradeRules';
 
 export const HUD: React.FC = () => {
   const turn = useGameStore((state) => state.turn);
@@ -27,6 +28,36 @@ export const HUD: React.FC = () => {
     state.isGameSetupModalOpen
   );
 
+  const openEurope = useCallback((): void => {
+    const state = useGameStore.getState();
+    const player = selectCurrentPlayer(state);
+    if (!player) {
+      return;
+    }
+
+    const selectedShip = player.units.find(
+      (unit) => unit.id === state.selectedUnitId && unit.type === UnitType.SHIP,
+    );
+    const ship = selectedShip ?? player.units.find((unit) => unit.type === UnitType.SHIP);
+    if (!ship) {
+      return;
+    }
+
+    if (ship.inEurope !== true) {
+      state.sailToEurope(ship.id);
+    }
+
+    const latest = useGameStore.getState();
+    const latestPlayer = selectCurrentPlayer(latest);
+    const latestShip = latestPlayer?.units.find((unit) => unit.id === ship.id);
+    if (!latestPlayer || !latestShip || !canTradeWithEurope(latestShip, latestPlayer, latest.map)) {
+      return;
+    }
+
+    latest.selectUnit(latestShip.id);
+    setEuropeScreenOpen(true);
+  }, [setEuropeScreenOpen]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isMainMenuOpen || isAnyModalOpen) return;
@@ -36,7 +67,7 @@ export const HUD: React.FC = () => {
         setSaveModalOpen(true);
       } else if (e.key.toLowerCase() === 'e' && hasShip) {
         e.preventDefault();
-        setEuropeScreenOpen(true);
+        openEurope();
       } else if (e.key.toLowerCase() === 'r') {
         e.preventDefault();
         setReportsModalOpen(true);
@@ -45,7 +76,7 @@ export const HUD: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => { window.removeEventListener('keydown', handleKeyDown); };
-  }, [isMainMenuOpen, isAnyModalOpen, hasShip, setSaveModalOpen, setEuropeScreenOpen, setReportsModalOpen]);
+  }, [isMainMenuOpen, isAnyModalOpen, hasShip, openEurope, setSaveModalOpen, setReportsModalOpen]);
 
   if (isMainMenuOpen) return null;
 
@@ -74,7 +105,7 @@ export const HUD: React.FC = () => {
       <div className="flex items-center gap-8 font-bold uppercase tracking-widest text-xs">
         <button
           className={`transition-colors py-1 px-3 rounded border focus-visible:ring-2 focus-visible:ring-blue-500 outline-none ${hasShip ? 'cursor-pointer hover:text-blue-400 hover:border-blue-400/30 bg-blue-600/10 border-transparent' : 'cursor-not-allowed opacity-30 border-transparent'}`}
-          onClick={() => { setEuropeScreenOpen(true); }}
+          onClick={openEurope}
           disabled={!hasShip}
           aria-label="Sail to Europe (E)"
           title={!hasShip ? "You need a Ship to sail to Europe" : "Sail to Europe (E)"}

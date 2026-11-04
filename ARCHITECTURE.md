@@ -6,17 +6,17 @@ Browser turn-based strategy game. Colonisation genre. See AGENTS.md for rules. S
 
 ## Stack
 
-| Concern                         | Library           | Version |
-|---------------------------------|-------------------|---------|
-| Game render, input, scenes      | Phaser            | 3.90    |
-| UI panels, modals, HUD          | React             | 19      |
-| React optimisation              | React Compiler    | 1.x     |
-| Phaser ↔ React state bridge     | Zustand           | 5       |
-| Language                        | TypeScript strict | 6       |
-| Styling                         | Tailwind CSS      | 4       |
-| Build and dev server            | Vite              | 8       |
-| Unit tests                      | Vitest            | 4       |
-| Noise generation                | simplex-noise     | 4       |
+| Concern                         | Library           |
+|---------------------------------|-------------------|
+| Game render, input, scenes      | Phaser            |
+| UI panels, modals, HUD          | React             |
+| React optimisation              | React Compiler    |
+| Phaser ↔ React state bridge     | Zustand           |
+| Language                        | TypeScript strict |
+| Styling                         | Tailwind CSS      |
+| Build and dev server            | Vite              |
+| Unit tests                      | Vitest            |
+| Noise generation                | simplex-noise     |
 
 ---
 

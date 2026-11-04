@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useGameStore } from '@client/game/state/gameStore';
 import { useUIStore } from '@client/game/state/uiStore';
 import { SaveManager, type SaveMeta } from '@client/game/state/SaveManager';
-import { eventBus } from '@client/game/state/EventBus';
 import { AutosaveSection } from './SaveLoadModal/components/AutosaveSection';
 import { ManualSavesSection } from './SaveLoadModal/components/ManualSavesSection';
 
@@ -34,7 +33,6 @@ export const SaveLoadModal: React.FC = () => {
     const loadedState = SaveManager.load(slotName);
     if (loadedState) {
       loadGameState(loadedState);
-      eventBus.emit('gameLoaded');
     }
   };
 

@@ -6,6 +6,8 @@ export const MAP_CONSTANTS = {
   NATIVE_SETTLEMENT_MAX_COUNT: 10,
   NATIVE_SETTLEMENT_MIN_DISTANCE: 8,
   NATIVE_SETTLEMENT_EDGE_MARGIN: 8,
+  RESOURCE_CHANCE: 0.05,
+  RESOURCE_CHANCE_COMMON: 0.1,
 } as const;
 
 export const UNIT_CONSTANTS = {
@@ -34,6 +36,29 @@ export const COLONY_CONSTANTS = {
   FOOD_CONSUMPTION_PER_CITIZEN: 2,
   FOOD_GROWTH_THRESHOLD: 200,
   EXPERT_PROMOTION_TURNS: 20,
+  SCHOOLHOUSE_PROMOTION_TURNS: 10,
+  BUILDING_BONUS: 2,
+  RESOURCE_BONUS: 2,
+  FALLBACK_BUILD_HAMMERS: 40,
+  VILLAGE_FOOD_PER_POP: 2,
+  STABLES_MOVE_BONUS: 1,
+} as const;
+
+export const CARGO_CONSTANTS = {
+  SHIP_HOLD: 100,
+  LAND_HOLD: 20,
+  PRICE_DROP_THRESHOLD: 20,
+  MIN_PRICE: 1,
+} as const;
+
+export const TRADE_CONSTANTS = {
+  GIFT_CAP: 20,
+  FOOD_FALLBACK: 10,
+} as const;
+
+export const RECRUITMENT_CONSTANTS = {
+  SPAIN_SOLDIER_COST: 600,
+  SOLDIER_MUSKETS: 50,
 } as const;
 
 export interface ResourceCost {
@@ -53,6 +78,7 @@ export const BUILDING_COSTS: Record<string, ResourceCost> = {
   TOBACCONISTS_SHOP: { hammers: 64, tools: 20 },
   TAILORS_SHOP: { hammers: 64, tools: 20 },
   ARMORY: { hammers: 52, tools: 40 },
+  STABLES: { hammers: 64, tools: 20 },
 } as const;
 
 export const UNIT_BUILD_COSTS: Record<string, ResourceCost & { muskets: number }> = {
@@ -77,6 +103,12 @@ export const COMBAT_CONSTANTS = {
   },
   BASE_NATIVE_STRENGTH: 2,
   BASE_COLONY_STRENGTH: 1,
+  MUSKET_CARGO: 10,
+  MUSKET_ATTACK_MODIFIER: 1.3,
+  HOSTILE_DEFENDER_MODIFIER: 1.2,
+  HILLS_DEFENDER_MODIFIER: 1.5,
+  MOUNTAINS_DEFENDER_MODIFIER: 2,
+  STOCKADE_DEFENDER_MODIFIER: 1.5,
 } as const;
 
 export interface NationData {

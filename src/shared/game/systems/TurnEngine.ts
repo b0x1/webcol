@@ -2,8 +2,8 @@ import type { Player } from '../entities/Player';
 import type { Tile } from '../entities/Tile';
 import type { Settlement } from '../entities/Settlement';
 import type { Unit } from '../entities/Unit';
-import { GoodType, UnitType, BuildingType } from '../entities/types';
-import { BUILDING_COSTS, COLONY_CONSTANTS, UNIT_BUILD_COSTS } from '../constants';
+import { Culture, GoodType, UnitType, BuildingType } from '../entities/types';
+import { BUILDING_COSTS, COLONY_CONSTANTS, NATION_BONUSES, UNIT_BUILD_COSTS, UNIT_CONSTANTS } from '../constants';
 import { createUnit } from '../entities/Unit';
 import { calculatePopulation } from '../entities/Settlement';
 import { ProductionSystem } from './ProductionSystem';
@@ -29,12 +29,16 @@ export class TurnEngine {
     players: Player[],
     map: Tile[][],
     namingStats: NamingStats,
-    generateId: (prefix: string) => string
+    generateId: (prefix: string) => string,
+    ownerId?: string,
   ): TurnEngineResult {
     let currentNamingStats = { ...namingStats };
     const effects: GameEffect[] = [];
 
     const updatedPlayers = players.map((player) => {
+      if (ownerId !== undefined && player.id !== ownerId) {
+        return player;
+      }
       const newPlayerUnits = [...player.units];
       const newSettlements = player.settlements.map((settlement) => {
         const newSettlement: Settlement = {
@@ -69,6 +73,19 @@ export class TurnEngine {
     return { players: updatedPlayers, namingStats: currentNamingStats, effects };
   }
 
+  static produceNativeGoods(players: readonly Player[]): void {
+    players.forEach((player) => {
+      if (NATION_BONUSES[player.nation]?.culture !== 'NATIVE') {
+        return;
+      }
+
+      player.settlements.forEach((settlement) => {
+        const food = settlement.population * COLONY_CONSTANTS.VILLAGE_FOOD_PER_POP;
+        settlement.goods.set(GoodType.FOOD, (settlement.goods.get(GoodType.FOOD) ?? 0) + food);
+      });
+    });
+  }
+
   private static processSettlementTurn(
     settlement: Settlement,
     player: Player,
@@ -80,7 +97,10 @@ export class TurnEngine {
   ): NamingStats {
     let currentNamingStats = namingStats;
 
-    settlement.population = calculatePopulation(settlement);
+    const workers = calculatePopulation(settlement);
+    settlement.population = settlement.culture === Culture.NATIVE
+      ? Math.max(settlement.population, workers)
+      : workers;
 
     this.promoteExperts(settlement, effects);
 
@@ -109,7 +129,7 @@ export class TurnEngine {
         UnitType.COLONIST,
         settlement.position.x,
         settlement.position.y,
-        3
+        UNIT_CONSTANTS.DEFAULT_MOVES,
       );
       playerUnits.push(newUnit);
       effects.push({ type: 'notification', message: `An intellectual has joined the cause in ${settlement.name}!` });
@@ -130,7 +150,10 @@ export class TurnEngine {
   private static promoteExperts(settlement: Settlement, effects: GameEffect[]): void {
     settlement.units.forEach((unit) => {
       unit.turnsInJob += 1;
-      if (unit.turnsInJob >= COLONY_CONSTANTS.EXPERT_PROMOTION_TURNS && !unit.expertise) {
+      const promotionTurns = settlement.buildings.includes(BuildingType.SCHOOLHOUSE)
+        ? COLONY_CONSTANTS.SCHOOLHOUSE_PROMOTION_TURNS
+        : COLONY_CONSTANTS.EXPERT_PROMOTION_TURNS;
+      if (unit.turnsInJob >= promotionTurns && !unit.expertise) {
         if (typeof unit.occupation === 'string') {
           unit.expertise = unit.occupation;
           effects.push({ type: 'notification', message: `${unit.type} has become an expert ${unit.expertise}!` });
@@ -191,7 +214,7 @@ export class TurnEngine {
         currentItem as UnitType,
         settlement.position.x,
         settlement.position.y,
-        3
+        UNIT_CONSTANTS.DEFAULT_MOVES,
       );
       settlement.units.push(newUnit);
       playerUnits.push(newUnit);
@@ -209,10 +232,17 @@ export class TurnEngine {
     isBuilding: boolean
   ): { hammers: number; tools: number; muskets: number } {
     if (isBuilding) {
-      const cost = (BUILDING_COSTS as Record<string, { hammers: number; tools?: number }>)[item as string] ?? { hammers: 40, tools: 0 };
+      const cost = (BUILDING_COSTS as Record<string, { hammers: number; tools?: number }>)[item as string] ?? {
+        hammers: COLONY_CONSTANTS.FALLBACK_BUILD_HAMMERS,
+        tools: 0,
+      };
       return { hammers: cost.hammers, tools: cost.tools ?? 0, muskets: 0 };
     }
-    const cost = (UNIT_BUILD_COSTS as Record<string, { hammers: number; tools?: number; muskets?: number }>)[item as string] ?? { hammers: 40, tools: 0, muskets: 0 };
+    const cost = (UNIT_BUILD_COSTS as Record<string, { hammers: number; tools?: number; muskets?: number }>)[item as string] ?? {
+      hammers: COLONY_CONSTANTS.FALLBACK_BUILD_HAMMERS,
+      tools: 0,
+      muskets: 0,
+    };
     return { hammers: cost.hammers, tools: cost.tools ?? 0, muskets: cost.muskets ?? 0 };
   }
 
@@ -270,7 +300,7 @@ export class TurnEngine {
         UnitType.COLONIST,
         settlement.position.x,
         settlement.position.y,
-        3
+        UNIT_CONSTANTS.DEFAULT_MOVES,
       );
       playerUnits.push(newColonist);
       effects.push({ type: 'notification', message: `A new colonist has been born in ${settlement.name}!` });

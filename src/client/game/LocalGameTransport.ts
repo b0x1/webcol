@@ -1,6 +1,6 @@
 import type { AuthoritativeGameState } from '@shared/game/AuthoritativeGameState';
 import type { GameCommand, GameStateMessage } from '@shared/game/protocol';
-import type { LocalGameServer } from '@server/game/LocalGameServer';
+import { LocalGameServer } from '@server/game/LocalGameServer';
 
 type Listener = (message: GameStateMessage) => void;
 
@@ -12,7 +12,7 @@ export interface GameTransport {
 }
 
 export class LocalGameTransport implements GameTransport {
-  constructor(private readonly server: LocalGameServer) {}
+  private readonly server = new LocalGameServer();
 
   send(command: GameCommand): GameStateMessage {
     return this.server.dispatch(command);

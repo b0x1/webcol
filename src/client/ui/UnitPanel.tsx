@@ -12,7 +12,9 @@ import {
   selectIsUnitAdjacentToAnySettlement,
 } from '@client/game/state/gameStore';
 import { useUIStore } from '@client/game/state/uiStore';
-import { UnitType } from '@shared/game/entities/types';
+import { GoodType, UnitType } from '@shared/game/entities/types';
+import { settlementBeside } from '@shared/game/rules/TradeRules';
+import { PIONEER_CLEARING } from '@shared/game/rules/PioneerRules';
 import { UnitSelector } from './UnitPanel/components/UnitSelector';
 import { ResourceIcon } from './ResourceIcon';
 import type { Unit } from '@shared/game/entities/Unit';
@@ -25,6 +27,9 @@ export const UnitPanel: React.FC = () => {
   const skipUnit = useGameStore((state) => state.skipUnit);
   const selectUnit = useGameStore((state) => state.selectUnit);
   const foundSettlement = useGameStore((state) => state.foundSettlement);
+  const transferGood = useGameStore((state) => state.transferGood);
+  const improveTile = useGameStore((state) => state.improveTile);
+  const map = useGameStore((state) => state.map);
 
   const isMainMenuOpen = useUIStore((state) => state.isMainMenuOpen);
   const isAnyModalOpen = useUIStore((state) =>
@@ -66,7 +71,8 @@ export const UnitPanel: React.FC = () => {
         e.preventDefault();
         skipUnit(selectedUnitId);
       } else if (e.key.toLowerCase() === 'b' && unit) {
-        if (unit.type === UnitType.COLONIST || unit.type === UnitType.VILLAGER) {
+        const canFound = (unit.type === UnitType.COLONIST || unit.type === UnitType.VILLAGER) && !isAdjacentToSettlement;
+        if (canFound) {
           e.preventDefault();
           foundSettlement(unit.id);
         }
@@ -74,7 +80,7 @@ export const UnitPanel: React.FC = () => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => { window.removeEventListener('keydown', handleKeyDown); };
-  }, [selectedUnitId, unit, skipUnit, isMainMenuOpen, isAnyModalOpen, foundSettlement]);
+  }, [selectedUnitId, unit, skipUnit, isMainMenuOpen, isAnyModalOpen, foundSettlement, isAdjacentToSettlement]);
 
   const unitsForTileSelector = useMemo((): readonly Unit[] => {
     if (!selectedTile) return EMPTY_TILE_UNITS;
@@ -106,6 +112,10 @@ export const UnitPanel: React.FC = () => {
   const isReadOnly = unit.ownerId !== player?.id;
 
   const canBuildSettlement = (unit.type === UnitType.COLONIST || unit.type === UnitType.VILLAGER) && !isAdjacentToSettlement;
+  const besideSettlement = player ? settlementBeside(unit, player.settlements) : undefined;
+  const occupiedTile = map[unit.position.y]?.[unit.position.x];
+  const clearedTerrain = occupiedTile ? PIONEER_CLEARING[occupiedTile.terrainType] : undefined;
+  const canClear = unit.type === UnitType.PIONEER && clearedTerrain !== undefined && unit.movesRemaining > 0 && !isReadOnly;
 
   return (
     <div className="absolute bottom-5 left-5 w-64 bg-black/80 text-white p-5 rounded-xl pointer-events-auto shadow-2xl border border-white/10 backdrop-blur-sm font-sans">
@@ -142,8 +152,53 @@ export const UnitPanel: React.FC = () => {
         )}
       </div>
 
+      {!isReadOnly && besideSettlement && (
+        <div className="mb-4 space-y-1">
+          <span className="block text-[10px] font-black uppercase tracking-widest text-slate-500">Colony hold</span>
+          {Object.values(GoodType).map((good) => {
+            const stock = besideSettlement.inventory.get(good) ?? 0;
+            const carried = unit.cargo.get(good) ?? 0;
+            if (stock === 0 && carried === 0) {
+              return null;
+            }
+            return (
+              <div key={good} className="flex items-center justify-between gap-1 text-[10px]">
+                <span className="capitalize text-slate-300">{good.replace('_', ' ').toLowerCase()}</span>
+                <span className="flex gap-1">
+                  <button
+                    type="button"
+                    disabled={stock === 0}
+                    onClick={() => { transferGood(unit.id, besideSettlement.id, good, stock, 'load'); }}
+                    className="px-1.5 py-0.5 bg-slate-700 rounded disabled:opacity-40 cursor-pointer"
+                  >
+                    Load
+                  </button>
+                  <button
+                    type="button"
+                    disabled={carried === 0}
+                    onClick={() => { transferGood(unit.id, besideSettlement.id, good, carried, 'unload'); }}
+                    className="px-1.5 py-0.5 bg-slate-700 rounded disabled:opacity-40 cursor-pointer"
+                  >
+                    Unload
+                  </button>
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {!isReadOnly && (
         <div className="space-y-2">
+          {canClear && (
+            <button
+              type="button"
+              onClick={() => { improveTile(unit.id); }}
+              className="w-full py-2.5 bg-amber-700 hover:bg-amber-600 text-white font-black uppercase tracking-widest text-xs rounded cursor-pointer"
+            >
+              Clear ground
+            </button>
+          )}
           {(unit.type === UnitType.COLONIST || unit.type === UnitType.VILLAGER) && (
             <div className="relative group/tooltip">
               <button

@@ -42,7 +42,19 @@ describe('ForeignInteractionSystem', () => {
     expect(updatedUnit.cargo.has(GoodType.TRADE_GOODS)).toBe(false);
     expect(updatedUnit.cargo.get(goodReceived)).toBeGreaterThan(0);
     expect(updatedSettlement.goods.get(GoodType.TRADE_GOODS)).toBe(50);
-    expect(updatedSettlement.attitude).toBe(Attitude.NEUTRAL);
+    expect(updatedSettlement.attitude).toBe(Attitude.FRIENDLY);
+  });
+
+  it('should improve a neutral attitude when a gift is offered', () => {
+    const mockSettlement = getMockSettlement();
+    mockSettlement.attitude = Attitude.NEUTRAL;
+    const { updatedSettlement } = ForeignInteractionSystem.trade(
+      mockSettlement,
+      getMockUnit(),
+      GoodType.TRADE_GOODS,
+      () => 0,
+    );
+    expect(updatedSettlement.attitude).toBe(Attitude.FRIENDLY);
   });
 
   it('should convert colonist to pioneer during learning', () => {
@@ -55,7 +67,8 @@ describe('ForeignInteractionSystem', () => {
     );
 
     expect(updatedUnit.type).toBe(UnitType.PIONEER);
-    expect(updatedSettlement.attitude).toBe(Attitude.NEUTRAL);
+    expect(updatedUnit.expertise).toBe('LUMBERJACK');
+    expect(updatedSettlement.attitude).toBe(Attitude.FRIENDLY);
   });
 
   it('should throw error when non-colonist tries to learn', () => {
@@ -81,8 +94,8 @@ describe('ForeignInteractionSystem', () => {
   });
 
   it('should shift attitude correctly', () => {
-    expect(ForeignInteractionSystem.shiftAttitude(Attitude.FRIENDLY)).toBe(Attitude.NEUTRAL);
-    expect(ForeignInteractionSystem.shiftAttitude(Attitude.NEUTRAL)).toBe(Attitude.HOSTILE);
-    expect(ForeignInteractionSystem.shiftAttitude(Attitude.HOSTILE)).toBe(Attitude.HOSTILE);
+    expect(ForeignInteractionSystem.shiftAttitude(Attitude.HOSTILE)).toBe(Attitude.NEUTRAL);
+    expect(ForeignInteractionSystem.shiftAttitude(Attitude.NEUTRAL)).toBe(Attitude.FRIENDLY);
+    expect(ForeignInteractionSystem.shiftAttitude(Attitude.FRIENDLY)).toBe(Attitude.FRIENDLY);
   });
 });
