@@ -52,6 +52,7 @@ export class EconomyCommandHandler {
     unit.cargo.set(good, (unit.cargo.get(good) ?? 0) - actualSellAmount);
     player.gold += goldGained;
     state.europePrices[good] = newPrice;
+    state.soldOnTurn[good] = state.turn;
     return [];
   }
 

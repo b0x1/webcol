@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createInitialAuthoritativeGameState } from '@server/game/createInitialAuthoritativeGameState';
 import { TurnCommandHandler } from '@server/game/handlers/TurnCommandHandler';
-import { COLONY_CONSTANTS } from '@shared/game/constants';
+import { COLONY_CONSTANTS, VICTORY_CONSTANTS } from '@shared/game/constants';
 import { createPlayer } from '@shared/game/entities/Player';
 import { createSettlement } from '@shared/game/entities/Settlement';
 import { createTile } from '@shared/game/entities/Tile';
@@ -46,7 +46,7 @@ describe('TurnCommandHandler', () => {
     expect(state.turn).toBe(2);
   });
 
-  it('skips native seats and still feeds their villages once per round', () => {
+  it('feeds a native seat during that seat\'s production phase', () => {
     const human = createPlayer('p1', 'Human', true, 0, Nation.ENGLAND);
     const villageOwner = createPlayer('ai-native-AZTEC', 'Aztec', false, 0, Nation.AZTEC);
     const village = createSettlement('v1', villageOwner.id, 'Village', 1, 1, 4, 'NATIVE', 'STATE');
@@ -64,5 +64,77 @@ describe('TurnCommandHandler', () => {
     expect(state.turn).toBe(2);
     expect(village.population).toBe(4);
     expect(village.goods.get(GoodType.FOOD)).toBe(4 * COLONY_CONSTANTS.VILLAGE_FOOD_PER_POP);
+  });
+
+  it('founds for a non-human seat during its movement phase', () => {
+    const human = createPlayer('p1', 'Human', true, 0, Nation.ENGLAND);
+    const ai = createPlayer('ai', 'Portugal', false, 0, Nation.PORTUGAL);
+    ai.units.push(createUnit('u-ai', 'ai', 'Settler', UnitType.COLONIST, 3, 3, 1));
+
+    const state = createInitialAuthoritativeGameState();
+    state.players = [human, ai];
+    state.currentPlayerId = 'p1';
+    state.phase = TurnPhase.MOVEMENT;
+    state.map = grasslandMap();
+
+    TurnCommandHandler.endTurn(state, () => 0.5, (prefix) => `${prefix}-1`);
+
+    const seated = state.players.find((player) => player.id === 'ai');
+    expect(seated?.settlements).toHaveLength(1);
+    expect(seated?.units).toHaveLength(0);
+    expect(state.currentPlayerId).toBe('p1');
+  });
+
+  it('raises unsold Europe prices once on the human trade phase', () => {
+    const human = createPlayer('p1', 'Human', true, 0, Nation.ENGLAND);
+    const ai = createPlayer('ai', 'Portugal', false, 0, Nation.PORTUGAL);
+    const state = createInitialAuthoritativeGameState();
+    state.players = [human, ai];
+    state.currentPlayerId = 'p1';
+    state.phase = TurnPhase.MOVEMENT;
+    state.map = grasslandMap();
+    state.soldOnTurn[GoodType.FOOD] = state.turn;
+    const food = state.europePrices[GoodType.FOOD];
+    const ore = state.europePrices[GoodType.ORE];
+
+    TurnCommandHandler.endTurn(state, () => 0.5, (prefix) => `${prefix}-1`);
+
+    expect(state.europePrices[GoodType.FOOD]).toBe(food);
+    expect(state.europePrices[GoodType.ORE]).toBe(ore + 1);
+  });
+
+  it('ends the game when every human colony is empty and no colonist can work', () => {
+    const human = createPlayer('p1', 'Human', true, 0, Nation.ENGLAND);
+    human.settlements.push(createSettlement('c1', 'p1', 'Home', 2, 2, 1, 'EUROPEAN', 'STATE'));
+    const state = createInitialAuthoritativeGameState();
+    state.players = [human];
+    state.currentPlayerId = 'p1';
+    state.phase = TurnPhase.MOVEMENT;
+    state.map = grasslandMap();
+
+    const first = TurnCommandHandler.endTurn(state, () => 0.5, (prefix) => `${prefix}-1`);
+    const second = TurnCommandHandler.endTurn(state, () => 0.5, (prefix) => `${prefix}-1`);
+
+    expect(state.outcome).toBe('loss');
+    expect(first.some((effect) => effect.type === 'gameEnded' && effect.result === 'loss')).toBe(true);
+    expect(second.some((effect) => effect.type === 'gameEnded')).toBe(false);
+  });
+
+  it('ends the game when the human reaches the gold and colony goal', () => {
+    const human = createPlayer('p1', 'Human', true, VICTORY_CONSTANTS.GOLD, Nation.ENGLAND);
+    human.settlements.push(
+      createSettlement('c1', 'p1', 'One', 0, 0, 1, 'EUROPEAN', 'STATE'),
+      createSettlement('c2', 'p1', 'Two', 2, 2, 1, 'EUROPEAN', 'STATE'),
+      createSettlement('c3', 'p1', 'Three', 4, 4, 1, 'EUROPEAN', 'STATE'),
+    );
+    const state = createInitialAuthoritativeGameState();
+    state.players = [human];
+    state.currentPlayerId = 'p1';
+    state.phase = TurnPhase.MOVEMENT;
+    state.map = grasslandMap();
+
+    TurnCommandHandler.endTurn(state, () => 0.5, (prefix) => `${prefix}-1`);
+
+    expect(state.outcome).toBe('goal');
   });
 });

@@ -43,6 +43,14 @@ export const emitEffects = (
         SaveManager.save(snapshot, 'autosave');
         eventBus.emit('notification', 'Auto-saved');
         break;
+      case 'gameEnded':
+        eventBus.emit(
+          'notification',
+          effect.result === 'goal'
+            ? 'The treasury and the colonies have reached the goal.'
+            : 'The colonies have no food and no colonist left to work a field.',
+        );
+        break;
     }
   });
 };

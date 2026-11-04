@@ -73,16 +73,15 @@ export class TurnEngine {
     return { players: updatedPlayers, namingStats: currentNamingStats, effects };
   }
 
-  static produceNativeGoods(players: readonly Player[]): void {
-    players.forEach((player) => {
-      if (NATION_BONUSES[player.nation]?.culture !== 'NATIVE') {
-        return;
-      }
+  static produceNativeGoods(players: readonly Player[], ownerId: string): void {
+    const player = players.find((candidate) => candidate.id === ownerId);
+    if (!player || NATION_BONUSES[player.nation]?.culture !== 'NATIVE') {
+      return;
+    }
 
-      player.settlements.forEach((settlement) => {
-        const food = settlement.population * COLONY_CONSTANTS.VILLAGE_FOOD_PER_POP;
-        settlement.goods.set(GoodType.FOOD, (settlement.goods.get(GoodType.FOOD) ?? 0) + food);
-      });
+    player.settlements.forEach((settlement) => {
+      const food = settlement.population * COLONY_CONSTANTS.VILLAGE_FOOD_PER_POP;
+      settlement.goods.set(GoodType.FOOD, (settlement.goods.get(GoodType.FOOD) ?? 0) + food);
     });
   }
 

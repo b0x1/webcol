@@ -8,7 +8,7 @@ import type {
   UnitType,
 } from '@shared/game/entities/types';
 import type { CombatResult } from '@shared/game/systems/CombatSystem';
-import type { AuthoritativeGameState } from './AuthoritativeGameState';
+import type { AuthoritativeGameState, GameOutcome } from './AuthoritativeGameState';
 
 export type MapSize = 'Small' | 'Medium' | 'Large';
 
@@ -59,7 +59,8 @@ export type GameEffect =
   | { type: 'gameStarted' }
   | { type: 'gameLoaded' }
   | { type: 'returnToMainMenu' }
-  | { type: 'autosaveRequested' };
+  | { type: 'autosaveRequested' }
+  | { type: 'gameEnded'; result: Exclude<GameOutcome, 'playing'> };
 
 export interface GameStateMessage {
   type: 'state';

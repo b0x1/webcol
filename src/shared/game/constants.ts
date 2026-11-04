@@ -49,6 +49,12 @@ export const CARGO_CONSTANTS = {
   LAND_HOLD: 20,
   PRICE_DROP_THRESHOLD: 20,
   MIN_PRICE: 1,
+  MAX_PRICE: 20,
+} as const;
+
+export const VICTORY_CONSTANTS = {
+  GOLD: 2000,
+  COLONIES: 3,
 } as const;
 
 export const TRADE_CONSTANTS = {

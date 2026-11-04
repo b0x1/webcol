@@ -23,6 +23,8 @@ export function createInitialAuthoritativeGameState(): AuthoritativeGameState {
       [GoodType.TRADE_GOODS]: 6,
       [GoodType.MUSKETS]: 12,
     },
+    soldOnTurn: {},
+    outcome: 'playing',
     map: [],
     namingStats: {},
   };

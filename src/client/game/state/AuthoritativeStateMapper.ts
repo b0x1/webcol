@@ -10,6 +10,8 @@ export const applyAuthoritativeState = (
   state.turn = snapshot.turn;
   state.phase = snapshot.phase;
   state.europePrices = snapshot.europePrices;
+  state.soldOnTurn = snapshot.soldOnTurn;
+  state.outcome = snapshot.outcome;
   state.map = snapshot.map;
   state.namingStats = snapshot.namingStats;
 };
@@ -20,6 +22,8 @@ export const extractAuthoritativeState = (state: GameState): AuthoritativeGameSt
   turn: state.turn,
   phase: state.phase,
   europePrices: state.europePrices,
+  soldOnTurn: state.soldOnTurn,
+  outcome: state.outcome,
   map: state.map,
   namingStats: state.namingStats,
 });

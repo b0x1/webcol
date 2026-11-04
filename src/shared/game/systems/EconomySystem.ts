@@ -1,6 +1,6 @@
 import type { Player } from '../entities/Player';
 import type { Unit } from '../entities/Unit';
-import type { GoodType } from '../entities/types';
+import { GoodType } from '../entities/types';
 import { CARGO_CONSTANTS } from '../constants';
 
 /* eslint-disable-next-line @typescript-eslint/no-extraneous-class */
@@ -59,5 +59,20 @@ export class EconomySystem {
       cost,
       canAfford: playerGold >= cost
     };
+  }
+
+  static recoverUnsoldPrices(
+    prices: Record<GoodType, number>,
+    soldOnTurn: Partial<Record<GoodType, number>>,
+    turn: number,
+  ): Record<GoodType, number> {
+    const next = { ...prices };
+    for (const good of Object.values(GoodType)) {
+      if (soldOnTurn[good] === turn) {
+        continue;
+      }
+      next[good] = Math.min(CARGO_CONSTANTS.MAX_PRICE, next[good] + 1);
+    }
+    return next;
   }
 }
