@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createInitialAuthoritativeGameState } from '@server/game/createInitialAuthoritativeGameState';
 import { EconomyCommandHandler } from '@server/game/handlers/EconomyCommandHandler';
+import { VoyageCommandHandler } from '@server/game/handlers/VoyageCommandHandler';
 import { createPlayer } from '@shared/game/entities/Player';
 import { createSettlement } from '@shared/game/entities/Settlement';
 import { createTile } from '@shared/game/entities/Tile';
@@ -45,5 +46,39 @@ describe('EconomyCommandHandler', () => {
     ship.inEurope = true;
     EconomyCommandHandler.sellGood(state, 'ship', GoodType.LUMBER, 10);
     expect(player.gold).toBe(120);
+  });
+
+  it('lands a returning ship on water beside the nearest colony', () => {
+    const player = createPlayer('p1', 'Human', true, 0, Nation.ENGLAND);
+    const first = createSettlement('s1', 'p1', 'First', 0, 0, 1, 'EUROPEAN', 'STATE');
+    const second = createSettlement('s2', 'p1', 'Second', 4, 0, 1, 'EUROPEAN', 'STATE');
+    const ship = createUnit('ship', 'p1', 'Ship', UnitType.SHIP, 3, 0, 0);
+    const colonist = createUnit('colonist', 'p1', 'Colonist', UnitType.COLONIST, 1, 1, 1);
+    const otherShip = createUnit('other', 'p1', 'Other', UnitType.SHIP, 0, 1, 0);
+    ship.inEurope = true;
+    colonist.inEurope = true;
+    otherShip.inEurope = true;
+    player.settlements.push(first, second);
+    player.units.push(ship, colonist, otherShip);
+
+    const row = (y: number, terrains: TerrainType[]) =>
+      terrains.map((terrain, x) => createTile(`${x}-${y}`, x, y, terrain, 1));
+    const state = createInitialAuthoritativeGameState();
+    state.players = [player];
+    state.currentPlayerId = 'p1';
+    state.map = [
+      row(0, [TerrainType.PLAINS, TerrainType.PLAINS, TerrainType.PLAINS, TerrainType.PLAINS, TerrainType.PLAINS]),
+      row(1, [TerrainType.PLAINS, TerrainType.PLAINS, TerrainType.PLAINS, TerrainType.PLAINS, TerrainType.COAST]),
+    ];
+
+    VoyageCommandHandler.returnFromEurope(state, 'ship');
+
+    expect(ship.position).toEqual({ x: 4, y: 1 });
+    expect(ship.inEurope).toBe(false);
+    expect(ship.movesRemaining).toBe(0);
+    expect(colonist.position).toEqual({ x: 4, y: 0 });
+    expect(colonist.inEurope).toBe(false);
+    expect(otherShip.inEurope).toBe(true);
+    expect(otherShip.position).toEqual({ x: 0, y: 1 });
   });
 });

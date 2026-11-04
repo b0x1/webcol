@@ -1,4 +1,7 @@
 import type { Player } from '@shared/game/entities/Player';
+import type { Settlement } from '@shared/game/entities/Settlement';
+import { distance, getNeighbors, type Position } from '@shared/game/entities/Position';
+import type { Tile } from '@shared/game/entities/Tile';
 import { TerrainType, UnitType } from '@shared/game/entities/types';
 import { TraversalUtils } from '@shared/game/utils/TraversalUtils';
 import type { AuthoritativeGameState } from '@shared/game/AuthoritativeGameState';
@@ -38,20 +41,46 @@ export class VoyageCommandHandler {
       return [];
     }
 
-    const landing = player.settlements[0]?.position ?? ship.position;
+    const colony = this.nearestColony(player, ship.position);
+    const harbor = colony ? this.harborTile(colony.position, state.map) : undefined;
+    if (!colony || !harbor) {
+      return [];
+    }
+
+    ship.position = { ...harbor };
     ship.inEurope = false;
     ship.movesRemaining = 0;
     player.units.forEach((unit) => {
-      if (unit.inEurope !== true || unit.id === ship.id) {
+      if (unit.inEurope !== true || unit.type === UnitType.SHIP) {
         return;
       }
       unit.inEurope = false;
-      if (unit.type !== UnitType.SHIP) {
-        unit.position = { ...landing };
-      }
+      unit.position = { ...colony.position };
     });
 
     return [{ type: 'notification', message: `${ship.name} returned from Europe.` }];
+  }
+
+  private static nearestColony(player: Player, origin: Position): Settlement | undefined {
+    let best: Settlement | undefined;
+    let bestDistance = Infinity;
+    for (const settlement of player.settlements) {
+      const tileDistance = distance(origin, settlement.position);
+      if (tileDistance < bestDistance) {
+        bestDistance = tileDistance;
+        best = settlement;
+      }
+    }
+    return best;
+  }
+
+  private static harborTile(colony: Position, map: Tile[][]): Position | undefined {
+    const width = map[0]?.length ?? 0;
+    const height = map.length;
+    return getNeighbors(colony, width, height).find((position) => {
+      const terrain = map[position.y]?.[position.x]?.terrainType;
+      return terrain === TerrainType.OCEAN || terrain === TerrainType.COAST;
+    });
   }
 
   private static selectCurrentPlayer(state: AuthoritativeGameState): Player | undefined {
