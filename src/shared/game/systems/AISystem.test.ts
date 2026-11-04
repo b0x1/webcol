@@ -72,6 +72,21 @@ describe('AISystem', () => {
     expect(commands[1]).toEqual({ type: 'skipUnit', unitId: 'u1' });
   });
 
+  it('steps and skips a colonist already standing on a colony', () => {
+    const ai = createPlayer('ai', 'Portugal', false, 0, Nation.PORTUGAL);
+    const colony = createSettlement('c1', 'ai', 'Home', 2, 2, 1, 'EUROPEAN', 'STATE');
+    ai.settlements.push(colony);
+    const colonist = createUnit('u1', 'ai', 'Settler', UnitType.COLONIST, 2, 2, 1);
+    ai.units.push(colonist);
+
+    const commands = AISystem.chooseCommands(stateFor(ai, grassland(6, 6)));
+
+    expect(commands).toEqual([
+      { type: 'moveUnit', unitId: 'u1', to: { x: 1, y: 1 } },
+      { type: 'skipUnit', unitId: 'u1' },
+    ]);
+  });
+
   it('assigns one idle colonist to a food field', () => {
     const ai = createPlayer('ai', 'Portugal', false, 0, Nation.PORTUGAL);
     const colony = createSettlement('c1', 'ai', 'Home', 2, 2, 1, 'EUROPEAN', 'STATE');

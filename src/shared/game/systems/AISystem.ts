@@ -24,6 +24,7 @@ export class AISystem {
 
     const settlements = state.players.flatMap((candidate) => candidate.settlements);
     const commands: GameCommand[] = [];
+    const ordered = new Set<string>();
 
     for (const unit of player.units) {
       if (!this.isSettler(unit) || unit.inEurope === true) {
@@ -32,6 +33,7 @@ export class AISystem {
 
       if (SettlementSystem.canFoundSettlement(player, unit, state.map, settlements)) {
         commands.push({ type: 'foundSettlement', unitId: unit.id });
+        ordered.add(unit.id);
         continue;
       }
 
@@ -41,9 +43,10 @@ export class AISystem {
         commands.push({ type: 'moveUnit', unitId: unit.id, to: step });
       }
       commands.push({ type: 'skipUnit', unitId: unit.id });
+      ordered.add(unit.id);
     }
 
-    const job = this.oneFieldJob(player, state.map);
+    const job = this.oneFieldJob(player, state.map, ordered);
     if (job) {
       commands.push(job);
     }
@@ -51,9 +54,13 @@ export class AISystem {
     return commands;
   }
 
-  private static oneFieldJob(player: Player, map: Tile[][]): GameCommand | undefined {
+  private static oneFieldJob(
+    player: Player,
+    map: Tile[][],
+    orderedUnitIds: ReadonlySet<string>,
+  ): GameCommand | undefined {
     for (const settlement of player.settlements) {
-      const worker = this.idleWorker(player, settlement);
+      const worker = this.idleWorker(player, settlement, orderedUnitIds);
       const tile = worker ? this.openFoodTile(settlement, map) : undefined;
       if (worker && tile) {
         return {
@@ -67,11 +74,17 @@ export class AISystem {
     return undefined;
   }
 
-  private static idleWorker(player: Player, settlement: Settlement): Unit | undefined {
+  private static idleWorker(
+    player: Player,
+    settlement: Settlement,
+    orderedUnitIds: ReadonlySet<string>,
+  ): Unit | undefined {
     const atColony = player.units.filter(
       (unit) => unit.position.x === settlement.position.x && unit.position.y === settlement.position.y,
     );
-    return [...settlement.units, ...atColony].find((unit) => this.isIdle(unit));
+    return [...settlement.units, ...atColony].find(
+      (unit) => !orderedUnitIds.has(unit.id) && this.isIdle(unit),
+    );
   }
 
   private static openFoodTile(settlement: Settlement, map: Tile[][]): Position | undefined {
@@ -97,7 +110,7 @@ export class AISystem {
     player: Player,
     unit: Unit,
     map: Tile[][],
-    settlements: readonly Settlement[],
+    settlements: Settlement[],
   ): Position | undefined {
     let best: Position | undefined;
     let bestDistance = Infinity;
