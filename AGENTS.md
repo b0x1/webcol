@@ -32,8 +32,8 @@ If server need EventBus, React, Phaser, Zustand, or DOM, code wrong.
 
 1. Read file first.
 2. Say clean-up plan, not only new thing plan.
-3. Look for old bad code in touched file. Fix now.
-4. Magic number or string go `src/shared/game/constants.ts`.
+3. Old bad code in a touched file: fix in its own commit. Keep that commit off the feature. A layer break is still fixed in the change that touches it.
+4. A balance number goes to `src/shared/game/constants.ts`. An ordinary literal stays where it is.
 5. Touch system logic, add or update test.
 6. One logical change per commit. Refactor separate from feature.
 7. New game-changing action goes through shared command + server handler.
@@ -42,8 +42,8 @@ If server need EventBus, React, Phaser, Zustand, or DOM, code wrong.
 
 ## KEEP CODE SMALL
 
-- Same logic two place: extract now.
-- Big class around 150+ line: split job.
+- Same decision written twice: extract. A copied one-line lookup: leave.
+- A class with a second job: split that job out. A class with one job past 150 lines: leave.
 - Dead code: delete.
 - Commented code: delete.
 - No test on tricky logic: add test before change.
